@@ -4646,10 +4646,45 @@ if (SETUP.intakeToken && !SETUP.manageToken) {
 if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.intakeToken) {
   routeEntry();
 }
+
+// ============================================================
+// 🚀 0917spd: トップレベル（＝HP設置ページ・サンドボックス外）では、
+//   「LINEで続ける」を押したら中継画面（LINEで確認しています）を通らず、
+//   サーバから認可URLを取ってそのまま LINE へ跳ぶ（1画面ぶん短くなる）。
+//   ・GASの画面（iframeの中）は従来どおりリンク遷移（sandbox の制約で
+//     fetch 後の自動遷移がユーザー操作扱いにならず止められるため）。
+//   ・fetch に失敗したら従来の中継ページ経由に倒す（行き止まりにしない）。
+// ============================================================
+(function () {
+  var isTop = false;
+  try { isTop = (window.self === window.top); } catch (eT) { isTop = false; }
+  if (!isTop) return;
+  ['gateLineBtn', 'linePromoBtn'].forEach(function (id) {
+    var el = $(id);
+    if (!el) return;
+    el.addEventListener('click', function (ev) {
+      try {
+        ev.preventDefault();
+        if (el.getAttribute('data-busy')) return;   // 連打で二重に取りに行かない
+        el.setAttribute('data-busy', '1');
+        var prev = el.textContent;
+        el.textContent = 'LINEへ進んでいます…';
+        callAction('getLineLoginUrl', { ret: 'hp' })
+          .then(function (r) {
+            if (r && r.success && r.url) { location.replace(r.url); return; }
+            location.href = el.getAttribute('href');   // 保険: 従来の中継ページ経由
+          })
+          .catch(function () { location.href = el.getAttribute('href'); });
+        // 遷移しなかった場合に備えてボタンを戻す（通常は遷移して見えない）
+        setTimeout(function () { el.removeAttribute('data-busy'); el.textContent = prev; }, 15000);
+      } catch (eC) { /* 何かあれば既定のリンク遷移に任せる */ }
+    });
+  });
+})();
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-16b）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4665,9 +4700,20 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       body: JSON.stringify(body) }).then(function (r) { return r.text(); })
       .then(function (t) { return JSON.parse(t); });
   }
+  // 0917spd: 読み込み失敗は自動で1回だけやり直す（「読み込めませんでした」対策）
+  function postRetry(body) {
+    return post(body).catch(function () {
+      return new Promise(function (res) { setTimeout(res, 800); }).then(function () { return post(body); });
+    });
+  }
   var auth = /^[0-9a-f]{64}$/.test(String(q.get('auth') || '')) ? q.get('auth') : '';
-  var jobs = [post({ action: 'getPatientSetup', pu: String(q.get('pu') || '').trim() })];
-  if (auth) jobs.push(post({ action: 'getBookingAuthUser', auth: auth }));
+  // 🚀 0917spd: LINEからの直接コールバック（LINE_DIRECT_CALLBACK が有効なときだけ届く）
+  var cbCode  = String(q.get('code') || '');
+  var cbState = /^[0-9a-f]{64}$/.test(String(q.get('state') || '')) ? q.get('state') : '';
+  var hasCb = !!(cbCode && cbState);
+  var jobs = [postRetry({ action: 'getPatientSetup', pu: String(q.get('pu') || '').trim() })];
+  jobs.push(auth ? post({ action: 'getBookingAuthUser', auth: auth }) : Promise.resolve(null));
+  jobs.push(hasCb ? post({ action: 'lineMenuCallback', code: cbCode, state: cbState }).catch(function(){ return null; }) : Promise.resolve(null));
   Promise.all(jobs).then(function (rs) {
     var r0 = rs[0];
     if (!r0 || !r0.success || !r0.setup) throw new Error((r0 && r0.error) || '読み込みに失敗しました');
@@ -4686,6 +4732,18 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     if (auth && rs[1] && rs[1].success && rs[1].user && rs[1].user.name) {
       setup.bookingAuth = auth; setup.bookingUser = rs[1].user;
     }
+    // 🚀 0917spd: LINE直接コールバックの結果（中継画面なしで本人確認まで済ませる）
+    var cbFail = false;
+    if (hasCb) {
+      var rc = rs[2];
+      if (rc && rc.success && rc.auth && rc.user && rc.user.name) {
+        setup.bookingAuth = rc.auth; setup.bookingUser = rc.user;
+      } else if (rc && rc.success && rc.guest) {
+        setup.lineHint = true;   // 未連携（ゲート/案内側に流れる）
+      } else {
+        cbFail = true;           // 交換に失敗（stateの期限切れ等）。下で案内を出す
+      }
+    }
     // ---- 予約パス等をURLから消す（履歴・ブックマークに残さない）----
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
     window.__HP_SETUP__ = setup;
@@ -4701,6 +4759,15 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
         e.setAttribute('href', e.getAttribute('href') + '&ret=hp');
       }
     });
+    // 🚀 0917spd: 直接コールバックの交換に失敗したときの案内（行き止まりにしない）
+    if (cbFail) {
+      var mf = document.getElementById('msg');
+      if (mf) {
+        mf.className = 'msg err';
+        mf.innerHTML = 'LINEの確認をやり直してください。 ' +
+          '<a href="' + GAS + '?from=line&ret=hp">もう一度LINEで続ける</a>';
+      }
+    }
   }).catch(function (e) {
     // ⚠ 行き止まりにしない: 読み込めないときは 従来の予約ページ と 電話 を必ず案内する
     var m = document.getElementById('msg');
