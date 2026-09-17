@@ -4860,7 +4860,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18a）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4868,7 +4868,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-18a";
+    vt.textContent = "版 2026-09-18b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -4904,7 +4904,47 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   var hasCb = !!(cbCode && cbState);
   // 0917err: 失敗時の「もう一度読み込む」用（?auth= を保ったまま）。href に埋めるので記号は消毒
   var origUrl = location.href.replace(/"/g, '%22').replace(/</g, '%3C').replace(/>/g, '%3E').replace(/\x27/g, '%27');
-  var jobs = [postRetry({ action: 'getPatientSetup', pu: String(q.get('pu') || '').trim() })];
+  // 🆕 0918spd: setup の「土台」(menus/clinic/today など)を sessionStorage に先読みしておく。
+  //   ・LINEへ行く前の初回取得を保存し、戻ってきた時は【待たずに】メニューを出せる。
+  //   🔴 枠の空き(◯×)は setup に含まれない＝キャッシュ対象外（毎回サーバから取る）。
+  //   ・5分TTL・?pu=（情報更新リンク）のときは使わない・裏で必ず取り直して更新（すぐ反映）。
+  var SETUP_CACHE_KEY = 'hpSetupBase_v1';
+  var SETUP_CACHE_TTL = 5 * 60 * 1000;
+  var hasPu = !!String(q.get('pu') || '').trim();
+  function readSetupCache() {
+    if (hasPu) return null;
+    try {
+      var raw = sessionStorage.getItem(SETUP_CACHE_KEY);
+      if (!raw) return null;
+      var o = JSON.parse(raw);
+      if (!o || !o.at || (Date.now() - o.at) > SETUP_CACHE_TTL) return null;
+      if (!o.setup || !o.setup.menus || !o.setup.menus.length) return null;
+      return o.setup;
+    } catch (e) { return null; }
+  }
+  function writeSetupCache(setup) {
+    try {
+      if (!setup || !setup.menus) return;
+      // 🔴 保存するのは変わりにくい土台だけ（枠の空きは元々 setup に無い）
+      var slim = { menus: setup.menus, clinic: setup.clinic, today: setup.today,
+        build: setup.build, lineRequired: setup.lineRequired, execUrl: setup.execUrl };
+      sessionStorage.setItem(SETUP_CACHE_KEY, JSON.stringify({ at: Date.now(), setup: slim }));
+    } catch (e) {}
+  }
+  var cachedSetup = readSetupCache();
+  function fetchSetup() {
+    return postRetry({ action: 'getPatientSetup', pu: String(q.get('pu') || '').trim() })
+      .then(function (r) { if (r && r.success && r.setup) writeSetupCache(r.setup); return r; });
+  }
+  // 先読みが手元にあれば【待たずに】使い、裏で取り直してキャッシュを更新（次回に効く）
+  var setupJob;
+  if (cachedSetup) {
+    setupJob = Promise.resolve({ success: true, setup: cachedSetup, _cached: true });
+    try { fetchSetup(); } catch (eBg) {}
+  } else {
+    setupJob = fetchSetup();
+  }
+  var jobs = [setupJob];
   // 🔴 0917err: 本人確認の照会だけが通信で落ちても、ページ全体を道連れにしない
   //   （リトライ付き・最後まで失敗したら netFail の目印で降参し、画面は起動させる）
   jobs.push(auth ? postRetry({ action: 'getBookingAuthUser', auth: auth }).catch(function () { return { netFail: true }; }) : Promise.resolve(null));
