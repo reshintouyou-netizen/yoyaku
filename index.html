@@ -4721,7 +4721,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17c）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17d）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4729,7 +4729,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-17c";
+    vt.textContent = "版 2026-09-17d";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -4745,20 +4745,31 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       body: JSON.stringify(body) }).then(function (r) { return r.text(); })
       .then(function (t) { return JSON.parse(t); });
   }
-  // 0917spd: 読み込み失敗は自動で1回だけやり直す（「読み込めませんでした」対策）
+  // 0917err: 読み込み失敗は自動でやり直す（計3回・間隔を空ける。
+  //   LINEアプリから戻った直後は回線の切替中で最初の通信が落ちやすいため）
+  var RETRY_WAITS = [800, 2000];
   function postRetry(body) {
-    return post(body).catch(function () {
-      return new Promise(function (res) { setTimeout(res, 800); }).then(function () { return post(body); });
-    });
+    function attempt(i) {
+      return post(body).catch(function (e) {
+        if (i >= RETRY_WAITS.length) throw e;
+        return new Promise(function (res) { setTimeout(res, RETRY_WAITS[i]); })
+          .then(function () { return attempt(i + 1); });
+      });
+    }
+    return attempt(0);
   }
   var auth = /^[0-9a-f]{64}$/.test(String(q.get('auth') || '')) ? q.get('auth') : '';
   // 🚀 0917spd: LINEからの直接コールバック（LINE_DIRECT_CALLBACK が有効なときだけ届く）
   var cbCode  = String(q.get('code') || '');
   var cbState = /^[0-9a-f]{64}$/.test(String(q.get('state') || '')) ? q.get('state') : '';
   var hasCb = !!(cbCode && cbState);
+  // 0917err: 失敗時の「もう一度読み込む」用（?auth= を保ったまま）。href に埋めるので記号は消毒
+  var origUrl = location.href.replace(/"/g, '%22').replace(/</g, '%3C').replace(/>/g, '%3E').replace(/\x27/g, '%27');
   var jobs = [postRetry({ action: 'getPatientSetup', pu: String(q.get('pu') || '').trim() })];
-  jobs.push(auth ? post({ action: 'getBookingAuthUser', auth: auth }) : Promise.resolve(null));
-  jobs.push(hasCb ? post({ action: 'lineMenuCallback', code: cbCode, state: cbState }).catch(function(){ return null; }) : Promise.resolve(null));
+  // 🔴 0917err: 本人確認の照会だけが通信で落ちても、ページ全体を道連れにしない
+  //   （リトライ付き・最後まで失敗したら netFail の目印で降参し、画面は起動させる）
+  jobs.push(auth ? postRetry({ action: 'getBookingAuthUser', auth: auth }).catch(function () { return { netFail: true }; }) : Promise.resolve(null));
+  jobs.push(hasCb ? postRetry({ action: 'lineMenuCallback', code: cbCode, state: cbState }).catch(function(){ return null; }) : Promise.resolve(null));
   Promise.all(jobs).then(function (rs) {
     var r0 = rs[0];
     if (!r0 || !r0.success || !r0.setup) throw new Error((r0 && r0.error) || '読み込みに失敗しました');
@@ -4774,8 +4785,11 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     setup.prefill = null;
     setup.lineNoticeGate = false;
     setup.bookingAuth = ''; setup.bookingUser = null;
+    var authNetFail = false;   // 0917err: 本人確認の照会が通信で落ちた（札が無効だったのとは別）
     if (auth && rs[1] && rs[1].success && rs[1].user && rs[1].user.name) {
       setup.bookingAuth = auth; setup.bookingUser = rs[1].user;
+    } else if (auth && rs[1] && rs[1].netFail) {
+      authNetFail = true;
     }
     // 🚀 0917spd: LINE直接コールバックの結果（中継画面なしで本人確認まで済ませる）
     var cbFail = false;
@@ -4813,12 +4827,25 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
           '<a href="' + GAS + '?from=line&ret=hp">もう一度LINEで続ける</a>';
       }
     }
+    // 🔴 0917err: 本人確認の照会だけが失敗したとき。ページは動かしたまま、
+    //   ?auth= を保った元のURLで「もう一度読み込む」を案内する（情報を捨てない）
+    if (authNetFail) {
+      var ma = document.getElementById('msg');
+      if (ma) {
+        ma.className = 'msg err';
+        ma.innerHTML = 'ご本人確認の読み込みに失敗しました。電波の良いところで ' +
+          '<a href="' + origUrl + '">もう一度読み込む</a> を押してください。';
+      }
+    }
   }).catch(function (e) {
-    // ⚠ 行き止まりにしない: 読み込めないときは 従来の予約ページ と 電話 を必ず案内する
+    // ⚠ 行き止まりにしない: まず再読み込み（?auth= を保ったまま）を案内し、
+    //   従来の予約ページ と 電話 も必ず添える
     var m = document.getElementById('msg');
     if (m) {
       m.className = 'msg err';
-      m.innerHTML = '予約ページを読み込めませんでした。お手数ですが ' +
+      m.innerHTML = '予約ページを読み込めませんでした。電波の良いところで ' +
+        '<a href="' + origUrl + '">もう一度読み込む</a> を押してください。' +
+        '直らない場合は ' +
         '<a href="' + GAS + '">こちらの予約ページ</a> をご利用いただくか、' +
         'お電話（089-906-8249）でご予約ください。';
     }
