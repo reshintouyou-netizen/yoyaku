@@ -597,17 +597,21 @@
        ⚠ 見た目の出し分けだけ。強制はサーバ（createBooking の予約パス必須）が担保する。
        ============================================================ -->
   <section class="sec hidden" id="screenGate">
-    <h2>ご予約はLINEから</h2>
-    <p class="lead">
-      システム変更に伴い、ご不便をおかけして申し訳ございません。<br>
-      ネット予約は、LINEでのご本人確認をお願いすることになりました。<br>
-      お手数ですが、下のボタンからお進みください。</p>
+    <!-- 🆕 0917name(問題③): 謝罪から始めず、メリットを先に伝える -->
+    <h2>ご予約はLINEからが便利です</h2>
+    <ul class="gate-merits" style="list-style:none;padding:0;margin:8px 0 14px;line-height:2">
+      <li>✓ お名前の入力が不要になります</li>
+      <li>✓ 次回からはワンタップで予約できます</li>
+      <li>✓ ご予約の確認や変更も LINEから</li>
+    </ul>
     <a class="gate-line-btn" id="gateLineBtn" href="#" target="_top" rel="noopener">LINEで続ける</a>
     <p style="font-size:12px;color:var(--gray);margin:4px 0 0">
       LINEの画面が開きます。「許可する」を押すと、そのまま予約に進めます。</p>
     <!-- 🆕 0917auth: LINE必須OFF のときだけ「LINEを使わない」入口を出す（今までどおり5項目で予約） -->
-    <button type="button" id="gateNoLine" class="btn btn-ghost" style="width:100%;margin-top:10px;display:none">
+    <button type="button" id="gateNoLine" class="btn btn-ghost" style="width:100%;margin-top:12px;display:none">
       LINEを使わずに予約する</button>
+    <p id="gateNoLineNote" style="font-size:12px;color:var(--gray);margin:4px 0 0;display:none">
+      ※ 毎回、お名前やご連絡先の入力が必要になります。</p>
     <div class="gate-tel-box">
       お電話でも今まで通りご予約を承っております。<br>
       <a class="tel-big" id="gateTel" href="tel:">📞 <span id="gateTelText"></span></a>
@@ -643,19 +647,22 @@
 
   <section class="sec hidden" id="screenWho">
     <h2>ご本人の確認</h2>
-    <!-- 連携済み（カルテ紐づけ済み）: 氏名の確認だけ -->
+    <!-- 氏名の確認（連携済み＝カルテ / 2回目以降＝前回の氏名） -->
     <div id="whoConfirmBlock">
-      <p class="lead">LINEのご登録から、お客様の情報をお預かりしています。</p>
+      <p class="lead" id="whoConfirmLead">LINEのご登録から、お客様の情報をお預かりしています。</p>
       <div class="who-name" id="whoName"></div>
       <p class="lead" style="text-align:center;margin-top:0">様でお間違いないですか？</p>
       <button class="btn btn-primary" id="whoOk" type="button" style="width:100%">はい、予約にすすむ</button>
+      <!-- 🆕 0917name: 前回の氏名のときだけ「別の名前にする」を出す（家族で同じLINE等） -->
+      <button class="btn btn-ghost" id="whoChangeName" type="button" style="width:100%;margin-top:8px;display:none">別の名前にする</button>
     </div>
     <!-- 🆕 0917new: カルテ未紐づけ（初めての方など）: 氏名だけ入力してもらう -->
     <div id="whoInputBlock" class="hidden">
       <p class="lead">ご予約のため、お名前を教えてください。</p>
       <label for="whoNameInput">お名前<span class="req">必須</span></label>
+      <!-- 🆕 0917name(問題④): 入力欄の高さ・文字を大きく（44px以上・16pxでiOS自動ズーム防止） -->
       <input type="text" id="whoNameInput" autocomplete="name" placeholder="例：山田 花子"
-             style="width:100%;box-sizing:border-box">
+             style="width:100%;box-sizing:border-box;height:52px;font-size:16px;padding:12px 14px">
       <button class="btn btn-primary" id="whoNameOk" type="button" style="width:100%;margin-top:12px">この名前で予約にすすむ</button>
     </div>
     <p style="font-size:13px;color:var(--gray);margin:12px 0 0;line-height:1.7">
@@ -1118,6 +1125,7 @@ var AUTH = {
   token: String(SETUP.bookingAuth || ''),
   user: SETUP.bookingUser || null,
   needName: !!SETUP.bookingNeedName,   // 🆕 0917new: カルテ未紐づけ＝氏名だけ入力してもらう
+  presetName: String(SETUP.bookingPresetName || ''),   // 🆕 0917name: 前回入力した氏名（あれば確認だけ）
   confirmed: false            // 「◯◯様でお間違いないですか」に「はい」と答えたか
 };
 
@@ -1149,6 +1157,8 @@ function showGateScreen(errText) {
   // 🆕 0917auth: LINE必須OFF のときだけ「LINEを使わずに予約する」を出す（今までどおり5項目）
   var nl = $('gateNoLine');
   if (nl) nl.style.display = SETUP.lineRequired ? 'none' : 'block';
+  var nln = $('gateNoLineNote');
+  if (nln) nln.style.display = SETUP.lineRequired ? 'none' : 'block';   // 🆕 0917name: 面倒である旨
   $('screenGate').classList.remove('hidden');
   showAuthStep();
   if (errText) showMsg(errText);
@@ -1163,14 +1173,29 @@ function showWhoScreen() {
   hideBookingFlow();
   ['screenGate', 'screenNotice'].forEach(function(id) { $(id).classList.add('hidden'); });
   showAuthStep();
-  // 🆕 0917new: カルテ未紐づけ（needName）は氏名入力、そうでなければ氏名確認
-  if (AUTH.needName) {
+  // 🆕 0917name: 出し分け
+  //   ・カルテ未紐づけ＋前回の氏名あり(presetName) … 確認「◯◯様?」＋「別の名前にする」
+  //   ・カルテ未紐づけ＋前回なし(1回目) … 氏名入力
+  //   ・カルテ紐づけ済み … 確認（従来・別名は出さない）
+  var showInput = AUTH.needName && !AUTH.presetName;
+  if (showInput) {
     $('whoConfirmBlock').classList.add('hidden');
     $('whoInputBlock').classList.remove('hidden');
   } else {
     $('whoInputBlock').classList.add('hidden');
     $('whoConfirmBlock').classList.remove('hidden');
-    $('whoName').textContent = (AUTH.user && AUTH.user.name) || '';
+    if (AUTH.needName && AUTH.presetName) {
+      // 2回目以降（未紐づけ）：覚えている氏名で確認
+      if (!AUTH.user) AUTH.user = { name: AUTH.presetName, kana: '', phone: '', email: '' };
+      $('whoName').textContent = AUTH.presetName;
+      $('whoConfirmLead').textContent = '前回のお名前でご予約を続けます。';
+      $('whoChangeName').style.display = 'block';
+    } else {
+      // カルテ紐づけ済み：従来の確認
+      $('whoName').textContent = (AUTH.user && AUTH.user.name) || '';
+      $('whoConfirmLead').textContent = 'LINEのご登録から、お客様の情報をお預かりしています。';
+      $('whoChangeName').style.display = 'none';
+    }
   }
   $('screenWho').classList.remove('hidden');
 }
@@ -2625,10 +2650,34 @@ $('whoNameOk').addEventListener('click', function() {
   if (nm.length > 60) { showMsg('お名前が長すぎます'); return; }
   AUTH.user = { name: nm, kana: '', phone: '', email: '' };
   AUTH.confirmed = true;
+  AUTH.presetName = nm;   // この画面ではもう聞かない
+  // 🆕 0917name: 次回から聞かないよう、入力した氏名をサーバ(line_links)に覚えてもらう。
+  //   ★失敗しても予約は進める（行き止まりにしない）。1回だけ自動で再試行。
+  if (AUTH.token) {
+    try {
+      callAction('rememberBookingName', { auth: AUTH.token, name: nm })
+        .catch(function () {
+          return new Promise(function (r) { setTimeout(r, 700); })
+            .then(function () { return callAction('rememberBookingName', { auth: AUTH.token, name: nm }); });
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
   $('screenWho').classList.add('hidden');
   $('stepBar').classList.remove('hidden');
   goStep(1);
 });
+
+// 🆕 0917name: 「別の名前にする」（覚えている氏名と違う人が使うとき）→ 入力画面に切り替え
+if ($('whoChangeName')) {
+  $('whoChangeName').addEventListener('click', function() {
+    AUTH.presetName = '';        // 入力しなおす
+    AUTH.user = null;
+    $('whoConfirmBlock').classList.add('hidden');
+    $('whoInputBlock').classList.remove('hidden');
+    var inp = $('whoNameInput'); if (inp) { inp.value = ''; inp.focus(); }
+  });
+}
 
 // ---- 予約の確認・変更（★関数を作ったらボタンも作る）----
 $('btnManage').addEventListener('click', function() { openManage(); mgShow('mgAsk'); });
@@ -4811,7 +4860,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17i）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17j）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4819,7 +4868,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-17i";
+    vt.textContent = "版 2026-09-17j";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -4874,12 +4923,13 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     setup.lineHint = (ln === 'guest');   // LINE経由で未連携だった人への控えめなヒント
     setup.prefill = null;
     setup.lineNoticeGate = false;
-    setup.bookingAuth = ''; setup.bookingUser = null; setup.bookingNeedName = false;
+    setup.bookingAuth = ''; setup.bookingUser = null; setup.bookingNeedName = false; setup.bookingPresetName = '';
     var authNetFail = false;   // 0917err: 本人確認の照会が通信で落ちた（札が無効だったのとは別）
     if (auth && rs[1] && rs[1].success && rs[1].user && rs[1].user.name) {
       setup.bookingAuth = auth; setup.bookingUser = rs[1].user;
     } else if (auth && rs[1] && rs[1].success && rs[1].needName) {
       setup.bookingAuth = auth; setup.bookingNeedName = true;   // 🆕 0917new: 氏名だけ入力してもらう
+      setup.bookingPresetName = String(rs[1].preset || '');   // 🆕 0917name: 前回の氏名（確認に出す）
     } else if (auth && rs[1] && rs[1].netFail) {
       authNetFail = true;
     }
@@ -4891,6 +4941,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
         setup.bookingAuth = rc.auth; setup.bookingUser = rc.user;
       } else if (rc && rc.success && rc.auth && rc.needName) {
         setup.bookingAuth = rc.auth; setup.bookingNeedName = true;   // 🆕 0917new
+        setup.bookingPresetName = String(rc.preset || '');   // 🆕 0917name
       } else if (rc && rc.success && rc.guest) {
         setup.lineHint = true;   // 未連携（ゲート/案内側に流れる）
       } else {
