@@ -27,6 +27,8 @@
   .steps{display:flex;gap:6px;padding:14px 16px 0}
   .step{flex:1;height:4px;border-radius:2px;background:var(--line)}
   .step.on{background:var(--green2)}
+  /* 🆕 0917auth: 進捗バーの上に「今どの段階か」を出す（1番目=ご本人確認） */
+  .step-label{padding:10px 16px 0;font-size:12px;color:var(--gray);font-weight:600}
 
   .sec{padding:18px 16px 0}
   .sec h2{font-size:16px;font-weight:600;margin:0 0 4px}
@@ -578,6 +580,8 @@
     <p>オンラインでご予約いただけます</p>
   </div>
 
+  <!-- 🆕 0917auth: 4段階＝①ご本人確認 ②メニュー ③日時 ④ご確認 -->
+  <div class="step-label" id="stepLabel">① ご本人確認</div>
   <div class="steps" id="stepBar">
     <div class="step on" id="st1"></div><div class="step" id="st2"></div>
     <div class="step" id="st3"></div><div class="step" id="st4"></div>
@@ -601,6 +605,9 @@
     <a class="gate-line-btn" id="gateLineBtn" href="#" target="_top" rel="noopener">LINEで続ける</a>
     <p style="font-size:12px;color:var(--gray);margin:4px 0 0">
       LINEの画面が開きます。「許可する」を押すと、そのまま予約に進めます。</p>
+    <!-- 🆕 0917auth: LINE必須OFF のときだけ「LINEを使わない」入口を出す（今までどおり5項目で予約） -->
+    <button type="button" id="gateNoLine" class="btn btn-ghost" style="width:100%;margin-top:10px;display:none">
+      LINEを使わずに予約する</button>
     <div class="gate-tel-box">
       お電話でも今まで通りご予約を承っております。<br>
       <a class="tel-big" id="gateTel" href="tel:">📞 <span id="gateTelText"></span></a>
@@ -1123,22 +1130,39 @@ function hideBookingFlow() {
   $('linePromo').classList.add('hidden');
   $('lineHint').classList.add('hidden');
   $('stepBar').classList.add('hidden');
+  if ($('stepLabel')) $('stepLabel').classList.add('hidden');   // 🆕 0917auth
   $('navRow').classList.add('hidden');
+}
+// 🆕 0917auth: 本人確認は「① ご本人確認」＝進捗バーの1番目。バーとラベルを出す。
+function showAuthStep() {
+  try {
+    S.step = 0;   // 予約の流れ(1〜)より前＝本人確認
+    $('stepBar').classList.remove('hidden');
+    var sl = $('stepLabel');
+    if (sl) { sl.classList.remove('hidden'); sl.textContent = '① ご本人確認'; }
+    for (var i = 1; i <= 4; i++) $('st' + i).classList.toggle('on', i === 1);
+  } catch (e) {}
 }
 function showGateScreen(errText) {
   hideBookingFlow();
   ['screenNotice', 'screenWho'].forEach(function(id) { $(id).classList.add('hidden'); });
+  // 🆕 0917auth: LINE必須OFF のときだけ「LINEを使わずに予約する」を出す（今までどおり5項目）
+  var nl = $('gateNoLine');
+  if (nl) nl.style.display = SETUP.lineRequired ? 'none' : 'block';
   $('screenGate').classList.remove('hidden');
+  showAuthStep();
   if (errText) showMsg(errText);
 }
 function showNoticeScreen() {
   hideBookingFlow();
   ['screenGate', 'screenWho'].forEach(function(id) { $(id).classList.add('hidden'); });
   $('screenNotice').classList.remove('hidden');
+  showAuthStep();
 }
 function showWhoScreen() {
   hideBookingFlow();
   ['screenGate', 'screenNotice'].forEach(function(id) { $(id).classList.add('hidden'); });
+  showAuthStep();
   // 🆕 0917new: カルテ未紐づけ（needName）は氏名入力、そうでなければ氏名確認
   if (AUTH.needName) {
     $('whoConfirmBlock').classList.add('hidden');
@@ -1165,8 +1189,11 @@ function routeEntry() {
     if (AUTH.confirmed) return false;      // 確認済みなら予約の流れへ
     showWhoScreen(); return true;
   }
-  if (SETUP.lineRequired) { showGateScreen(); return true; }
-  return false;
+  // 🆕 0917auth: パス無し（未連携）は 本人確認(ゲート) を1番目に出す。
+  //   ・必須(true)  … LINEで続ける＋電話（今までどおり）
+  //   ・解除(false) … 「LINEで続ける」＋「LINEを使わずに予約する」（後者で今までの5項目フローへ）
+  showGateScreen();
+  return true;
 }
 
 // ---- 起動 ----
@@ -2520,7 +2547,21 @@ function goStep(n) {
   $('screenGate').classList.add('hidden');
   $('screenNotice').classList.add('hidden');
   $('screenWho').classList.add('hidden');
-  for (var i = 1; i <= 4; i++) $('st' + i).classList.toggle('on', i <= Math.min(n, 4));
+  // 🆕 0917auth: 進捗バーは ①ご本人確認 ②メニュー ③日時 ④ご確認。
+  //   本人確認(st1)はここに来た時点で済んでいる＝常に点灯。以降は段階に応じて点灯。
+  $('st1').classList.add('on');
+  $('st2').classList.toggle('on', n >= 1);   // メニュー
+  $('st3').classList.toggle('on', n >= 2);   // 日時（未連携の5項目入力もこの段）
+  $('st4').classList.toggle('on', n >= 4);   // ご確認
+  var _sl = $('stepLabel');
+  if (_sl) {
+    var _lab = (n === 1) ? '② メニュー'
+             : (n === 2) ? '③ 日時'
+             : (n === 3) ? '③ ご入力'
+             : (n === 4) ? '④ ご確認' : '';
+    if (_lab) { _sl.classList.remove('hidden'); _sl.textContent = _lab; }
+    else _sl.classList.add('hidden');
+  }
   $('helpBox').classList.toggle('hidden', n === 5);
   // 🔴 0831a: 未連携の案内はメニュー画面だけ（★予約の途中で邪魔をしない）
   if (SETUP.lineHint) $('lineHint').classList.toggle('hidden', n !== 1);
@@ -2564,6 +2605,16 @@ $('whoOk').addEventListener('click', function() {
   $('stepBar').classList.remove('hidden');
   goStep(1);
 });
+
+// 🆕 0917auth: 「LINEを使わずに予約する」（LINE必須OFF のときだけ表示）
+//   → 今までどおり メニュー→日時→5項目 の流れへ（AUTH.token 無しなので screenForm を通る）
+if ($('gateNoLine')) {
+  $('gateNoLine').addEventListener('click', function() {
+    $('screenGate').classList.add('hidden');
+    $('stepBar').classList.remove('hidden');
+    goStep(1);
+  });
+}
 
 // 🆕 0917new: 「この名前で予約にすすむ」（カルテ未紐づけ＝氏名だけ入力 → 予約の流れへ）
 //   ★入力した氏名は送信時に auth と一緒に送る。サーバは needName の札のときだけ
@@ -4760,7 +4811,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17h）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17i）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4768,7 +4819,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-17h";
+    vt.textContent = "版 2026-09-17i";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
