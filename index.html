@@ -678,6 +678,9 @@
   <p class="ln-hint hidden" id="lineHint">
     💬 LINEで連携すると、次回から入力が省けます。<span class="t">ご予約完了後にご案内します。</span></p>
 
+  <!-- 🆕 0918spd2: LINEから戻った直後、本人確認を裏で確認している間の表示（メニューは先に見せる） -->
+  <p class="ln-hint hidden" id="authPendingNote">💬 ご本人を確認しています。メニューはそのままお選びいただけます。</p>
+
   <!-- 🔴 0915nolineA: 未連携の方へのLINEのおすすめ（★必須ではない。押さなくても予約できる）
        ・宛先は既存の ?from=line（サーバが id_token を検証する入口）。新しい入口は作らない。
        ・LINE経由で来た未連携の方（lineHint）には出さない（押しても同じ画面に戻るだけのため）。 -->
@@ -1126,7 +1129,50 @@ var AUTH = {
   user: SETUP.bookingUser || null,
   needName: !!SETUP.bookingNeedName,   // 🆕 0917new: カルテ未紐づけ＝氏名だけ入力してもらう
   presetName: String(SETUP.bookingPresetName || ''),   // 🆕 0917name: 前回入力した氏名（あれば確認だけ）
+  // 🆕 0918spd2: LINEから直接戻った直後、本人確認(lineMenuCallback)を裏で走らせている間 true。
+  //   メニューは先に見せ、確定（予約作成）の前に本人確認の完了を必ず待つ（サーバも札必須で担保）。
+  authPending: !!SETUP.authPending,
+  _resumeSubmit: null,        // 確定待ちで止めているとき、完了後に呼ぶ関数
   confirmed: false            // 「◯◯様でお間違いないですか」に「はい」と答えたか
+};
+
+// 🆕 0918spd2: 裏で終わった本人確認の結果を画面に反映する（起動役 build_hp.js が呼ぶ）。
+//   ★サーバは createBooking で予約パス必須＝ここが遅れても二重予約・無認証予約は起きない。
+window.__hpApplyAuth__ = function (rc) {
+  try {
+    AUTH.authPending = false;
+    var note = document.getElementById('authPendingNote');
+    if (note) note.classList.add('hidden');
+    var resume = AUTH._resumeSubmit; AUTH._resumeSubmit = null;
+    if (rc && rc.success && rc.auth && rc.user && rc.user.name) {
+      // 連携済み（カルテ紐づけ）＝氏名は分かっている。そのまま予約できる。
+      AUTH.token = rc.auth; AUTH.user = rc.user; AUTH.needName = false; AUTH.presetName = '';
+      try { sessionStorage.removeItem('cbfail'); } catch (e) {}
+      if (resume) resume(true);   // 確定待ちなら進める
+    } else if (rc && rc.success && rc.auth && rc.needName) {
+      // カルテ未紐づけ＝氏名の確認/入力が要る。本人確認画面へ（確定はまだ）。
+      AUTH.token = rc.auth; AUTH.needName = true; AUTH.presetName = String(rc.preset || '');
+      AUTH.confirmed = false;
+      AUTH.user = rc.preset ? { name: rc.preset, kana: '', phone: '', email: '' } : null;
+      try { sessionStorage.removeItem('cbfail'); } catch (e) {}
+      if (typeof showWhoScreen === 'function') showWhoScreen();
+    } else if (rc && rc.success && rc.guest) {
+      // 未連携（通常は起きない）。false運用なら入力で予約できる＝メニュー継続。
+      SETUP.lineHint = true;
+    } else {
+      // 失敗：2回で電話案内（ループにしない）
+      var cbN = 0; try { cbN = parseInt(sessionStorage.getItem('cbfail') || '0', 10) || 0; } catch (e) {}
+      cbN += 1; try { sessionStorage.setItem('cbfail', String(cbN)); } catch (e) {}
+      var m = document.getElementById('msg');
+      if (m) {
+        m.className = 'msg err';
+        m.innerHTML = (cbN >= 2)
+          ? 'ご本人確認がうまくいきませんでした。お手数ですが、お電話（089-906-8249）でご予約ください。'
+          : ('ご本人確認をやり直してください。<a href="' + esc(SETUP.execUrl) + '?from=line">もう一度LINEで続ける</a>');
+      }
+      if (resume) resume(false);   // 確定待ちなら失敗を伝えて止める
+    }
+  } catch (e) {}
 };
 
 /** 予約フローの画面と段バーを全部畳む（ゲート系の画面を出す前に呼ぶ） */
@@ -1204,6 +1250,15 @@ function showWhoScreen() {
  *   ⚠ ?t=（確認・変更）・?pu=（情報更新）・?intake=（問診票）は今まで通りで、ここは通らない。
  */
 function routeEntry() {
+  // 🆕 0918spd2: LINEから直接戻った直後は、本人確認を裏で走らせつつ【先にメニューを見せる】。
+  //   ・氏名の確認/入力（needName）や失敗の案内は __hpApplyAuth__ が後から出す。
+  //   ・確定（予約作成）の直前に必ず本人確認の完了を待つ（下の submitBooking）。
+  if (AUTH.authPending && !AUTH.token) {
+    var apn = $('authPendingNote'); if (apn) apn.classList.remove('hidden');
+    $('stepBar').classList.remove('hidden');
+    goStep(1);            // メニューを表示
+    return true;
+  }
   if (SETUP.lineNoticeGate) { showNoticeScreen(); return true; }
   // 🆕 0917new: カルテ未紐づけ（needName）＝氏名入力から
   if (AUTH.token && AUTH.needName) {
@@ -2081,6 +2136,19 @@ function fmtJP(dt) {
 
 // ---- 送信 ----
 function submitBooking() {
+  // 🆕 0918spd2: 本人確認がまだ裏で走っているなら、ここで【必ず待つ】（予約は確認完了後だけ）。
+  //   ・完了(成功)したら自動で予約に進む。失敗したら案内が出て止まる（__hpApplyAuth__）。
+  //   🔴 サーバも createBooking で予約パス必須＝万一この待ちを抜けても無認証予約はできない。
+  if (AUTH.authPending && !AUTH.token) {
+    showMsg('ご本人を確認しています。少しお待ちください…', 'ok');
+    var nb = $('btnNext'); if (nb) { nb.disabled = true; nb.textContent = '確認しています…'; }
+    AUTH._resumeSubmit = function (ok) {
+      if (nb) { nb.disabled = false; nb.textContent = 'この内容で予約する'; }
+      if (ok) { showMsg(''); submitBooking(); }
+      // ok===false のときは __hpApplyAuth__ が既に案内を出している（ここでは何もしない）
+    };
+    return;
+  }
   // 🔴 0907line 案A: 本人情報はサーバが札（auth）から取る。画面の値は表示・問診の下書きにだけ使う
   var f = (AUTH.token && AUTH.user) ? AUTH.user : readForm();
   var btn = $('btnNext');
@@ -4860,7 +4928,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18b）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18c）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4868,7 +4936,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-18b";
+    vt.textContent = "版 2026-09-18c";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -4948,7 +5016,9 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   // 🔴 0917err: 本人確認の照会だけが通信で落ちても、ページ全体を道連れにしない
   //   （リトライ付き・最後まで失敗したら netFail の目印で降参し、画面は起動させる）
   jobs.push(auth ? postRetry({ action: 'getBookingAuthUser', auth: auth }).catch(function () { return { netFail: true }; }) : Promise.resolve(null));
-  jobs.push(hasCb ? postRetry({ action: 'lineMenuCallback', code: cbCode, state: cbState }).catch(function(){ return null; }) : Promise.resolve(null));
+  // 🆕 0918spd2: LINE直帰の本人確認(lineMenuCallback)は【描画を待たせない】＝裏で走らせる。
+  //   メニューを先に見せ、結果は __hpApplyAuth__ が後から反映（確定の前に必ず待つ）。
+  var cbPromise = hasCb ? postRetry({ action: 'lineMenuCallback', code: cbCode, state: cbState }).catch(function () { return null; }) : null;
   Promise.all(jobs).then(function (rs) {
     var r0 = rs[0];
     if (!r0 || !r0.success || !r0.setup) throw new Error((r0 && r0.error) || '読み込みに失敗しました');
@@ -4973,21 +5043,8 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     } else if (auth && rs[1] && rs[1].netFail) {
       authNetFail = true;
     }
-    // 🚀 0917spd: LINE直接コールバックの結果（中継画面なしで本人確認まで済ませる）
-    var cbFail = false;
-    if (hasCb) {
-      var rc = rs[2];
-      if (rc && rc.success && rc.auth && rc.user && rc.user.name) {
-        setup.bookingAuth = rc.auth; setup.bookingUser = rc.user;
-      } else if (rc && rc.success && rc.auth && rc.needName) {
-        setup.bookingAuth = rc.auth; setup.bookingNeedName = true;   // 🆕 0917new
-        setup.bookingPresetName = String(rc.preset || '');   // 🆕 0917name
-      } else if (rc && rc.success && rc.guest) {
-        setup.lineHint = true;   // 未連携（ゲート/案内側に流れる）
-      } else {
-        cbFail = true;           // 交換に失敗（stateの期限切れ等）。下で案内を出す
-      }
-    }
+    // 🆕 0918spd2: LINE直帰は 本人確認(lineMenuCallback)を裏で走らせる＝メニューを先に見せる。
+    setup.authPending = !!cbPromise;
     // ---- 予約パス等をURLから消す（履歴・ブックマークに残さない）----
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
     window.__HP_SETUP__ = setup;
@@ -5003,28 +5060,13 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
         e.setAttribute('href', e.getAttribute('href') + '&ret=hp');
       }
     });
-    // 🚀 0917spd / 0918dc: 直接コールバックの交換に失敗したときの案内（行き止まり・ループにしない）
-    //   ・1回目の失敗 … 従来の /exec 経由（3枚目あり）でやり直す導線を出す。
-    //   ・🔴 2回失敗したら もう自動でLINEに戻さず「お電話でご予約ください」で止める。
-    if (cbFail) {
-      var cbN = 0;
-      try { cbN = parseInt(sessionStorage.getItem('cbfail') || '0', 10) || 0; } catch (eS) {}
-      cbN += 1;
-      try { sessionStorage.setItem('cbfail', String(cbN)); } catch (eS2) {}
-      var mf = document.getElementById('msg');
-      if (mf) {
-        mf.className = 'msg err';
-        if (cbN >= 2) {
-          mf.innerHTML = 'ご本人確認がうまくいきませんでした。お手数ですが、' +
-            '<a href="' + GAS + '">こちらの予約ページ</a> をご利用いただくか、' +
-            'お電話（089-906-8249）でご予約ください。';
-        } else {
-          mf.innerHTML = 'LINEの確認をやり直してください。 ' +
-            '<a href="' + GAS + '?from=line&ret=hp">もう一度LINEで続ける</a>';
-        }
-      }
-    } else {
-      try { sessionStorage.removeItem('cbfail'); } catch (eS3) {}   // 成功したら失敗回数をリセット
+    // 🆕 0918spd2: 本人確認(lineMenuCallback)を裏で完了させ、結果は画面(__hpApplyAuth__)に反映する。
+    //   ・成功/氏名入力/失敗の出し分け・失敗2回で電話案内 は __hpApplyAuth__ 側で行う。
+    //   ・確定（予約作成）の前に本人確認の完了を必ず待つ（patient.html submitBooking）。
+    if (cbPromise) {
+      cbPromise.then(function (rc) {
+        try { if (typeof window.__hpApplyAuth__ === "function") window.__hpApplyAuth__(rc); } catch (eApply) {}
+      });
     }
     // 🔴 0917err: 本人確認の照会だけが失敗したとき。ページは動かしたまま、
     //   ?auth= を保った元のURLで「もう一度読み込む」を案内する（情報を捨てない）
