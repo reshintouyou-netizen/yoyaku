@@ -4860,7 +4860,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17j）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18a）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4868,7 +4868,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-17j";
+    vt.textContent = "版 2026-09-18a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -4963,14 +4963,28 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
         e.setAttribute('href', e.getAttribute('href') + '&ret=hp');
       }
     });
-    // 🚀 0917spd: 直接コールバックの交換に失敗したときの案内（行き止まりにしない）
+    // 🚀 0917spd / 0918dc: 直接コールバックの交換に失敗したときの案内（行き止まり・ループにしない）
+    //   ・1回目の失敗 … 従来の /exec 経由（3枚目あり）でやり直す導線を出す。
+    //   ・🔴 2回失敗したら もう自動でLINEに戻さず「お電話でご予約ください」で止める。
     if (cbFail) {
+      var cbN = 0;
+      try { cbN = parseInt(sessionStorage.getItem('cbfail') || '0', 10) || 0; } catch (eS) {}
+      cbN += 1;
+      try { sessionStorage.setItem('cbfail', String(cbN)); } catch (eS2) {}
       var mf = document.getElementById('msg');
       if (mf) {
         mf.className = 'msg err';
-        mf.innerHTML = 'LINEの確認をやり直してください。 ' +
-          '<a href="' + GAS + '?from=line&ret=hp">もう一度LINEで続ける</a>';
+        if (cbN >= 2) {
+          mf.innerHTML = 'ご本人確認がうまくいきませんでした。お手数ですが、' +
+            '<a href="' + GAS + '">こちらの予約ページ</a> をご利用いただくか、' +
+            'お電話（089-906-8249）でご予約ください。';
+        } else {
+          mf.innerHTML = 'LINEの確認をやり直してください。 ' +
+            '<a href="' + GAS + '?from=line&ret=hp">もう一度LINEで続ける</a>';
+        }
       }
+    } else {
+      try { sessionStorage.removeItem('cbfail'); } catch (eS3) {}   // 成功したら失敗回数をリセット
     }
     // 🔴 0917err: 本人確認の照会だけが失敗したとき。ページは動かしたまま、
     //   ?auth= を保った元のURLで「もう一度読み込む」を案内する（情報を捨てない）
