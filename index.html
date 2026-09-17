@@ -4649,30 +4649,67 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 
 // ============================================================
 // 🚀 0917spd: トップレベル（＝HP設置ページ・サンドボックス外）では、
-//   「LINEで続ける」を押したら中継画面（LINEで確認しています）を通らず、
-//   サーバから認可URLを取ってそのまま LINE へ跳ぶ（1画面ぶん短くなる）。
+//   「LINEで続ける」を押したら中継画面（LINEで確認しています）を通らず LINE へ跳ぶ。
 //   ・GASの画面（iframeの中）は従来どおりリンク遷移（sandbox の制約で
 //     fetch 後の自動遷移がユーザー操作扱いにならず止められるため）。
-//   ・fetch に失敗したら従来の中継ページ経由に倒す（行き止まりにしない）。
+// 🔴 0917spd2（iOS実機で中継画面が出た件の対策）:
+//   認可URLは【ページ読み込み時に事前取得】しておき、クリック時は
+//   通信を待たずその場で location.replace する（クリック後の通信は
+//   失敗・遅延すると従来の中継ページに倒れてしまうため＝実測で再現済み）。
+//   ・state はサーバ発行のまま（従来も中継ページ表示時に発行していたので
+//     露出時間は同じ。期限10分・1回きり・検証は既存の1箇所もの）。
+//   ・8分より古くなったら取り直す／LINEから戻ってきた直後も取り直す。
+//   ・事前取得が無いときだけクリック時取得（1回だけ自動で取り直し）、
+//     それでもだめなら最後の手段として従来の中継ページへ。
 // ============================================================
 (function () {
   var isTop = false;
   try { isTop = (window.self === window.top); } catch (eT) { isTop = false; }
   if (!isTop) return;
-  ['gateLineBtn', 'linePromoBtn'].forEach(function (id) {
-    var el = $(id);
-    if (!el) return;
+  var lineBtns = ['gateLineBtn', 'linePromoBtn'].map(function (id) { return $(id); })
+    .filter(function (el) { return !!el; });
+  if (!lineBtns.length) return;
+  var PRE_FRESH_MS = 8 * 60 * 1000;   // サーバ側の期限(10分)より短く
+  var pre = { url: '', at: 0, busy: false };
+  function prefetchLineUrl() {
+    if (pre.busy) return;
+    pre.busy = true;
+    callAction('getLineLoginUrl', { ret: 'hp' })
+      .then(function (r) {
+        if (r && r.success && r.url) { pre.url = r.url; pre.at = Date.now(); }
+      })
+      .catch(function () {})
+      .then(function () { pre.busy = false; });
+  }
+  prefetchLineUrl();
+  window.addEventListener('pageshow', function (e) {
+    if (e && e.persisted) { pre.url = ''; prefetchLineUrl(); }   // LINEから「戻る」で復帰
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && !pre.busy
+        && (!pre.url || Date.now() - pre.at > PRE_FRESH_MS)) prefetchLineUrl();
+  });
+  lineBtns.forEach(function (el) {
     el.addEventListener('click', function (ev) {
       try {
+        if (pre.url && Date.now() - pre.at < PRE_FRESH_MS) {
+          ev.preventDefault();
+          location.replace(pre.url);   // 通信ゼロ＝ユーザー操作の文脈のまま即遷移
+          return;
+        }
         ev.preventDefault();
         if (el.getAttribute('data-busy')) return;   // 連打で二重に取りに行かない
         el.setAttribute('data-busy', '1');
         var prev = el.textContent;
         el.textContent = 'LINEへ進んでいます…';
-        callAction('getLineLoginUrl', { ret: 'hp' })
+        function goFetch() { return callAction('getLineLoginUrl', { ret: 'hp' }); }
+        goFetch()
+          .catch(function () {
+            return new Promise(function (res) { setTimeout(res, 800); }).then(goFetch);
+          })
           .then(function (r) {
             if (r && r.success && r.url) { location.replace(r.url); return; }
-            location.href = el.getAttribute('href');   // 保険: 従来の中継ページ経由
+            location.href = el.getAttribute('href');   // 最後の手段: 従来の中継ページ経由
           })
           .catch(function () { location.href = el.getAttribute('href'); });
         // 遷移しなかった場合に備えてボタンを戻す（通常は遷移して見えない）
@@ -4684,10 +4721,18 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17b）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-17c）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
+  // 0917dbg: 版番号を右下に常時表示（先生が「新しいページか」を1目で判別するため）
+  try {
+    var vt = document.createElement('div');
+    vt.id = 'hpBuildTag';
+    vt.textContent = "版 2026-09-17c";
+    vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
+    document.body.appendChild(vt);
+  } catch (eV) {}
   var GAS = "https://script.google.com/macros/s/AKfycbzw8nXO5DRxMAMSHmyDmJNnjVITAuRZEzQnTbNFgLWfkD5Ar34C4bH1HT0udyTRcntLfQ/exec";
   var q;
   try { q = new URLSearchParams(location.search); } catch (e) { q = { get: function () { return ''; } }; }
