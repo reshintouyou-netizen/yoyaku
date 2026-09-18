@@ -1143,6 +1143,9 @@ window.__hpApplyAuth__ = function (rc) {
     AUTH.authPending = false;
     var note = document.getElementById('authPendingNote');
     if (note) note.classList.add('hidden');
+    // 🆕 0918banner: 本人確認が終わったら「LINEで続けると省けます」の案内は必ず畳む
+    //   （連携済みの人＝もう来ている人に見せない）。
+    var _lp = document.getElementById('linePromo'); if (_lp) _lp.classList.add('hidden');
     var resume = AUTH._resumeSubmit; AUTH._resumeSubmit = null;
     if (rc && rc.success && rc.auth && rc.user && rc.user.name) {
       // 連携済み（カルテ紐づけ）＝氏名は分かっている。そのまま予約できる。
@@ -1304,7 +1307,10 @@ function init() {
     //   ・本人確認済み（AUTH.token）… 不要
     //   ・LINE経由の未連携（lineHint）… 既存のヒントが出る（ボタンを押しても戻るだけなので出さない）
     $('linePromoBtn').href = SETUP.execUrl + '?from=line';
-    if (!AUTH.token && !SETUP.lineHint) $('linePromo').classList.remove('hidden');
+    // 🆕 0918banner: 🔴 連携済み(AUTH.token)・裏で本人確認中(authPending) には出さない。
+    //   ＝すでにLINEから来ている人に「LINEで続けると省けます」を見せない（混乱防止）。
+    //   ★「LINEを使わずに予約する」で進んだ未連携の人にだけ出す（連携すれば楽と伝える）。
+    if (!AUTH.token && !AUTH.authPending && !SETUP.lineHint) $('linePromo').classList.remove('hidden');
     if (SETUP.clinic.lineUrl) $('noticeAddFriend').href = SETUP.clinic.lineUrl;
     else $('noticeAddFriend').classList.add('hidden');   // ID未設定ならリンク切れを見せない
     // ============================================================
@@ -2693,8 +2699,13 @@ function goStep(n) {
   $('helpBox').classList.toggle('hidden', n === 5);
   // 🔴 0831a: 未連携の案内はメニュー画面だけ（★予約の途中で邪魔をしない）
   if (SETUP.lineHint) $('lineHint').classList.toggle('hidden', n !== 1);
-  // 🔴 0915nolineA: LINEのおすすめも同じくメニュー画面だけ
-  if (!AUTH.token && !SETUP.lineHint) $('linePromo').classList.toggle('hidden', n !== 1);
+  // 🔴 0915nolineA / 🆕 0918banner: LINEのおすすめはメニュー画面だけ。
+  //   🔴 連携済み(AUTH.token)・裏で本人確認中(authPending) には出さない（else で必ず畳む）。
+  if (!AUTH.token && !AUTH.authPending && !SETUP.lineHint) {
+    $('linePromo').classList.toggle('hidden', n !== 1);
+  } else {
+    $('linePromo').classList.add('hidden');
+  }
   // 🔴 0830b: ②日時は週表（部品は1つ。変更画面と同じもの）
   if (n === 2) mountWeekPickerForNew();
   if (n === 4) renderConfirm();
@@ -4963,7 +4974,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18d）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18e）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4971,7 +4982,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-18d";
+    vt.textContent = "版 2026-09-18e";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
