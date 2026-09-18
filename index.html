@@ -1487,14 +1487,39 @@ function wpStart(el, dur, onPick, picked) {
   //   ★隠していない。◀ でいつでも戻れる。
   WP.auto = !WP.picked;
   WP.hops = 0;
-  // 🔴 0915pf: 2ヶ月分を先読み。週送りを瞬時にする（通信0回）。
-  //   ★最初の読み込みは 350ms 程度（7日で 237ms なので +113ms）。
-  //   ★読み直しは無い（同時予約がほぼ無いため）。押したときの再確認で守る。
-  WP.loading = true;
-  wpRender();
-  wpFetch(SETUP.today, horizonDate())
-    .then(function() { WP.loading = false; wpGo(ws); })
-    .catch(function() { WP.loading = false; wpGo(ws); });
+  // 🆕 0918os: 🔴 まず【表示する週だけ】取って即描く（今までは2ヶ月=60日を1往復で取り、
+  //   シート併読(@164)が加わって重く・弱い回線で落ちて「空き枠が出ない」原因になっていた）。
+  //   ・wpGo(ws) が その週(7日)だけを取得して描画（失敗しても wpFetch が1回やり直す）。
+  //   ・残りは【裏で】少しずつ先読み＝週送りは速いまま・失敗しても表示済みなので壊れない。
+  //   🔴 枠の空きはキャッシュしない（毎回サーバから取得。押したときも再確認する）。
+  wpGo(ws);
+  wpPrefetchAhead(ws);
+}
+
+/** 🆕 0918os: 表示中の週の先の数週を、裏でこっそり先読みする（週送りを速く保つ・非同期）。 */
+function wpPrefetchAhead(ws) {
+  try {
+    var ranges = [
+      [wpAddDays(ws, 7),  wpAddDays(ws, 13)],   // 翌週
+      [wpAddDays(ws, 14), wpAddDays(ws, 27)]    // 2〜3週先
+    ];
+    var i = 0;
+    function next() {
+      if (i >= ranges.length) return;
+      var rg = ranges[i++];
+      var a = (rg[0] > WP.maxWeek) ? null : rg[0];
+      if (!a) return;
+      var b = (rg[1] > wpAddDays(WP.maxWeek, 6)) ? wpAddDays(WP.maxWeek, 6) : rg[1];
+      // 既に持っていれば飛ばす
+      if (wpHave(rg[0], b)) { next(); return; }
+      wpFetch(a, b).then(function() {
+        if (!WP.loading && WP.el) wpRender();   // 先読みできたら軽く描き直す（今の週は変えない）
+        next();
+      }).catch(function() { next(); });          // 先読み失敗は無視（オンデマンドで取れる）
+    }
+    // 表示が落ち着いてから（初回描画をブロックしない）
+    setTimeout(next, 400);
+  } catch (e) {}
 }
 
 /** 所要時間ごとの入れ物（無ければ作る） */
@@ -1536,13 +1561,23 @@ function slotOpen(s) { return s && s.mark === 'o'; }
  */
 function wpFetch(from, to) {
   var st = wpStore(), dur = WP.dur;
-  return callAction('getOpenSlots', {
+  // 🆕 0918os: 通信が落ちても「空き枠が出ない」を起こさない＝自動で1回やり直す。
+  //   （GAS往復は数秒あり、弱い回線で最初の1回が落ちやすいため）
+  function once() {
+    return callAction('getOpenSlots', {
       durationMinutes: dur,
       startDate: (from < SETUP.today) ? SETUP.today : from,
       endDate:   to
+    }).then(function(r) {
+      if (!r || r.success === false) throw new Error((r && r.error) || '');
+      return r;
+    });
+  }
+  return once()
+    .catch(function() {
+      return new Promise(function(res) { setTimeout(res, 800); }).then(once);
     })
     .then(function(r) {
-      if (!r || r.success === false) throw new Error((r && r.error) || '');
       if (String(dur) !== String(WP.dur)) return;      // 途中でメニューが変わった
       (r.days || []).forEach(function(d) { st.day[d.date] = d; });
       for (var d2 = from; d2 <= to; d2 = wpAddDays(d2, 1)) st.got[d2] = true;
@@ -4928,7 +4963,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18c）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18d）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4936,7 +4971,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-18c";
+    vt.textContent = "版 2026-09-18d";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
