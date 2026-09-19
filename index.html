@@ -2245,7 +2245,9 @@ function submitBooking() {
       //   ⚠ トークンが無ければ（初診以外・発行失敗）今まで通り完了画面。
       if (r.intakeToken) {
         iqOpen(r.intakeToken, { prefill: { name: f.name, kana: f.kana, phone: f.phone, email: f.email,
-                                           address: f.address || '' } });
+                                           address: f.address || '' },
+                                // 🎀 0919beauty: メニュー名に「美容鍼」を含めば美容鍼専用の問診
+                                beauty: /美容鍼/.test(String(r.menuName || '')) });
       } else if (r.revisitToken) {
         // 🔴 0906k 第7段階-4: 再診メニュー → 経過・新しい症状の事前入力（任意）
         rvOpen(r.revisitToken);
@@ -2844,7 +2846,9 @@ var QUEST_STORAGE_KEY = 'rishin_questionnaire_draft';
 
 var Q_PAGE_TITLES = [
   '', 'A. 基本情報', 'B. 主なお悩み選択', 'C. 症状別の詳細質問',
-  'D. 症状全体の共通質問', 'E. 全身症状チェック', 'F. 女性専用フォーム', 'G. 最終共通項目'
+  'D. 症状全体の共通質問', 'E. 全身症状チェック', 'F. 女性専用フォーム', 'G. 最終共通項目',
+  // 🎀 0919beauty: 美容鍼専用ページ(page 8)。鍼灸の1〜7は不変。
+  'B. 美容鍼の問診'
 ];
 
 var SYMPTOM_CATEGORIES = [
@@ -3262,8 +3266,15 @@ function calcAgeGroup(bd) {
 
 function renderQProgressBar(page) {
   var isMale = qFormData.gender === '男性';
-  var total = isMale ? 6 : 7;
-  var effectivePage = (isMale && page === 7) ? 6 : page;
+  var total, effectivePage;
+  if (IQ.beauty) {
+    // 🎀 0919beauty: 美容鍼は 3ページ（1=基本 / 8=美容鍼 / 7=最終）
+    total = 3;
+    effectivePage = (page === 1) ? 1 : (page === 8 ? 2 : 3);
+  } else {
+    total = isMale ? 6 : 7;
+    effectivePage = (isMale && page === 7) ? 6 : page;
+  }
   var pct = Math.round(((effectivePage - 1) / (total - 1)) * 100);
   return (
     '<div style="margin-bottom:1.5rem;">' +
@@ -3287,6 +3298,7 @@ function renderQPage(page) {
   if (page === 5) { renderQPage5(); return; }
   if (page === 6) { renderQPage6(); return; }
   if (page === 7) { renderQPage7(); return; }
+  if (page === 8) { renderQPage8(); return; }   // 🎀 0919beauty: 美容鍼専用
   renderQPageStub(page);
 }
 
@@ -4300,6 +4312,8 @@ function collectQPageData(page) {
     collectQPage6Data();
   } else if (page === 7) {
     collectQPage7Data();
+  } else if (page === 8) {
+    collectQPage8Data();   // 🎀 0919beauty
   }
 }
 
@@ -4333,6 +4347,8 @@ function validateQPage(page) {
     return validateQPage6();
   } else if (page === 7) {
     return validateQPage7();
+  } else if (page === 8) {
+    return validateQPage8();   // 🎀 0919beauty
   }
   // Page 5 (E) has no required fields
   return errs;
@@ -4349,18 +4365,30 @@ function qNext() {
     }
     return;
   }
-  var nextPage = qPage + 1;
-  if (nextPage === 6 && qFormData.gender === '男性') nextPage = 7;
-  saveDraft({ page: nextPage, formData: qFormData, selectedComplaints: selectedComplaints });
+  // 🎀 0919beauty: 美容鍼は 1 → 8(美容鍼専用) → 7(最終) の3ページ。鍼灸は従来どおり。
+  var nextPage;
+  if (IQ.beauty) {
+    nextPage = (qPage === 1) ? 8 : (qPage === 8 ? 7 : qPage + 1);
+  } else {
+    nextPage = qPage + 1;
+    if (nextPage === 6 && qFormData.gender === '男性') nextPage = 7;
+  }
+  saveDraft({ page: nextPage, formData: qFormData, selectedComplaints: selectedComplaints, beauty: IQ.beauty });
   renderQPage(nextPage);
 }
 
 function qBack() {
   if (qPage <= 1) return;
   collectQPageData(qPage);
-  var prevPage = qPage - 1;
-  if (prevPage === 6 && qFormData.gender === '男性') prevPage = 5;
-  saveDraft({ page: prevPage, formData: qFormData, selectedComplaints: selectedComplaints });
+  // 🎀 0919beauty: 美容鍼は 7 → 8 → 1 で戻る。
+  var prevPage;
+  if (IQ.beauty) {
+    prevPage = (qPage === 7) ? 8 : (qPage === 8 ? 1 : qPage - 1);
+  } else {
+    prevPage = qPage - 1;
+    if (prevPage === 6 && qFormData.gender === '男性') prevPage = 5;
+  }
+  saveDraft({ page: prevPage, formData: qFormData, selectedComplaints: selectedComplaints, beauty: IQ.beauty });
   renderQPage(prevPage);
 }
 
@@ -4381,7 +4409,8 @@ function val(id) {                       // 旧booking.htmlと同じ実装
 var IQ = {
   token: '',          // 問診トークン（createBooking の応答 or ?intake= から）
   active: false,
-  standalone: false   // メールのリンク（?intake=）から開いたか
+  standalone: false,  // メールのリンク（?intake=）から開いたか
+  beauty: false       // 🎀 0919beauty: 美容鍼の初診か（メニュー名に「美容鍼」を含む）
 };
 
 /**
@@ -4394,6 +4423,7 @@ function iqOpen(token, opts) {
   IQ.token = String(token || '');
   IQ.active = true;
   IQ.standalone = !!opts.standalone;
+  IQ.beauty = !!opts.beauty;   // 🎀 0919beauty: メニュー名に「美容鍼」を含む初診か
 
   ['screenMenu', 'screenDate', 'screenForm', 'screenConfirm', 'screenDone', 'screenManage']
     .forEach(function(id) { $(id).classList.add('hidden'); });
@@ -4436,6 +4466,8 @@ function iqOpen(token, opts) {
     // 🔴 0915nolineA: 未連携の予約フォームで住所も入力済み → 問診票にも引き継ぐ
     if (!qFormData.address  && pf.address) qFormData.address = pf.address;
   }
+  // 🎀 0919beauty: フォーム種別が違う下書き（鍼灸↔美容鍼）はページだけ1に戻す（違うページを出さない）。
+  if (draft && (!!draft.beauty !== IQ.beauty)) qPage = 1;
   renderQPage(qPage);
 }
 
@@ -4629,9 +4661,11 @@ function renderQPage7() {
     renderRadioGroup3('g_sns_consent', ['同意する','使用前に都度確認してほしい','同意しない'], g.sns_consent) +
     '</div>';
 
-  // Q5: 美容鍼希望
-  html += '<div class="q-card"><label>美容鍼希望<span class="req">*</span></label>' +
-    renderRadioGroup3('g_beauty_acu', ['はい','いいえ'], g.beauty_acu) + '</div>';
+  // Q5: 美容鍼希望（🎀 0919beauty: 美容鍼の問診では出さない＝選んで来ているため。鍼灸は従来どおり）
+  if (!IQ.beauty) {
+    html += '<div class="q-card"><label>美容鍼希望<span class="req">*</span></label>' +
+      renderRadioGroup3('g_beauty_acu', ['はい','いいえ'], g.beauty_acu) + '</div>';
+  }
 
   html += '<div id="q-page-err"></div>' +
     '<div style="display:flex;gap:0.8rem;margin-top:1.5rem;">' +
@@ -4667,8 +4701,131 @@ function validateQPage7() {
     errs.push('通院ペースの希望を選択してください');
   if (!document.querySelector('input[name="g_sns_consent"]:checked'))
     errs.push('SNS・ブログ掲載同意を選択してください');
-  if (!document.querySelector('input[name="g_beauty_acu"]:checked'))
+  // 🎀 0919beauty: 美容鍼の問診では「美容鍼希望」を出していないので必須にしない。
+  if (!IQ.beauty && !document.querySelector('input[name="g_beauty_acu"]:checked'))
     errs.push('美容鍼希望を選択してください');
+  return errs;
+}
+
+// ------------------------------------------------------------
+// 🎀 0919beauty: Page 8 = 美容鍼専用の問診（鍼灸の主訴・症状詳細・共通症状・身体チェックは出さない）
+//   ・回答は qFormData.beauty_form に入れる → questionnaire_raw(JSON)に保存（列は増やさない）。
+//   ・必須: 美容医療の経験 / 皮膚疾患 / 抗凝固薬 / 内出血同意 / 肌の悩み / 気になる部位。
+//   ・入力欄は16px・タップ44px以上（スマホ配慮）。
+// ------------------------------------------------------------
+function renderQPage8() {
+  var bf = qFormData.beauty_form || {};
+  var INP = 'width:100%;box-sizing:border-box;font-size:16px;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit';
+  function chk(name, opt) { var a = bf[name]; return (Array.isArray(a) && a.indexOf(opt) !== -1) ? ' checked' : ''; }
+  function cbGrid(name, opts) {
+    return '<div class="q-check-grid">' + opts.map(function(o) {
+      return '<label class="q-check-label"><input type="checkbox" name="' + name + '" value="' + esc(o) + '"' + chk(name, o) + ' onchange="checkConditionals()">' + esc(o) + '</label>';
+    }).join('') + '</div>';
+  }
+  var html = renderQProgressBar(8) +
+    '<div class="q-header"><h2>B. 美容鍼の問診</h2><p>お肌の状態と、安全に施術するための確認です。</p></div>';
+
+  html += '<div style="font-weight:700;color:var(--accent);margin:0.4rem 0 0.6rem">安全のための確認</div>';
+  // 美容医療の経験（必須・複数）＋ なし以外なら時期・部位
+  html += '<div class="q-card"><label>美容医療の経験<span class="req">*</span><span class="q-optional">（複数選択可・無ければ「なし」）</span></label>' +
+    cbGrid('b_cosmetic_history', ['ヒアルロン酸', 'ボトックス', '糸リフト', 'レーザー', 'その他', 'なし']) + '</div>';
+  html += '<div class="q-card q-cond-block" data-cond-on="b_cosmetic_history" data-cond-mode="not" data-cond-vals="なし">' +
+    '<label>受けた時期<span class="q-optional">（任意）</span></label>' +
+    '<input type="text" id="b_cosmetic_when" value="' + esc(bf.cosmetic_when || '') + '" placeholder="例：3か月前" style="' + INP + '"></div>';
+  html += '<div class="q-card q-cond-block" data-cond-on="b_cosmetic_history" data-cond-mode="not" data-cond-vals="なし">' +
+    '<label>受けた部位<span class="q-optional">（任意）</span></label>' +
+    '<input type="text" id="b_cosmetic_area" value="' + esc(bf.cosmetic_area || '') + '" placeholder="例：ほうれい線・目元" style="' + INP + '"></div>';
+  // 皮膚疾患・アレルギー（必須）→ ある→内容
+  html += '<div class="q-card"><label>皮膚疾患・アトピー・金属アレルギー<span class="req">*</span></label>' +
+    renderRadioGroup3('b_skin_disease', ['ある', 'ない'], bf.skin_disease) + '</div>';
+  html += '<div class="q-card q-cond-block" data-cond-on="b_skin_disease" data-cond-mode="values" data-cond-vals="ある">' +
+    '<label>内容<span class="q-optional">（任意）</span></label>' +
+    '<textarea id="b_skin_disease_detail" rows="2" placeholder="例：金属アレルギー（ピアスでかぶれる）" style="' + INP + '">' + esc(bf.skin_disease_detail || '') + '</textarea></div>';
+  // 抗凝固薬（必須）→ あり→薬名
+  html += '<div class="q-card"><label>血をサラサラにする薬（抗凝固薬）の服用<span class="req">*</span></label>' +
+    renderRadioGroup3('b_anticoagulant', ['あり', 'なし', 'わからない'], bf.anticoagulant) + '</div>';
+  html += '<div class="q-card q-cond-block" data-cond-on="b_anticoagulant" data-cond-mode="values" data-cond-vals="あり">' +
+    '<label>お薬の名前<span class="q-optional">（任意）</span></label>' +
+    '<input type="text" id="b_anticoagulant_name" value="' + esc(bf.anticoagulant_name || '') + '" placeholder="例：ワーファリン" style="' + INP + '"></div>';
+  // 内出血の同意（必須チェック）
+  html += '<div class="q-card" style="background:#fdf6ec"><label class="q-check-label" style="font-weight:600;align-items:flex-start">' +
+    '<input type="checkbox" id="b_bruise_consent"' + (bf.bruise_consent ? ' checked' : '') + ' style="margin-top:3px">' +
+    '<span>美容鍼では まれに内出血が出ることがあります（数日〜2週間ほどで自然に消えます）。理解しました<span class="req">*</span></span></label></div>';
+  // 直近の大事な予定（任意）→ ある→日付
+  html += '<div class="q-card"><label>直近の大事な予定（結婚式・撮影・行事など）<span class="q-optional">（任意）</span></label>' +
+    renderRadioGroup3('b_upcoming_event', ['ある', 'ない'], bf.upcoming_event) + '</div>';
+  html += '<div class="q-card q-cond-block" data-cond-on="b_upcoming_event" data-cond-mode="values" data-cond-vals="ある">' +
+    '<label>予定の日<span class="q-optional">（任意）</span></label>' +
+    '<input type="text" id="b_upcoming_event_date" value="' + esc(bf.upcoming_event_date || '') + '" placeholder="例：10月20日 結婚式" style="' + INP + '"></div>';
+
+  html += '<div style="font-weight:700;color:var(--accent);margin:1rem 0 0.6rem">お肌について</div>';
+  html += '<div class="q-card"><label>肌の悩み<span class="req">*</span><span class="q-optional">（複数選択可）</span></label>' +
+    cbGrid('b_skin_concerns', ['しわ', 'たるみ', 'くすみ', '乾燥', 'ニキビ・吹き出物', '毛穴', 'シミ', '赤み', 'その他']) + '</div>';
+  html += '<div class="q-card"><label>特に気になる部位<span class="req">*</span><span class="q-optional">（複数選択可）</span></label>' +
+    cbGrid('b_concern_area', ['目元', 'ほうれい線', 'フェイスライン', '額', '口元', '首', '全体']) + '</div>';
+  html += '<div class="q-card"><label>肌質<span class="q-optional">（任意）</span></label>' +
+    renderRadioGroup3('b_skin_type', ['乾燥', '脂性', '混合', '敏感', '普通', 'わからない'], bf.skin_type) + '</div>';
+  html += '<div class="q-card"><label>顔のむくみ<span class="q-optional">（任意）</span></label>' +
+    renderRadioGroup3('b_face_swelling', ['よくある', 'ときどき', 'ない'], bf.face_swelling) + '</div>';
+  html += '<div class="q-card"><label>食いしばり・歯ぎしり<span class="q-optional">（任意）</span></label>' +
+    renderRadioGroup3('b_teeth_clenching', ['ある', 'ときどき', 'ない', 'わからない'], bf.teeth_clenching) + '</div>';
+  html += '<div class="q-card"><label>スキンケア・使っている化粧品<span class="q-optional">（任意）</span></label>' +
+    '<textarea id="b_skincare" rows="2" placeholder="例：化粧水と乳液のみ／敏感肌用" style="' + INP + '">' + esc(bf.skincare || '') + '</textarea></div>';
+  html += '<div class="q-card"><label>日焼けの習慣<span class="q-optional">（任意）</span></label>' +
+    '<textarea id="b_sun_habit" rows="2" placeholder="例：日焼け止めを毎日／日焼けサロンに通っている" style="' + INP + '">' + esc(bf.sun_habit || '') + '</textarea></div>';
+  html += '<div class="q-card"><label>睡眠（時間・質）<span class="q-optional">（任意）</span></label>' +
+    '<input type="text" id="b_sleep" value="' + esc(bf.sleep || '') + '" placeholder="例：6時間・寝つきが悪い" style="' + INP + '"></div>';
+  html += '<div class="q-card"><label>食事・水分<span class="q-optional">（任意）</span></label>' +
+    '<input type="text" id="b_meal" value="' + esc(bf.meal || '') + '" placeholder="例：外食が多い・水分少なめ" style="' + INP + '"></div>';
+  html += '<div class="q-card"><label>便通<span class="q-optional">（任意）</span></label>' +
+    '<input type="text" id="b_bowel" value="' + esc(bf.bowel || '') + '" placeholder="例：毎日／便秘がち" style="' + INP + '"></div>';
+
+  html += '<div id="q-page-err"></div>' +
+    '<div style="display:flex;gap:0.8rem;margin-top:1.5rem;">' +
+    '<button class="btn-back" style="flex:0 0 auto;" onclick="qBack()">← 戻る</button>' +
+    '<button class="btn-submit" style="flex:1;" onclick="qNext()">次へ →</button>' +
+    '</div>';
+  setContent(html);
+  checkConditionals();
+}
+
+function collectQPage8Data() {
+  var bf = qFormData.beauty_form || {};
+  function cbVals(name) { var a = []; document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function(c) { a.push(c.value); }); return a; }
+  function rVal(name) { var el = document.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ''; }
+  function tv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  bf.cosmetic_history    = cbVals('b_cosmetic_history');
+  bf.cosmetic_when       = tv('b_cosmetic_when');
+  bf.cosmetic_area       = tv('b_cosmetic_area');
+  bf.skin_disease        = rVal('b_skin_disease');
+  bf.skin_disease_detail = tv('b_skin_disease_detail');
+  bf.anticoagulant       = rVal('b_anticoagulant');
+  bf.anticoagulant_name  = tv('b_anticoagulant_name');
+  var bc = document.getElementById('b_bruise_consent'); bf.bruise_consent = (bc && bc.checked) ? 'はい（理解しました）' : '';
+  bf.upcoming_event      = rVal('b_upcoming_event');
+  bf.upcoming_event_date = tv('b_upcoming_event_date');
+  bf.skin_concerns       = cbVals('b_skin_concerns');
+  bf.concern_area        = cbVals('b_concern_area');
+  bf.skin_type           = rVal('b_skin_type');
+  bf.face_swelling       = rVal('b_face_swelling');
+  bf.teeth_clenching     = rVal('b_teeth_clenching');
+  bf.skincare            = tv('b_skincare');
+  bf.sun_habit           = tv('b_sun_habit');
+  bf.sleep               = tv('b_sleep');
+  bf.meal                = tv('b_meal');
+  bf.bowel               = tv('b_bowel');
+  qFormData.beauty_form = bf;
+}
+
+function validateQPage8() {
+  var bf = qFormData.beauty_form || {};
+  var errs = [];
+  if (!bf.cosmetic_history || bf.cosmetic_history.length === 0) errs.push('美容医療の経験を選択してください（無ければ「なし」）');
+  if (!bf.skin_disease)   errs.push('皮膚疾患・アレルギーの有無を選択してください');
+  if (!bf.anticoagulant)  errs.push('血をサラサラにする薬の服用を選択してください');
+  if (!bf.bruise_consent) errs.push('内出血について「理解しました」にチェックしてください');
+  if (!bf.skin_concerns || bf.skin_concerns.length === 0) errs.push('肌の悩みを1つ以上選択してください');
+  if (!bf.concern_area || bf.concern_area.length === 0)   errs.push('特に気になる部位を1つ以上選択してください');
   return errs;
 }
 
@@ -4877,7 +5034,9 @@ if (SETUP.intakeToken && !SETUP.manageToken) {
   callAction('checkIntakeToken', { token: SETUP.intakeToken })
     .then(function(r) {
       if (r && r.success && r.valid) {
-        iqOpen(SETUP.intakeToken, { standalone: true, submittedBefore: !!r.submitted });
+        // 🎀 0919beauty: サーバが返す menuName に「美容鍼」を含めば美容鍼専用の問診
+        iqOpen(SETUP.intakeToken, { standalone: true, submittedBefore: !!r.submitted,
+                                    beauty: /美容鍼/.test(String((r && r.menuName) || '')) });
       } else {
         showMsg('問診票のリンクの有効期限が切れています。お手数ですが、ご来院時にご記入ください。');
       }
@@ -4974,7 +5133,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-18e）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-19b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -4982,7 +5141,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-18e";
+    vt.textContent = "版 2026-09-19b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
