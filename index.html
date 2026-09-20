@@ -1409,6 +1409,9 @@ function pickMenu(id) {
 var WP = {
   el: null,          // 描画先の要素
   dur: 0,            // 所要時間（分）
+  // 👥 0921owner 第2段-B-2: 選んでいるメニューのID（あれば）。サーバーに渡すだけで
+  //   見た目・動作は変えない。無ければ渡さない（既存の自己申告フローは今までどおり）。
+  menuId: '',
   weekStart: '',     // 表示中の週の月曜 'YYYY-MM-DD'
   minWeek: '',       // これより前には戻れない（今日の週）
   maxWeek: '',       // これより先には進めない（2ヶ月先の週）
@@ -1470,10 +1473,12 @@ function wpLabel(ymd, hm) {
  * @param {number}   dur       所要時間（分）
  * @param {Function} onPick    ◯が押されたとき onPick(datetimeJST, label)
  * @param {string}   [picked]  すでに選ばれている日時（'YYYY/MM/DD HH:mm'）
+ * @param {string}   [menuId]  👥 0921owner: 選んでいるメニューのID（分かれば）。無ければ空のまま。
  */
-function wpStart(el, dur, onPick, picked) {
+function wpStart(el, dur, onPick, picked, menuId) {
   WP.el = el;
   WP.dur = dur;
+  WP.menuId = menuId || '';
   WP.onPick = onPick;
   WP.picked = picked || '';
   WP.minWeek = wpMonday(SETUP.today);
@@ -1570,11 +1575,14 @@ function wpFetch(from, to) {
   // 🆕 0918os: 通信が落ちても「空き枠が出ない」を起こさない＝自動で1回やり直す。
   //   （GAS往復は数秒あり、弱い回線で最初の1回が落ちやすいため）
   function once() {
-    return callAction('getOpenSlots', {
+    var payload = {
       durationMinutes: dur,
       startDate: (from < SETUP.today) ? SETUP.today : from,
       endDate:   to
-    }).then(function(r) {
+    };
+    // 👥 0921owner 第2段-B-2: メニューIDが分かっていれば添える（無ければ送らない＝今までどおり）
+    if (WP.menuId) payload.menuId = WP.menuId;
+    return callAction('getOpenSlots', payload).then(function(r) {
       if (!r || r.success === false) throw new Error((r && r.error) || '');
       return r;
     });
@@ -2002,7 +2010,7 @@ function mountWeekPickerForNew() {
     S.menu.name + '（施術 約' + menuDispMin(S.menu) + '分）で空いているお時間です。○を押してください。';
   wpStart($('dayList'), S.menu.durationMinutes, function(dt, label) {
     cfOpenNew(dt, label);
-  }, S.datetimeJST);
+  }, S.datetimeJST, S.menu.id);
 }
 
 // ============================================================
@@ -2021,7 +2029,8 @@ function loadSlots() {
   callAction('getOpenSlots', {
       durationMinutes: S.menu.durationMinutes,
       startDate: SETUP.today,      // ★指定しないと当日1日分しか返らない
-      endDate:   horizonDate()     // ★2ヶ月先まで
+      endDate:   horizonDate(),    // ★2ヶ月先まで
+      menuId:    S.menu.id         // 👥 0921owner 第2段-B-2
     })
     .then(function(r) {
       S.loading = false;
@@ -5133,7 +5142,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-19b）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-20b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5141,7 +5150,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-19b";
+    vt.textContent = "版 2026-09-20b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
