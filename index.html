@@ -2256,7 +2256,9 @@ function submitBooking() {
         iqOpen(r.intakeToken, { prefill: { name: f.name, kana: f.kana, phone: f.phone, email: f.email,
                                            address: f.address || '' },
                                 // 🎀 0919beauty: メニュー名に「美容鍼」を含めば美容鍼専用の問診
-                                beauty: /美容鍼/.test(String(r.menuName || '')) });
+                                beauty: /美容鍼/.test(String(r.menuName || '')),
+                                // 🆕 0921carry: 前回の問診票から共通項目を引き継ぐ（無ければ found:false）
+                                carryover: r.intakeCarryover });
       } else if (r.revisitToken) {
         // 🔴 0906k 第7段階-4: 再診メニュー → 経過・新しい症状の事前入力（任意）
         rvOpen(r.revisitToken);
@@ -4425,7 +4427,9 @@ var IQ = {
 /**
  * 問診票を開く。
  * @param {string} token
- * @param {Object} [opts] { prefill:{name,kana,phone,email}, standalone:boolean, submittedBefore:boolean }
+ * @param {Object} [opts] { prefill:{name,kana,phone,email,address}, standalone:boolean,
+ *   submittedBefore:boolean, beauty:boolean,
+ *   carryover:{found:boolean, fields?:Object, beauty?:Object|null} }  🆕 0921carry
  */
 function iqOpen(token, opts) {
   opts = opts || {};
@@ -4441,11 +4445,6 @@ function iqOpen(token, opts) {
   $('screenIntakeDone').classList.add('hidden');
   $('screenIntake').classList.remove('hidden');
   showMsg('');
-
-  // 案内文（★予約が成立していることを必ず伝える＝途中でやめても不安にさせない）
-  $('iqBanner').innerHTML = opts.submittedBefore
-    ? '✅ この問診票はご提出済みです。<br>内容を修正して再送信すると、新しい内容が院に届きます。'
-    : '✅ ご予約は確定しています。<br>続けて、初診の問診票のご記入をお願いいたします（5〜10分）。';
 
   // 途中保存（旧booking.htmlと同じ localStorage 下書き・文言もそのまま）
   var draft = loadDraft();
@@ -4475,6 +4474,64 @@ function iqOpen(token, opts) {
     // 🔴 0915nolineA: 未連携の予約フォームで住所も入力済み → 問診票にも引き継ぐ
     if (!qFormData.address  && pf.address) qFormData.address = pf.address;
   }
+
+  // 🆕 0921carry: 前回（別の予約）の問診票から、共通項目だけを空欄のときだけ引き継ぐ
+  //   （同意・その回だけの項目は含めない＝サーバ側 _itCarryoverForPatient_ で既に除かれている）。
+  IQ.carriedOver = false;
+  var co = opts.carryover;
+  if (co && co.found) {
+    var cf = co.fields || {};
+    var fillQ = function(key, val) {
+      if (!val || qFormData[key]) return;
+      qFormData[key] = val;
+      IQ.carriedOver = true;
+    };
+    fillQ('furigana', cf.furigana);
+    fillQ('address', cf.address);
+    fillQ('gender', cf.gender);
+    fillQ('acupuncture_exp', cf.acupuncture_exp);
+    fillQ('referral_source', cf.referral_source);
+    fillQ('referral_relation', cf.referral_relation);
+    fillQ('referrer_name', cf.referrer_name);
+    if (cf.birth_date && !qFormData.birth_date) {
+      qFormData.birth_date = cf.birth_date;
+      qFormData.age_group  = calcAgeGroup(cf.birth_date);
+      IQ.carriedOver = true;
+    }
+    if (cf.family_structure && cf.family_structure.length &&
+        (!qFormData.family_structure || !qFormData.family_structure.length)) {
+      qFormData.family_structure = cf.family_structure.slice();
+      IQ.carriedOver = true;
+    }
+    if (cf.past_illness) {
+      if (!qFormData.final_items) qFormData.final_items = {};
+      if (!qFormData.final_items.past_illness) {
+        qFormData.final_items.past_illness = cf.past_illness;
+        IQ.carriedOver = true;
+      }
+    }
+    // 🎀 美容鍼の問診を開くときだけ、前回の美容鍼データ（服薬・アレルギー・生活習慣のみ）を引き継ぐ
+    if (IQ.beauty && co.beauty) {
+      if (!qFormData.beauty_form) qFormData.beauty_form = {};
+      var bfDst = qFormData.beauty_form, bfSrc = co.beauty;
+      ['skin_disease', 'skin_disease_detail', 'anticoagulant', 'anticoagulant_name', 'sleep', 'meal', 'bowel']
+        .forEach(function(k) {
+          if (bfSrc[k] && !bfDst[k]) { bfDst[k] = bfSrc[k]; IQ.carriedOver = true; }
+        });
+    }
+  }
+
+  // 案内文（★予約が成立していることを必ず伝える＝途中でやめても不安にさせない）
+  $('iqBanner').innerHTML = (opts.submittedBefore
+    ? '✅ この問診票はご提出済みです。<br>内容を修正して再送信すると、新しい内容が院に届きます。'
+    : '✅ ご予約は確定しています。<br>続けて、初診の問診票のご記入をお願いいたします（5〜10分）。')
+    + (IQ.carriedOver
+        ? '<div style="margin-top:0.6rem;padding:0.6rem 0.8rem;background:#eef6ff;border-radius:8px;'
+          + 'font-size:0.85rem;color:var(--text);line-height:1.6;">'
+          + '💬 前回ご記入いただいた内容をもとに、いくつかの項目にあらかじめ入力しています。'
+          + '変更があれば書き換えてください。</div>'
+        : '');
+
   // 🎀 0919beauty: フォーム種別が違う下書き（鍼灸↔美容鍼）はページだけ1に戻す（違うページを出さない）。
   if (draft && (!!draft.beauty !== IQ.beauty)) qPage = 1;
   renderQPage(qPage);
@@ -5045,7 +5102,9 @@ if (SETUP.intakeToken && !SETUP.manageToken) {
       if (r && r.success && r.valid) {
         // 🎀 0919beauty: サーバが返す menuName に「美容鍼」を含めば美容鍼専用の問診
         iqOpen(SETUP.intakeToken, { standalone: true, submittedBefore: !!r.submitted,
-                                    beauty: /美容鍼/.test(String((r && r.menuName) || '')) });
+                                    beauty: /美容鍼/.test(String((r && r.menuName) || '')),
+                                    // 🆕 0921carry: 前回の問診票から共通項目を引き継ぐ（無ければ found:false）
+                                    carryover: r.carryover });
       } else {
         showMsg('問診票のリンクの有効期限が切れています。お手数ですが、ご来院時にご記入ください。');
       }
@@ -5142,7 +5201,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-21a）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-21c）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5150,7 +5209,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-21a";
+    vt.textContent = "版 2026-09-21c";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
