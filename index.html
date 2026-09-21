@@ -280,9 +280,22 @@
   .wpc.o { color:var(--green2); font-weight:700; cursor:pointer; }
   .wpc.o:active { background:#eef3ef; }
   .wpc.x { color:#b9c2bb; cursor:default; }   /* 空きなし … 押せないことが薄さで分かる */
+  /* 🔴 0921wait: キャンセル待ちに登録できる×だけ、タップできる色にする */
+  .wpc.x.wait { color:#d97706; cursor:pointer; }
+  .wpc.x.wait:active { background:#fef3e2; }
   /* 🗂 0830b の「―」用。0830c で ◯× の2種類に統一したので使っていない（消していない） */
   .wpc.n { color:#d3dad5; cursor:default; }
   .wpc.on { background:var(--green); color:#fff; border-radius:8px; }
+
+  /* 🔴 0921wait: 自分が登録中のキャンセル待ち */
+  .wl-mine-box { background:#fffbeb; border:1px solid #fcd34d; border-radius:10px;
+    padding:.6rem .8rem; margin-bottom:.8rem; font-size:.86rem; }
+  .wl-mine-title { font-weight:700; color:#92400e; margin-bottom:.3rem; }
+  .wl-mine-row { display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+    padding:.2rem 0; }
+  .wl-mine-cancel { border:1px solid #d97706; background:#fff; color:#92400e;
+    border-radius:6px; padding:.25rem .6rem; font-size:.78rem; cursor:pointer; font-family:inherit;
+    min-height:32px; }
 
   /* ── 月表示（0830c）★既定は閉じている ── */
   .wp-mtoggle {
@@ -699,6 +712,8 @@
   <section class="sec hidden" id="screenDate">
     <h2>日時をお選びください</h2>
     <p class="lead" id="dateLead"></p>
+    <!-- 🔴 0921wait: 自分が登録中のキャンセル待ち（無ければ非表示・最低限の取り消し導線） -->
+    <div id="wlMineBox" class="wl-mine-box hidden"></div>
     <div id="dayList"><div class="loading">空き状況を読み込んでいます…</div></div>
   </section>
 
@@ -1474,13 +1489,16 @@ function wpLabel(ymd, hm) {
  * @param {Function} onPick    ◯が押されたとき onPick(datetimeJST, label)
  * @param {string}   [picked]  すでに選ばれている日時（'YYYY/MM/DD HH:mm'）
  * @param {string}   [menuId]  👥 0921owner: 選んでいるメニューのID（分かれば）。無ければ空のまま。
+ * @param {boolean}  [enableWaitlist]  🔴 0921wait: ×の枠からキャンセル待ちに登録できるようにする
+ *   （新規予約の日時選択画面だけ true。予約の変更画面(mgPickDays)では今まで通り false のまま）
  */
-function wpStart(el, dur, onPick, picked, menuId) {
+function wpStart(el, dur, onPick, picked, menuId, enableWaitlist) {
   WP.el = el;
   WP.dur = dur;
   WP.menuId = menuId || '';
   WP.onPick = onPick;
   WP.picked = picked || '';
+  WP.enableWaitlist = !!enableWaitlist;
   WP.minWeek = wpMonday(SETUP.today);
   WP.maxWeek = wpMonday(horizonDate());
   // 🔴 月表示は既定で閉じる（今までの見た目を変えない）。範囲は今日〜2ヶ月先。
@@ -1728,6 +1746,10 @@ function wpRender() {
         var on = (WP.picked === dt) ? ' on' : '';
         h += '<td><button type="button" class="wpc o' + on + '" data-dt="' + esc(dt) + '"'
            + ' aria-label="' + esc(wpLabel(ymd, hm)) + ' 空きあり">○</button></td>';
+      } else if (WP.enableWaitlist) {
+        // 🔴 0921wait: ×でもタップできる（キャンセル待ちに登録）。過去かどうか等はサーバが判定する。
+        h += '<td><button type="button" class="wpc x wait" data-dt="' + esc(dt) + '"'
+           + ' aria-label="' + esc(wpLabel(ymd, hm)) + ' 満席・タップでキャンセル待ち">×</button></td>';
       } else {
         h += '<td><span class="wpc x" aria-label="' + esc(wpLabel(ymd, hm))
            + ' 選べません">×</span></td>';
@@ -1763,7 +1785,71 @@ function wpRender() {
       if (WP.onPick) WP.onPick(dt, fmtJP(dt));
     });
   });
+  // 🔴 0921wait: ×（満席）をタップ → キャンセル待ちに登録できる（enableWaitlist=trueのときだけ）
+  Array.prototype.forEach.call(WP.el.querySelectorAll('.wpc.x.wait'), function(b) {
+    b.addEventListener('click', function() {
+      var dt = b.getAttribute('data-dt');
+      wpJoinWaitlist(dt, fmtJP(dt));
+    });
+  });
   updateNav();
+}
+
+// ============================================================
+// 🔴 0921wait: キャンセル待ち（×の枠から登録）
+// ------------------------------------------------------------
+//   ・本人特定はAUTH.token（LINE連携済み・id_token検証済み）だけ。未連携は登録させない。
+//   ・断る条件（1枠1人・1人3件まで・過去日時等）はすべてサーバ側 joinWaitlist_ が判定する。
+//     ここでは案内と確認ダイアログだけ（サーバの判定を先取りして複雑にしない）。
+// ============================================================
+function wpJoinWaitlist(dt, label) {
+  if (!AUTH.token) {
+    // 🔴 LINE連携が無ければ登録できない（先生の決定）。連携の入口へ案内するだけ。
+    if (window.confirm(label + ' は満席です。\n'
+        + 'キャンセルが出たらLINEでお知らせできますが、LINE連携が必要です。\n'
+        + '今すぐLINEで連携しますか？')) {
+      location.href = SETUP.execUrl + '?from=line';
+    }
+    return;
+  }
+  if (!window.confirm(label + ' は満席です。\nキャンセルが出たらLINEでお知らせしますか？')) return;
+  var p = dt.split(' ');
+  var ymd = p[0].replace(/\//g, '-'), hm = p[1];
+  callAction('joinWaitlist', { reqId: mgReqId(), auth: AUTH.token, menuId: WP.menuId, date: ymd, time: hm })
+    .then(function(r) {
+      if (r && r.success) {
+        showMsg('キャンセルが出たらLINEでお知らせします。', 'ok');
+        try { wlRefreshMine(); } catch (e) {}
+      } else {
+        showMsg((r && r.error) || 'キャンセル待ちに登録できませんでした');
+      }
+    })
+    .catch(function(e) {
+      showMsg('通信できませんでした: ' + ((e && e.message) ? e.message : ''));
+    });
+}
+
+/** 🔴 0921wait: 自分が待っているキャンセル待ちを表示し、取り消せるようにする（最低限の導線） */
+function wlRefreshMine() {
+  var box = $('wlMineBox');
+  if (!box || !AUTH.token) return;
+  callAction('getMyWaitlist', { auth: AUTH.token }).then(function(r) {
+    var items = (r && r.items) || [];
+    if (!items.length) { box.innerHTML = ''; box.classList.add('hidden'); return; }
+    box.classList.remove('hidden');
+    box.innerHTML = '<p class="wl-mine-title">⏳ キャンセル待ち中</p>' + items.map(function(it) {
+      return '<div class="wl-mine-row">' + esc(fmtJP(it.date.replace(/-/g, '/') + ' ' + it.time))
+        + (it.menuName ? '　' + esc(it.menuName) : '')
+        + ' <button type="button" class="wl-mine-cancel" data-wait-id="' + esc(it.waitId) + '">取り消す</button></div>';
+    }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('.wl-mine-cancel'), function(btn) {
+      btn.addEventListener('click', function() {
+        if (!window.confirm('このキャンセル待ちを取り消しますか？')) return;
+        callAction('cancelMyWaitlistEntry', { reqId: mgReqId(), auth: AUTH.token, waitId: btn.getAttribute('data-wait-id') })
+          .then(function() { wlRefreshMine(); });
+      });
+    });
+  }).catch(function() { /* ⚠ 表示だけの補助機能。失敗しても日時選択は止めない */ });
 }
 
 function wpBindNav() {
@@ -2010,7 +2096,8 @@ function mountWeekPickerForNew() {
     S.menu.name + '（施術 約' + menuDispMin(S.menu) + '分）で空いているお時間です。○を押してください。';
   wpStart($('dayList'), S.menu.durationMinutes, function(dt, label) {
     cfOpenNew(dt, label);
-  }, S.datetimeJST, S.menu.id);
+  }, S.datetimeJST, S.menu.id, true);   // 🔴 0921wait: 新規予約の日時選択だけ ×からキャンセル待ちに登録できる
+  try { wlRefreshMine(); } catch (e) {}
 }
 
 // ============================================================
@@ -5201,7 +5288,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-21c）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-21e）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5209,7 +5296,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-21c";
+    vt.textContent = "版 2026-09-21e";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
