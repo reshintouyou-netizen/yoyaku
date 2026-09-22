@@ -339,6 +339,8 @@
 
   .wp-legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--gray); }
   .wp-legend b { color:var(--green2); font-size:14px; }
+  /* 🔴 0922wlnotify【A】: ×→キャンセル待ちの常時案内（折りたたみ・ポップアップにしない） */
+  .wp-wait-note { margin:4px 0 0; padding:0; font-size:11.5px; color:var(--gray); line-height:1.4; }
   .wp-hint { font-size:12.5px; color:var(--gray); line-height:1.7; margin:8px 0 0; }
   .wp-scrollhint { font-size:12px; color:var(--gray); margin:0 0 6px; }
   .wp-today {
@@ -365,6 +367,26 @@
   .cf-arrow { font-size:13px; color:var(--gray); margin:4px 0; }
   .cf-to { font-size:19px; font-weight:700; color:var(--ink); line-height:1.4; }
   .cf-actions { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+
+  /* ============================================================
+     🔴 0922wlnotify【B】: キャンセル待ち登録完了モーダル
+     ・自動で消えない（showMsgのトースト置き換え）。閉じるボタン＋ESCのみで閉じる。
+     ============================================================ */
+  .wl-modal-overlay {
+    position:fixed; inset:0; background:rgba(20,30,25,.55);
+    display:flex; align-items:center; justify-content:center;
+    z-index:300; padding:16px;
+  }
+  .wl-modal-box {
+    background:#fff; width:100%; max-width:380px;
+    border-radius:16px; padding:22px 20px calc(20px + env(safe-area-inset-bottom));
+    box-shadow:0 8px 32px rgba(0,0,0,.22); max-height:88vh; overflow-y:auto;
+  }
+  .wl-modal-box h3 { margin:0 0 12px; font-size:17px; color:var(--ink); }
+  .wl-modal-dt { font-size:19px; font-weight:700; color:var(--ink); line-height:1.4; }
+  .wl-modal-menu { font-size:14px; color:var(--gray); margin-top:2px; }
+  .wl-modal-body { font-size:13.5px; color:var(--ink); line-height:1.8; white-space:pre-line; margin:16px 0 20px; }
+  .modal-close { margin-top:0; }
   /* ============================================================
      🔴 0903a 第7段階-1: 初診の問診票（旧booking.htmlの7ページを移植）
      ------------------------------------------------------------
@@ -1061,6 +1083,17 @@
       <button class="btn btn-primary" id="cfOk" type="button">この時間にする</button>
       <button class="btn btn-ghost" id="cfCancel" type="button">選び直す</button>
     </div>
+  </div>
+</div>
+
+<!-- 🔴 0922wlnotify【B】: キャンセル待ち登録完了モーダル（自動で消えない・閉じるボタン/ESCのみ） -->
+<div class="wl-modal-overlay hidden" id="wlDoneModal" role="dialog" aria-modal="true" aria-labelledby="wlDoneTitle">
+  <div class="wl-modal-box">
+    <h3 id="wlDoneTitle">⏳ キャンセル待ちに登録しました</h3>
+    <div class="wl-modal-dt" id="wlDoneDt"></div>
+    <div class="wl-modal-menu" id="wlDoneMenu"></div>
+    <p class="wl-modal-body">空きが出たら、すぐにLINEでお知らせします。<br>LINEにも確認を送りました。</p>
+    <button class="btn btn-primary modal-close" id="wlDoneClose" type="button">閉じる</button>
   </div>
 </div>
 
@@ -1763,6 +1796,12 @@ function wpRender() {
      + '<span><b>○</b> 空きあり</span>'
      + '<span><b style="color:#b9c2bb">×</b> 空きなし</span>'
      + '</div>';
+  // 🔴 0922wlnotify【A】: ×からキャンセル待ちに登録できることの常時表示の説明
+  //   （折りたたみ・ポップアップにしない＝先生の指示）。enableWaitlistの画面だけに出す
+  //   （予約の変更画面(mgPickDays)は×をタップしても登録できないので、ここでは出さない）。
+  if (WP.enableWaitlist) {
+    h += '<p class="wp-wait-note">💡 ×の枠をタップすると「キャンセル待ち」に登録できます（LINE連携が必要です）</p>';
+  }
   // ⚠ 表が真っ白なまま黙らせない。次にどうすればよいかを必ず出す。
   if (!wpWeekOpen(ws)) {
     h += '<p class="wp-hint">この週に空いているお時間はありません。'
@@ -1818,8 +1857,8 @@ function wpJoinWaitlist(dt, label) {
   callAction('joinWaitlist', { reqId: mgReqId(), auth: AUTH.token, menuId: WP.menuId, date: ymd, time: hm })
     .then(function(r) {
       if (r && r.success) {
-        showMsg('キャンセルが出たらLINEでお知らせします。', 'ok');
-        try { wlRefreshMine(); } catch (e) {}
+        // 🔴 0922wlnotify【B】: showMsgのトーストではなく、閉じるまで消えないモーダルで知らせる
+        wlShowDoneModal(label, S.menu ? (S.menu.name + '（' + menuDispMin(S.menu) + '分）') : '');
       } else {
         showMsg((r && r.error) || 'キャンセル待ちに登録できませんでした');
       }
@@ -1828,6 +1867,29 @@ function wpJoinWaitlist(dt, label) {
       showMsg('通信できませんでした: ' + ((e && e.message) ? e.message : ''));
     });
 }
+
+/** 🔴 0922wlnotify【B】: キャンセル待ち登録完了モーダルを開く */
+function wlShowDoneModal(dtLabel, menuLabel) {
+  var m = $('wlDoneModal');
+  if (!m) return;
+  $('wlDoneDt').textContent = dtLabel || '';
+  $('wlDoneMenu').textContent = menuLabel || '';
+  m.classList.remove('hidden');
+}
+function wlCloseDoneModal() {
+  var m = $('wlDoneModal');
+  if (!m || m.classList.contains('hidden')) return;
+  m.classList.add('hidden');
+  try { wlRefreshMine(); } catch (e) {}
+}
+(function() {
+  var closeBtn = $('wlDoneClose'), overlay = $('wlDoneModal');
+  if (closeBtn) closeBtn.addEventListener('click', wlCloseDoneModal);
+  if (overlay) overlay.addEventListener('click', function(e) { if (e.target === overlay) wlCloseDoneModal(); });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) wlCloseDoneModal();
+  });
+})();
 
 /** 🔴 0921wait: 自分が待っているキャンセル待ちを表示し、取り消せるようにする（最低限の導線） */
 function wlRefreshMine() {
@@ -5288,7 +5350,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-21e）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-22b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5296,7 +5358,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-21e";
+    vt.textContent = "版 2026-09-22b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
