@@ -2361,7 +2361,9 @@ function submitBooking() {
       // 🔴 0915nolineA: 未連携（auth無し）はこの入力値で予約が作られる。
       //   auth があるときは今まで通りサーバがパスの値だけを使う（この4つ＋住所は無視される）
       name: f.name, kana: f.kana, phone: f.phone, email: f.email,
-      address: f.address || ''
+      address: f.address || '',
+      // 🔴 0923dup Step2: 「別の者が担当」の確認に「はい」と答えた後だけ true（既定は付けない）
+      confirmSasada: !!S.confirmSasada
     })
     .then(function(r) {
       btn.disabled = false;
@@ -2371,6 +2373,13 @@ function submitBooking() {
         if (r && r.needLine) {
           AUTH.token = ''; AUTH.user = null; AUTH.confirmed = false;
           showGateScreen(r.error || '');
+          return;
+        }
+        // 🔴 0923dup Step2: 「この時間は、別の者が担当いたします。よろしいでしょうか？」
+        //   サーバが聞き返してきたときだけ確認シートを出す。「はい」で confirmSasada:true を付けて送り直す。
+        //   「別の時間を選ぶ」で日時の選び直し（②）へ戻す。★黙って振り替えない。
+        if (r && r.needsConfirm && r.ownerFallback) {
+          showConfirmOwnerFallback(r);
           return;
         }
         // ⚠ 無言で失敗しない。理由を必ず出す
@@ -2969,6 +2978,45 @@ $('mgRetry').addEventListener('click', function() {
 });
 $('mgSave').addEventListener('click', function() { saveEdit($('mgSave')); });
 $('mgPickBack').addEventListener('click', function() { mgShow('mgList'); });
+
+// 🔴 0923dup Step2: 「この時間は、別の者が担当いたします。よろしいでしょうか？」の確認シート
+//   ★既存の確認シート（cfOpen）に乗せる。新しい部品は作らない。
+//   「はい、お願いします」→ confirmSasada:true を付けて同じ内容を送り直す
+//   「別の時間を選ぶ」→ 日時の選び直し（②）へ戻す
+function showConfirmOwnerFallback(r) {
+  var cancelBtn = $('cfCancel');
+  var origCancel = cancelBtn.textContent;
+  function restore() {
+    cancelBtn.textContent = origCancel;
+    cancelBtn.removeEventListener('click', onPickAnother);
+  }
+  function onPickAnother() {
+    restore();
+    S.confirmSasada = false;
+    S.datetimeJST = '';
+    WP.picked = '';
+    WP.cache = {};
+    goStep(2);
+    showMsg('別の時間をお選びください。');
+  }
+  cancelBtn.textContent = '別の時間を選ぶ';
+  cancelBtn.addEventListener('click', onPickAnother);
+  cfOpen({
+    title: 'この時間は、別の者が担当いたします。',
+    lead:  'よろしいでしょうか？',
+    okText: 'はい、お願いします',
+    bodyHtml: '<div class="cf-dt">' + esc(r.datetimeLabel || fmtJP(S.datetimeJST)) + '</div>'
+            + '<div class="cf-menu">' + esc((S.menu && S.menu.name) || r.menuName || '')
+            + (S.menu ? '（施術 約' + esc(menuDispMin(S.menu)) + '分）' : '') + '</div>',
+    onOk: function() {
+      restore();
+      cfClose();
+      S.confirmSasada = true;   // ★この1回の送信にだけ付く（送信後に必ず戻す）
+      submitBooking();
+      S.confirmSasada = false;
+    }
+  });
+}
 
 // ---- 確認シート（0830b）★閉じるボタン＋ESC＋背景クリックで閉じられる ----
 $('cfOk').addEventListener('click', function() { if (CF.onOk) CF.onOk(); });
@@ -5350,7 +5398,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-22d）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-23a）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5358,7 +5406,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-22d";
+    vt.textContent = "版 2026-09-23a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
