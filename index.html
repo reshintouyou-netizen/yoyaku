@@ -1606,9 +1606,11 @@ function wpPrefetchAhead(ws) {
   } catch (e) {}
 }
 
-/** 所要時間ごとの入れ物（無ければ作る） */
+/** 所要時間ごとの入れ物（無ければ作る）
+ *   👤 0923choice: 鍵に メニューID と 希望担当 も入れる。同じ所要時間でも担当者（メニューの owner／選んだ担当）が
+ *   違えば ◯× が違うので、取り置きを混ぜない（OFF・固定メニューでは staff は '' ＝今までと同じ鍵の形）。 */
 function wpStore() {
-  var k = String(WP.dur);
+  var k = String(WP.dur) + '|' + (WP.menuId || '') + '|' + (WP.staff || '');
   if (!WP.cache[k]) WP.cache[k] = { day: {}, got: {}, starts: [] };
   return WP.cache[k];
 }
