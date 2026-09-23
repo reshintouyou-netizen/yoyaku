@@ -53,6 +53,14 @@
   }
   .menu-btn:active{background:#eef3ef}
   .menu-btn.on{border-color:var(--green);box-shadow:0 0 0 2px rgba(26,61,46,.14)}
+  /* 👤 0923choice: 担当者の選択（ミニマル・--green 系。375px では3つ横並び、収まらなければ折り返す） */
+  .staff-choice{margin:0 0 12px}
+  .staff-choice .sc-label{font-size:14px;color:var(--gray);margin:0 0 6px}
+  .staff-choice .sc-btns{display:flex;flex-wrap:wrap;gap:6px}
+  .staff-choice .sc-btn{flex:1 1 auto;min-width:96px;min-height:40px;padding:8px 10px;border-radius:10px;
+    border:1.5px solid #cfd8d3;background:#fff;color:#1f2a24;font-family:inherit;font-size:14px;cursor:pointer}
+  .staff-choice .sc-btn.on{border-color:var(--green);background:#E4EEE8;color:var(--green);font-weight:700;
+    box-shadow:0 0 0 2px rgba(26,61,46,.14)}
   .menu-name{font-size:16px;font-weight:600;display:block}
   .menu-meta{font-size:13px;color:var(--gray);margin-top:3px;display:block}
   /* 0905b: メニューに料金・説明 */
@@ -734,6 +742,16 @@
   <section class="sec hidden" id="screenDate">
     <h2>日時をお選びください</h2>
     <p class="lead" id="dateLead"></p>
+    <!-- 👤 0923choice: 担当者の選択（★サーバのスイッチ STAFF_CHOICE_ENABLED が ON かつ共通メニューのときだけ出す。
+         既定は OFF＝この箱は hidden のまま。既定の選択は「どちらでも」） -->
+    <div id="staffChoiceBox" class="staff-choice hidden">
+      <div class="sc-label">担当者をお選びください</div>
+      <div class="sc-btns" role="radiogroup" aria-label="担当者">
+        <button type="button" class="sc-btn on" data-staff="any" role="radio" aria-checked="true">どちらでも</button>
+        <button type="button" class="sc-btn" data-staff="harunori" role="radio" aria-checked="false">陳先生</button>
+        <button type="button" class="sc-btn" data-staff="sasada" role="radio" aria-checked="false">佐々田先生</button>
+      </div>
+    </div>
     <!-- 🔴 0921wait: 自分が登録中のキャンセル待ち（無ければ非表示・最低限の取り消し導線） -->
     <div id="wlMineBox" class="wl-mine-box hidden"></div>
     <div id="dayList"><div class="loading">空き状況を読み込んでいます…</div></div>
@@ -1429,6 +1447,7 @@ function pickMenu(id) {
   S.days = [];
   S.datetimeJST = '';
   S.showDays = SHOW_DAYS_STEP;
+  S.staff = 'any';   // 👤 0923choice: メニューを選び直したら希望担当は「どちらでも」に戻す（既定）
   Array.prototype.forEach.call($('menuList').querySelectorAll('.menu-btn'), function(b) {
     b.classList.toggle('on', b.getAttribute('data-id') === id);
   });
@@ -1529,6 +1548,9 @@ function wpStart(el, dur, onPick, picked, menuId, enableWaitlist) {
   WP.el = el;
   WP.dur = dur;
   WP.menuId = menuId || '';
+  // 👤 0923choice: 変更画面（startEdit）など他の呼び出し元は希望担当を持たない＝'' に戻す。
+  //   新規予約は mountWeekPickerForNew が wpStart の直前に WP.staff を入れ、ここでは触らない。
+  if (!(S.step === 2 && staffChoiceShown())) WP.staff = '';
   WP.onPick = onPick;
   WP.picked = picked || '';
   WP.enableWaitlist = !!enableWaitlist;
@@ -1633,6 +1655,8 @@ function wpFetch(from, to) {
     };
     // 👥 0921owner 第2段-B-2: メニューIDが分かっていれば添える（無ければ送らない＝今までどおり）
     if (WP.menuId) payload.menuId = WP.menuId;
+    // 👤 0923choice: 希望担当（スイッチ ON・共通メニューのときだけ WP.staff が入る。'' なら送らない）
+    if (WP.staff) payload.staff = WP.staff;
     return callAction('getOpenSlots', payload).then(function(r) {
       if (!r || r.success === false) throw new Error((r && r.error) || '');
       return r;
@@ -2150,12 +2174,51 @@ function cfOpenEdit(b, dt, label) {
   });
 }
 
+// 👤 0923choice: 担当者の選択を出すか（★サーバのスイッチ SETUP.staffChoice が true かつ 共通メニューのときだけ）
+//   メニューの owner が harunori / sasada のときは出さない（メニューの担当者に固定＝今までどおり）。
+function staffChoiceShown() {
+  return !!(SETUP.staffChoice && S.menu && !(S.menu.owner === 'harunori' || S.menu.owner === 'sasada'));
+}
+function staffChoiceLabel(v) {
+  var L = SETUP.staffLabels || {};
+  if (v === 'harunori') return L.harunori || '陳先生';
+  if (v === 'sasada')   return L.sasada || '佐々田先生';
+  return 'どちらでも';
+}
+function paintStaffChoice() {
+  var box = $('staffChoiceBox');
+  if (!box) return;
+  var show = staffChoiceShown();
+  box.classList.toggle('hidden', !show);
+  if (!show) return;
+  Array.prototype.forEach.call(box.querySelectorAll('.sc-btn'), function(b) {
+    var on = (b.getAttribute('data-staff') === (S.staff || 'any'));
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+}
+/** 担当者を選び直す → 空き枠を取り直す（表示だけ変わる。選んだ日時は捨てる） */
+function setStaffChoice(v) {
+  v = (v === 'harunori' || v === 'sasada') ? v : 'any';
+  if (S.staff === v) return;
+  S.staff = v;
+  S.datetimeJST = '';
+  WP.picked = '';
+  WP.cache = {};        // 🔴 担当者が変わると◯×が変わるので、取り置きは捨てる
+  paintStaffChoice();
+  mountWeekPickerForNew();
+  updateNav();
+}
+
 /** ②日時：新規予約の週表を出す（★変更画面と同じ部品を使う） */
 function mountWeekPickerForNew() {
   if (!S.menu) return;
   // 🔴 0906a: 見出しは治療時間。★週表の空き枠計算(wpStart)は今まで通り【枠 durationMinutes】
   $('dateLead').textContent =
     S.menu.name + '（施術 約' + menuDispMin(S.menu) + '分）で空いているお時間です。○を押してください。';
+  // 👤 0923choice: 選択を出す場面だけ希望担当を週表に渡す（OFF・固定メニューでは '' ＝今までどおり送らない）
+  paintStaffChoice();
+  WP.staff = staffChoiceShown() ? (S.staff || 'any') : '';
   wpStart($('dayList'), S.menu.durationMinutes, function(dt, label) {
     cfOpenNew(dt, label);
   }, S.datetimeJST, S.menu.id, true);   // 🔴 0921wait: 新規予約の日時選択だけ ×からキャンセル待ちに登録できる
@@ -2307,11 +2370,15 @@ function renderConfirm() {
   var rows = [
     ['日時', fmtJP(S.datetimeJST)],
     ['メニュー', S.menu.name + '（施術 約' + menuDispMin(S.menu) + '分）'],   // 🔴 0906a: 枠は見せない
+  ];
+  // 👤 0923choice: 選択を出しているときだけ、希望の担当者を確認に載せる（OFF では行ごと出ない）
+  if (staffChoiceShown()) rows.push(['ご希望の担当', staffChoiceLabel(S.staff || 'any')]);
+  rows = rows.concat([
     ['お名前', f.name],
     ['ふりがな', au ? (f.kana || '（ご登録なし）') : f.kana],
     ['電話番号', au ? (f.phone || '（ご登録なし）') : f.phone],
     ['メール', au ? (f.email || '（LINEでお知らせします）') : f.email]
-  ];
+  ]);
   // 🔴 0915nolineA: 住所は未連携で入力したときだけ出す（連携済みは入力しない＝カルテが正）
   if (!au) rows.push(['ご住所', f.address]);
   $('confirmBox').innerHTML = rows.map(function(r) {
@@ -2363,7 +2430,9 @@ function submitBooking() {
       name: f.name, kana: f.kana, phone: f.phone, email: f.email,
       address: f.address || '',
       // 🔴 0923dup Step2: 「別の者が担当」の確認に「はい」と答えた後だけ true（既定は付けない）
-      confirmSasada: !!S.confirmSasada
+      confirmSasada: !!S.confirmSasada,
+      // 👤 0923choice: 希望担当（スイッチ ON・共通メニューのときだけ送る。OFF では送らない＝今までどおり）
+      staff: staffChoiceShown() ? (S.staff || 'any') : undefined
     })
     .then(function(r) {
       btn.disabled = false;
@@ -2398,7 +2467,9 @@ function submitBooking() {
       // 🔴 0906a: 完了画面も治療時間（サーバ応答の r.durationMinutes は枠なので使わない。
       //   この画面に来るとき S.menu は必ず選択済み）
       $('doneMenu').textContent = r.menuName + '（施術 約'
-        + (S.menu ? menuDispMin(S.menu) : r.durationMinutes) + '分）';
+        + (S.menu ? menuDispMin(S.menu) : r.durationMinutes) + '分）'
+        // 👤 0923choice: 担当者名（サーバのスイッチ ON のときだけ r.staffLabel が入る。'' なら今までどおり）
+        + (r.staffLabel ? '　担当: ' + r.staffLabel : '');
       // 🔴 メールの失敗を無言にしない（0907line: LINEで届いた場合は文言を合わせる）
       $('doneMail').textContent = r.mailSent
         ? (String(r.notifyVia || '').indexOf('line') === 0
@@ -3017,6 +3088,11 @@ function showConfirmOwnerFallback(r) {
     }
   });
 }
+
+// 👤 0923choice: 担当者の選択ボタン（出ているときだけ押せる。OFF では箱ごと hidden）
+Array.prototype.forEach.call(document.querySelectorAll('#staffChoiceBox .sc-btn'), function(b) {
+  b.addEventListener('click', function() { setStaffChoice(b.getAttribute('data-staff')); });
+});
 
 // ---- 確認シート（0830b）★閉じるボタン＋ESC＋背景クリックで閉じられる ----
 $('cfOk').addEventListener('click', function() { if (CF.onOk) CF.onOk(); });
@@ -5398,7 +5474,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-23b）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-23e）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5406,7 +5482,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-23b";
+    vt.textContent = "版 2026-09-23e";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
