@@ -1419,6 +1419,9 @@ function menuDispMin(m) {
 function renderMenus() {
   var h = '';
   SETUP.menus.forEach(function(m) {
+    // 🔴 0924sasada: 佐々田先生が未稼働（SETUP.sasadaActive が false）なら佐々田担当メニューは出さない
+    //   （サーバ側 getBookingSetup_ でも除いているが、画面でも念のため守る）
+    if (SETUP.sasadaActive === false && m.owner === 'sasada') return;
     // 0905b: 料金(税込)・説明文を出す。0906a: 時間は【治療時間】・コース特典を追加
     //   （★枠 durationMinutes は患者に見せない。枠計算は durationMinutes のまま）
     var price = Number(m.price) || 0;
@@ -2179,6 +2182,8 @@ function cfOpenEdit(b, dt, label) {
 // 👤 0923choice: 担当者の選択を出すか（★サーバのスイッチ SETUP.staffChoice が true かつ 共通メニューのときだけ）
 //   メニューの owner が harunori / sasada のときは出さない（メニューの担当者に固定＝今までどおり）。
 function staffChoiceShown() {
+  // 🔴 0924sasada: 佐々田先生が未稼働（SETUP.sasadaActive が false）なら出さない（サーバも staffChoice を false にするが念のため）
+  if (SETUP.sasadaActive === false) return false;
   return !!(SETUP.staffChoice && S.menu && !(S.menu.owner === 'harunori' || S.menu.owner === 'sasada'));
 }
 function staffChoiceLabel(v) {
@@ -5476,7 +5481,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-23e）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-24a）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5484,7 +5489,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-23e";
+    vt.textContent = "版 2026-09-24a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
