@@ -41,6 +41,10 @@
     padding:12px 16px;
   }
   .btn-primary{background:var(--green);color:#fff}
+  /* 🔴 0928ux【1】: 送信中の進捗（控えめ・--green 系） */
+  .send-status{display:flex;align-items:center;gap:10px;margin:10px 4px 0;font-size:14px;color:var(--gray);line-height:1.6}
+  .send-spin{width:18px;height:18px;flex:0 0 18px;border:2px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:sendspin .9s linear infinite}
+  @keyframes sendspin{to{transform:rotate(360deg)}}
   .btn-primary:disabled{background:#9fb0a6;cursor:default}
   .btn-ghost{background:#fff;color:var(--green);border-color:var(--line)}
   .btn-row{display:flex;gap:10px;padding:16px}
@@ -701,7 +705,7 @@
     </div>
     <!-- 🆕 0917new: カルテ未紐づけ（初めての方など）: 氏名だけ入力してもらう -->
     <div id="whoInputBlock" class="hidden">
-      <p class="lead">ご予約のため、お名前を教えてください。</p>
+      <p class="lead">ご予約に使うお名前を教えてください<br><span style="font-size:13px;color:var(--gray)">（LINEのお名前とは別に承っております）</span></p>
       <label for="whoNameInput">お名前<span class="req">必須</span></label>
       <!-- 🆕 0917name(問題④): 入力欄の高さ・文字を大きく（44px以上・16pxでiOS自動ズーム防止） -->
       <input type="text" id="whoNameInput" autocomplete="name" placeholder="例：山田 花子"
@@ -722,7 +726,7 @@
     💬 LINEで連携すると、次回から入力が省けます。<span class="t">ご予約完了後にご案内します。</span></p>
 
   <!-- 🆕 0918spd2: LINEから戻った直後、本人確認を裏で確認している間の表示（メニューは先に見せる） -->
-  <p class="ln-hint hidden" id="authPendingNote">💬 ご本人を確認しています。メニューはそのままお選びいただけます。</p>
+  <p class="ln-hint hidden" id="authPendingNote"><span class="send-spin" style="display:inline-block;width:14px;height:14px;vertical-align:-3px;margin-right:6px" aria-hidden="true"></span>LINEの情報を確認しています。メニュー・日時はそのままお選びいただけます。</p>
 
   <!-- 🔴 0915nolineA: 未連携の方へのLINEのおすすめ（★必須ではない。押さなくても予約できる）
        ・宛先は既存の ?from=line（サーバが id_token を検証する入口）。新しい入口は作らない。
@@ -994,6 +998,11 @@
     <button class="btn btn-ghost" id="btnBack" type="button">戻る</button>
     <button class="btn btn-primary" id="btnNext" type="button">次へ</button>
   </div>
+  <!-- 🔴 0928ux【1】: 送信中の進捗（実測 7〜10 秒。押し直しを防ぐ） -->
+  <div class="send-status hidden" id="sendStatus" role="status" aria-live="polite">
+    <span class="send-spin" aria-hidden="true"></span>
+    <span id="sendStatusText">ご予約を登録しています<br>10秒ほどお待ちください</span>
+  </div>
 
   <!-- 🔴 予約の確認・変更（0830a 第5段階）
        ★メールに届いたリンクを押すこと自体が本人確認。
@@ -1232,6 +1241,8 @@ window.__hpApplyAuth__ = function (rc) {
       AUTH.token = rc.auth; AUTH.user = rc.user; AUTH.needName = false; AUTH.presetName = '';
       try { sessionStorage.removeItem('cbfail'); } catch (e) {}
       if (resume) resume(true);   // 確定待ちなら進める
+      // 🔴 0928ux【2】: 「次へ」を押して裏の確認を待っていた人は、そのまま④確認へ進める
+      if (AUTH._resumeNext) { AUTH._resumeNext = false; showMsg(''); if (S.step === 2 && S.menu && S.datetimeJST) goStep(4); }
     } else if (rc && rc.success && rc.auth && rc.needName) {
       // カルテ未紐づけ＝氏名の確認/入力が要る。本人確認画面へ（確定はまだ）。
       // 🔴 0928flow: 「この内容で予約する」を押して待っていた人は、氏名を入れたら自動で送信まで進める
@@ -1241,6 +1252,14 @@ window.__hpApplyAuth__ = function (rc) {
       AUTH.confirmed = false;
       AUTH.user = rc.preset ? { name: rc.preset, kana: '', phone: '', email: '' } : null;
       try { sessionStorage.removeItem('cbfail'); } catch (e) {}
+      // 🔴 0928ux【2】: 選択の途中（メニューを選んだ後）なら割り込まない。「次へ」または送信のときに氏名を聞く。
+      //   ★メニュー一覧を眺めているだけ（未選択）のときは今までどおりすぐ聞く（その方が早い）。
+      //   ★送信を押して待っていた人（resume）は今すぐ聞いて、氏名の後に自動で送信する（今までどおり）。
+      if (!resume && S.menu) {
+        AUTH.whoPending = true;
+        if (AUTH._resumeNext) { AUTH._resumeNext = false; showMsg(''); AUTH.whoPending = false; showWhoScreen(); }
+        return;
+      }
       if (typeof showWhoScreen === 'function') showWhoScreen();
     } else if (rc && rc.success && rc.guest) {
       // 未連携（通常は起きない）。false運用なら入力で予約できる＝メニュー継続。
@@ -1257,6 +1276,7 @@ window.__hpApplyAuth__ = function (rc) {
           : ('ご本人確認をやり直してください。<a href="' + esc(SETUP.execUrl) + '?from=line">もう一度LINEで続ける</a>');
       }
       if (resume) resume(false);   // 確定待ちなら失敗を伝えて止める
+      AUTH._resumeNext = false;   // 🔴 0928ux【2】: 「次へ」待ちは解除（次に押すと③ご入力へ進む）
     }
   } catch (e) {}
 };
@@ -2170,8 +2190,8 @@ function cfOpenNew(dt, label) {
       S.datetimeJST = dt;
       WP.picked = dt;
       cfClose();
-      // 🔴 0907line 案A: LINE本人確認済みなら「お客様の情報」は飛ばして確認へ
-      goStep(AUTH.token ? 4 : 3);
+      // 🔴 0907line 案A: LINE本人確認済みなら「お客様の情報」は飛ばして確認へ（0928ux: 裏の確認中は少し待つ）
+      proceedAfterDate();
     }
   });
 }
@@ -2426,6 +2446,27 @@ function fmtJP(dt) {
   return Number(m[1]) + '年' + Number(m[2]) + '月' + Number(m[3]) + '日（' + dows[d.getDay()] + '）' + m[4];
 }
 
+// 🔴 0928ux【1】: 送信中の進捗表示（実測 7〜10 秒）。10 秒を超えたら文言を進め、止まったように見せない。
+//   ★秒数は実測に合わせる（嘘を書かない）。装飾は小さな回転だけ。
+var SEND_STATUS_T = null;
+function sendStatusShow() {
+  var box = $('sendStatus'), tx = $('sendStatusText');
+  if (!box || !tx) return;
+  tx.innerHTML = 'ご予約を登録しています<br>10秒ほどお待ちください';
+  box.classList.remove('hidden');
+  if (SEND_STATUS_T) { clearTimeout(SEND_STATUS_T.a); clearTimeout(SEND_STATUS_T.b); }
+  SEND_STATUS_T = {
+    a: setTimeout(function () { if (S.sending) tx.innerHTML = 'もう少しお待ちください<br>混み合っているときは 20 秒ほどかかります'; }, 10000),
+    b: setTimeout(function () { if (S.sending) tx.innerHTML = 'まだ登録しています<br>このまま画面を閉じずにお待ちください'; }, 25000)
+  };
+}
+function sendStatusHide() {
+  S.sending = false;
+  var box = $('sendStatus'); if (box) box.classList.add('hidden');
+  var bb = $('btnBack'); if (bb) bb.disabled = false;
+  if (SEND_STATUS_T) { clearTimeout(SEND_STATUS_T.a); clearTimeout(SEND_STATUS_T.b); SEND_STATUS_T = null; }
+}
+
 // ---- 送信 ----
 function submitBooking() {
   // 🆕 0918spd2: 本人確認がまだ裏で走っているなら、ここで【必ず待つ】（予約は確認完了後だけ）。
@@ -2441,11 +2482,23 @@ function submitBooking() {
     };
     return;
   }
+  // 🔴 0928ux【2】: 本人確認は終わったが氏名の確認がまだ（割り込みを後回しにした）→ ここで聞き、氏名の後に自動で送信
+  if (AUTH.whoPending) {
+    AUTH.whoPending = false;
+    AUTH._afterWhoSubmit = true;
+    showWhoScreen();
+    return;
+  }
+  // 🔴 0928ux【1】: 二重送信の防止（押し直し・ダブルタップ）。送信中は何もしない
+  if (S.sending) return;
+  S.sending = true;
   // 🔴 0907line 案A: 本人情報はサーバが札（auth）から取る。画面の値は表示・問診の下書きにだけ使う
   var f = (AUTH.token && AUTH.user) ? AUTH.user : readForm();
   var btn = $('btnNext');
   btn.disabled = true;
   btn.textContent = '送信中…';
+  var bb = $('btnBack'); if (bb) bb.disabled = true;   // 戻るも押せない（送信中に画面を動かさない）
+  sendStatusShow();
   showMsg('');
 
   callAction('createBooking', {
@@ -2463,6 +2516,7 @@ function submitBooking() {
     .then(function(r) {
       btn.disabled = false;
       btn.textContent = 'この内容で予約する';
+      sendStatusHide();
       if (!r || !r.success) {
         // 🔴 0907line: 予約パスが無い/切れた → ゲートに戻して LINE で開き直してもらう
         if (r && r.needLine) {
@@ -2524,6 +2578,7 @@ function submitBooking() {
     .catch(function(e) {
       btn.disabled = false;
       btn.textContent = 'この内容で予約する';
+      sendStatusHide();
       showMsg('通信できませんでした: ' + ((e && e.message) ? e.message : '')
             + ' ご予約が完了しているかご不明な場合は、お手数ですがお電話でご確認ください。');
       // 📝 0927fail【B】: 予約の送信で通信が失敗＝いちばん知りたい失敗。届く範囲で記録する
@@ -3015,6 +3070,27 @@ function updateNav() {
 //   ・日時まで選んでいた … ④確認へ（送信ボタンを押して待っていた人はそのまま送信）
 //   ・メニューだけ選んでいた … ③日時へ（週表はキャッシュから再描画）
 //   ・何も選んでいない … ②メニューへ（今までどおり）
+// 🔴 0928ux【2】: 日時を決めた後の進み先（③日時の「次へ」と、日時確認シートの「はい」の両方から呼ぶ）。
+//   ・裏の LINE 本人確認がまだ → ③ご入力（5項目）を出さずに「確認しています」で少しだけ待つ。
+//     終わり次第 __hpApplyAuth__ が自動で進める（連携済み→④確認／新規→氏名の画面→④確認）。
+//     ★万一 20 秒たっても終わらないときは今までどおり③ご入力へ進める（止まったままにしない）。
+//   ・本人確認は終わっているが氏名の確認を後回しにしていた（whoPending）→ ここで氏名を聞く。
+//     氏名の後は returnAfterWho が ④確認へ戻す（@200 の「元いた画面に戻る」をそのまま使う）。
+var PROCEED_WAIT_T = null;
+function proceedAfterDate() {
+  if (AUTH.authPending && !AUTH.token) {
+    showMsg('LINEの情報を確認しています。少しお待ちください…', 'ok');
+    AUTH._resumeNext = true;
+    if (PROCEED_WAIT_T) clearTimeout(PROCEED_WAIT_T);
+    PROCEED_WAIT_T = setTimeout(function () {
+      PROCEED_WAIT_T = null;
+      if (AUTH._resumeNext && AUTH.authPending && !AUTH.token && S.step === 2) { AUTH._resumeNext = false; showMsg(''); goStep(3); }
+    }, 20000);
+    return;
+  }
+  if (AUTH.whoPending) { AUTH.whoPending = false; showWhoScreen(); return; }
+  goStep(AUTH.token ? 4 : 3);
+}
 function returnAfterWho() {
   $('screenWho').classList.add('hidden');
   $('stepBar').classList.remove('hidden');
@@ -3154,7 +3230,10 @@ $('btnBack').addEventListener('click', function() {
   if (S.step > 1) goStep(S.step - 1);
 });
 $('btnNext').addEventListener('click', function() {
-  if (S.step === 2) { if (S.datetimeJST) goStep(AUTH.token ? 4 : 3); return; }
+  if (S.step === 2) {
+    if (!S.datetimeJST) return;
+    proceedAfterDate(); return;
+  }
   if (S.step === 3) {
     var err = validateForm();
     if (err) { showMsg(err); return; }
@@ -5520,7 +5599,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-28a）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-28b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5528,7 +5607,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-28a";
+    vt.textContent = "版 2026-09-28b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
