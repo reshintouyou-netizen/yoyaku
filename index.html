@@ -1150,6 +1150,20 @@ var SETUP = window.__HP_SETUP__;
 })();
 
 /** doPost に action を投げる（★ここを通る＝許可リストの検査を必ず受ける） */
+// 📝 0927fail【B】: 画面で「通信できませんでした」等が出たとき、届く範囲でサーバに1本だけ記録を投げる。
+//   ★失敗しても何もしない（画面を止めない・患者さんに何も出さない）。通信そのものが落ちていれば届かないが、それでよい。
+function reportClientError(reason, context) {
+  try {
+    var body = { action: 'reportClientError',
+                 reason: String(reason || '').slice(0, 300),
+                 requested: String(context || '').slice(0, 120),
+                 name: String((typeof AUTH !== 'undefined' && AUTH && AUTH.user && AUTH.user.name) ? AUTH.user.name
+                              : ((document.getElementById('fName') || {}).value || '')).slice(0, 60) };
+    fetch(SETUP.execUrl, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), keepalive: true })
+      .catch(function() {});
+  } catch (e) {}
+}
+
 function callAction(action, payload) {
   var body = {};
   for (var k in (payload || {})) body[k] = payload[k];
@@ -1696,8 +1710,9 @@ function wpGo(ws) {
       WP.loading = false;
       if (WP.weekStart === ws) wpAfterLoad(ws);
     })
-    .catch(function() {
+    .catch(function(eW) {
       WP.loading = false;
+      reportClientError('空き枠（週表）の読み込みで通信失敗: ' + ((eW && eW.message) ? eW.message : ''), ws + (S.menu ? ' / ' + S.menu.name : ''));   // 📝 0927fail【B】
       // ⚠ 無言で固まらせない。読めなかったことを必ず出す
       if (WP.el) {
         WP.el.innerHTML = '<div class="loading">空き状況を読み込めませんでした。'
@@ -2270,6 +2285,7 @@ function loadSlots() {
       $('dayList').innerHTML = '';
       showMsg('通信できませんでした: ' + ((e && e.message) ? e.message : '')
             + ' お手数ですがお電話でご連絡ください。');
+      reportClientError('空き枠の読み込みで通信失敗: ' + ((e && e.message) ? e.message : ''), S.menu ? S.menu.name : '');   // 📝 0927fail【B】
       updateNav();
     });
 }
@@ -2507,6 +2523,9 @@ function submitBooking() {
       btn.textContent = 'この内容で予約する';
       showMsg('通信できませんでした: ' + ((e && e.message) ? e.message : '')
             + ' ご予約が完了しているかご不明な場合は、お手数ですがお電話でご確認ください。');
+      // 📝 0927fail【B】: 予約の送信で通信が失敗＝いちばん知りたい失敗。届く範囲で記録する
+      reportClientError('予約の送信で通信失敗: ' + ((e && e.message) ? e.message : ''),
+                        (S.datetimeJST || '') + (S.menu ? ' / ' + S.menu.name : ''));
     });
 }
 
@@ -5481,7 +5500,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-24a）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-27a）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5489,7 +5508,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-24a";
+    vt.textContent = "版 2026-09-27a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
