@@ -1234,6 +1234,9 @@ window.__hpApplyAuth__ = function (rc) {
       if (resume) resume(true);   // 確定待ちなら進める
     } else if (rc && rc.success && rc.auth && rc.needName) {
       // カルテ未紐づけ＝氏名の確認/入力が要る。本人確認画面へ（確定はまだ）。
+      // 🔴 0928flow: 「この内容で予約する」を押して待っていた人は、氏名を入れたら自動で送信まで進める
+      //   （今までは氏名の後にメニュー①へ戻され、選んだ内容が消えたように見えた）
+      AUTH._afterWhoSubmit = !!resume;
       AUTH.token = rc.auth; AUTH.needName = true; AUTH.presetName = String(rc.preset || '');
       AUTH.confirmed = false;
       AUTH.user = rc.preset ? { name: rc.preset, kana: '', phone: '', email: '' } : null;
@@ -3006,11 +3009,30 @@ function updateNav() {
 }
 
 // 🔴 0907line 案A: 「はい、予約にすすむ」（氏名確認 → 予約の流れへ）
-$('whoOk').addEventListener('click', function() {
-  AUTH.confirmed = true;
+// 🔴 0928flow: 本人確認の画面（裏の LINE 確認が終わったときに割り込みで出る）を閉じた後は、
+//   患者さんが【居た場所】へ戻す。メニュー・日時を選んでいたのに①メニュー一覧へ戻されて
+//   「選んだ内容が消えた」ように見える段差の修正。★選んだ内容（S.menu / S.datetimeJST）はもともと消していない。
+//   ・日時まで選んでいた … ④確認へ（送信ボタンを押して待っていた人はそのまま送信）
+//   ・メニューだけ選んでいた … ③日時へ（週表はキャッシュから再描画）
+//   ・何も選んでいない … ②メニューへ（今までどおり）
+function returnAfterWho() {
   $('screenWho').classList.add('hidden');
   $('stepBar').classList.remove('hidden');
-  goStep(1);
+  var resubmit = !!AUTH._afterWhoSubmit;
+  AUTH._afterWhoSubmit = false;
+  if (S.menu && S.datetimeJST) {
+    goStep(4);
+    if (resubmit && AUTH.token) { try { submitBooking(); } catch (e) {} }
+  } else if (S.menu) {
+    goStep(2);
+  } else {
+    goStep(1);
+  }
+}
+
+$('whoOk').addEventListener('click', function() {
+  AUTH.confirmed = true;
+  returnAfterWho();
 });
 
 // 🆕 0917auth: 「LINEを使わずに予約する」（LINE必須OFF のときだけ表示）
@@ -3045,9 +3067,7 @@ $('whoNameOk').addEventListener('click', function() {
         .catch(function () {});
     } catch (e) {}
   }
-  $('screenWho').classList.add('hidden');
-  $('stepBar').classList.remove('hidden');
-  goStep(1);
+  returnAfterWho();   // 🔴 0928flow: 居た場所へ戻す（①固定をやめた）
 });
 
 // 🆕 0917name: 「別の名前にする」（覚えている氏名と違う人が使うとき）→ 入力画面に切り替え
@@ -5500,7 +5520,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-27a）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-28a）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5508,7 +5528,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-27a";
+    vt.textContent = "版 2026-09-28a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
