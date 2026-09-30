@@ -2179,6 +2179,7 @@ function cfBusy(on, text) {
 
 /** 新規予約：◯を押したとき */
 function cfOpenNew(dt, label) {
+  S.reqId = ''; S._retriedReq = '';   // 1001deadend: 日時を選び直したら新しいキー
   cfOpen({
     title: 'この日時でよろしいですか？',
     lead:  'まだご予約は確定していません。',
@@ -2501,7 +2502,10 @@ function submitBooking() {
   sendStatusShow();
   showMsg('');
 
+  // 🔴 1001deadend【D-3】: 送信ごとの冪等キー（同じ確認内容なら同じ reqId＝送り直しても二重にならない）
+  if (!S.reqId) S.reqId = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   callAction('createBooking', {
+      reqId: S.reqId,
       menuId: S.menu.id, datetimeJST: S.datetimeJST,
       auth: AUTH.token,
       // 🔴 0915nolineA: 未連携（auth無し）はこの入力値で予約が作られる。
@@ -2543,6 +2547,7 @@ function submitBooking() {
         showMsg(why);
         return;
       }
+      S.reqId = '';   // 1001deadend: 成立したら次の予約は新しいキー
       $('doneDt').textContent   = r.datetimeLabel || fmtJP(r.datetimeJST);
       // 🔴 0906a: 完了画面も治療時間（サーバ応答の r.durationMinutes は枠なので使わない。
       //   この画面に来るとき S.menu は必ず選択済み）
@@ -2576,13 +2581,25 @@ function submitBooking() {
       }
     })
     .catch(function(e) {
+      var em = (e && e.message) ? e.message : '';
+      // 🔴 1001deadend【D-2/D-5】: 応答が読めなかった（サーバでは成立している場合がある）→ 同じ reqId で1回だけ自動で送り直す
+      //   ・サーバは reqId で冪等＝1回目が成立していれば同じ「完了」が返る（二重にならない）
+      //   ・それでも駄目なら、押し直しても二重にならないことを文言で伝える（「失敗した」と思わせない）
+      if (!S._retriedReq || S._retriedReq !== S.reqId) {
+        S._retriedReq = S.reqId;
+        sendStatusHide();
+        showMsg('応答を受け取れませんでした。同じ内容で確認しています…', 'ok');
+        setTimeout(function() { S.sending = false; submitBooking(); }, 1500);
+        return;
+      }
       btn.disabled = false;
       btn.textContent = 'この内容で予約する';
       sendStatusHide();
-      showMsg('通信できませんでした: ' + ((e && e.message) ? e.message : '')
-            + ' ご予約が完了しているかご不明な場合は、お手数ですがお電話でご確認ください。');
+      showMsg('通信の途中で応答を受け取れませんでした（' + em + '）。'
+            + 'ご予約が完了している場合があります。「この内容で予約する」をもう一度押しても、同じ内容が二重に登録されることはありません。'
+            + ' ご不明な場合はお電話（089-906-8249）でご確認ください。');
       // 📝 0927fail【B】: 予約の送信で通信が失敗＝いちばん知りたい失敗。届く範囲で記録する
-      reportClientError('予約の送信で通信失敗: ' + ((e && e.message) ? e.message : ''),
+      reportClientError('予約の送信で通信失敗: ' + em,
                         (S.datetimeJST || '') + (S.menu ? ' / ' + S.menu.name : ''));
     });
 }
@@ -2813,8 +2830,8 @@ function showLineNotice(code) {
     cancelled: ['LINEの連携は行いませんでした。メールでのお知らせを続けます。', false],
     conflict:  ['このLINEアカウントは、すでに別のご登録に使われています。'
                 + 'お手数ですが院にお問い合わせください。', true],
-    error:     ['ただいまLINEの連携ができませんでした。'
-                + 'お手数ですが、もう一度お試しください。', true]
+    error:     ['ただいまLINEの連携の結果を表示できませんでした。連携は完了している場合があります。'
+                + 'このページを開き直して「LINEで通知を受け取っています」と出ていれば完了です。', true]
   };
   var m = map[code];
   if (!m) return;
@@ -5400,7 +5417,7 @@ function puShowLine_(notice){
     el.textContent='LINEの連携が中止されました。お手数ですが、もう一度「LINEで続ける」をお試しください。';
   } else if (notice==='error'){
     el.className='msg err'; el.style.display='block';
-    el.textContent='LINEの連携がうまくいきませんでした。もう一度お試しください。';
+    el.textContent='LINEの連携の結果を表示できませんでした。連携は完了している場合があります。「LINEで続ける」をもう一度押すと確認できます（二重にはなりません）。';
   } else { el.style.display='none'; el.textContent=''; }
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -5599,7 +5616,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-28b）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-30e）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5607,7 +5624,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-28b";
+    vt.textContent = "版 2026-09-30e";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
