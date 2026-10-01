@@ -1173,19 +1173,78 @@ function reportClientError(reason, context) {
   } catch (e) {}
 }
 
+// ============================================================
+// 🔴 1002r2【🅓】: Google側の停滞を「待たせない」＝時間切れ → 自動で再試行（2秒・4秒）→ 混雑のご案内
+// ------------------------------------------------------------
+//   ・読む系（空き枠・設定など）は 12秒で時間切れ（@209 実測: 通常 2〜4秒・最大 5.4秒 → その2倍より長い＝正常時は再試行しない）
+//   ・書く系（予約の送信など）は 25秒（送信は実測 7〜10秒。通知の送信を含むため長め。「混み合っているときは20秒ほど」の案内と整合）
+//   ・再試行は【同じ内容・同じ reqId】で送る（createBooking はサーバが reqId で冪等＝二重にならない。1001deadend D-3）
+//   ・画面: 1回目の再試行「混み合っています。自動でもう一度お試ししています…」/ 2回目は電話・LINEを添える
+//   ・3回とも駄目なら Error('ただいま混み合っています')（e.congested=true）。呼び出し側が[もう一度試す]を出す
+// ============================================================
+var CA_TIMEOUT_READ_MS = 12000, CA_TIMEOUT_WRITE_MS = 25000, CA_RETRY_WAITS = [2000, 4000];
+var CA_WRITE_ACTIONS = /^(createBooking|updateMyBooking|cancelMyBooking|submitIntake|submitRevisit|submitPatientUpdate|joinWaitlist|cancelMyWaitlistEntry|rememberBookingName|requestBookingLink)$/;
+var CA_PHONE = '089-906-8249';
+function caLineUrl() { try { return (SETUP.clinic && SETUP.clinic.lineUrl) || ''; } catch (e) { return ''; } }
+/** 混雑時の連絡先（HTML）。big=true で2回目以降の「お急ぎの方は」を大きく */
+function caContactHtml(big) {
+  var ln = caLineUrl();
+  var inner = 'お急ぎの方はお電話（<a href="tel:' + CA_PHONE + '">' + CA_PHONE + '</a>）'
+            + (ln ? '・<a href="' + esc(ln) + '" target="_blank" rel="noopener">LINE</a>' : '・LINE') + 'でご連絡ください。';
+  return big ? '<div style="margin-top:.5rem;font-size:1.05em;font-weight:700">' + inner + '</div>' : '<div style="margin-top:.3rem">' + inner + '</div>';
+}
+/** 再試行の案内（n=1: 2秒待ち / n=2: 4秒待ち＝電話・LINEを大きく）。出す場所は 送信中表示 → 読み込み中表示 → 上部メッセージ の順 */
+function caCongestNotice(n) {
+  var text = '混み合っています。自動でもう一度お試ししています…';
+  var html = text + (n >= 2 ? caContactHtml(true) : '');
+  try {
+    var box = $('sendStatus'), tx = $('sendStatusText');
+    if (box && tx && !box.classList.contains('hidden')) { tx.innerHTML = html; return; }
+    var ld = document.querySelector('.loading');
+    if (ld) { ld.innerHTML = html; return; }
+    var el = $('msg');
+    if (el) { el.className = 'msg ok'; el.innerHTML = html; }
+  } catch (e) {}
+}
+/** 最終的に駄目だったときの案内（HTML）。retryId のボタンに呼び出し側が「もう一度試す」を付ける */
+function caFailHtml(retryId, extra) {
+  return 'ただいま混み合っています。' + (extra || '') + caContactHtml(false)
+       + '<div style="margin-top:.6rem"><button type="button" class="btn btn-primary" id="' + retryId + '">もう一度試す</button></div>';
+}
 function callAction(action, payload) {
   var body = {};
   for (var k in (payload || {})) body[k] = payload[k];
   body.action = action;
-  return fetch(SETUP.execUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify(body)
-  }).then(function(res) { return res.text(); })
-    .then(function(text) {
-      try { return JSON.parse(text); }
-      catch (e) { throw new Error('サーバの応答を読み取れませんでした'); }
+  var tmo = CA_WRITE_ACTIONS.test(action) ? CA_TIMEOUT_WRITE_MS : CA_TIMEOUT_READ_MS;
+  var raw = JSON.stringify(body);   // ★再試行は同じ内容（reqId も同じ）
+  function once() {
+    var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    var timer = setTimeout(function() { try { if (ctrl) ctrl.abort(); } catch (e) {} }, tmo);
+    var opt = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: raw };
+    if (ctrl) opt.signal = ctrl.signal;
+    return fetch(SETUP.execUrl, opt)
+      .then(function(res) { return res.text(); })
+      .then(function(text) {
+        clearTimeout(timer);
+        try { return JSON.parse(text); }
+        catch (e) { throw new Error('サーバの応答を読み取れませんでした'); }
+      }, function(e) {
+        clearTimeout(timer);
+        throw (e && e.name === 'AbortError') ? new Error('応答に時間がかかっています') : e;
+      });
+  }
+  function attempt(i) {
+    return once().catch(function(e) {
+      if (i >= CA_RETRY_WAITS.length) {
+        var fe = new Error('ただいま混み合っています');
+        fe.congested = true; fe.last = (e && e.message) || '';
+        throw fe;
+      }
+      caCongestNotice(i + 1);
+      return new Promise(function(res) { setTimeout(res, CA_RETRY_WAITS[i]); }).then(function() { return attempt(i + 1); });
     });
+  }
+  return attempt(0);
 }
 
 var SHOW_DAYS_STEP = 14;   // 一度に描く日数（スマホで重くならないように）
@@ -1691,13 +1750,19 @@ function slotOpen(s) { return s && s.mark === 'o'; }
 function wpPrefetched(dur, from, to) {
   try {
     var pre = window.__HP_SLOTS_PRE__;
-    if (!pre || !pre.p || String(pre.dur) !== String(dur)) return null;
+    if (!pre || !pre.p) return null;
     if (WP.staff) return null;
     if (from < pre.from || to > pre.to) return null;
     if (Date.now() - pre.at > 90000) return null;
     var mm = (SETUP.menus || []).filter(function(m) { return m.id === WP.menuId; })[0];
     if (mm && mm.owner === 'sasada') return null;
-    return pre.p;
+    // 🔴 1002r2【🅑】: 先読みの所要時間は「札あり→再診・札なし→初診」をメニュー設定から引く（起動役）。
+    //   手元の土台キャッシュが無い初めての方は、サーバ（menuRole）が決めて応答に durationMinutes が入る＝応答を待って照合。
+    if (pre.dur != null && pre.dur !== '') return (String(pre.dur) === String(dur)) ? pre.p : null;
+    return pre.p.then(function(r) {
+      if (r && r.success && String(r.durationMinutes) === String(dur)) return r;
+      throw new Error('prefetch-mismatch');   // 合わなければ wpFetch が今までどおり取りに行く
+    });
   } catch (e) { return null; }
 }
 /** 🔴 1002speed【🅐】: 起動役が裏で取り直した土台（メニュー等）が違っていたら静かに差し替える */
@@ -1740,17 +1805,14 @@ function wpFetch(from, to) {
     if (r.slotStarts && r.slotStarts.length) st.starts = r.slotStarts;
   }
   // 🔴 1002speed【🅕】: 先読み済みなら通信しない（失敗していれば今までどおり取りに行く）
+  //   1002r2【🅓】: 再試行（時間切れ→2秒→4秒）は callAction の中で行う＝ここでの重ね掛けはやめた
   var pre = wpPrefetched(dur, from, to);
   if (pre) {
     return pre.then(function(r) { if (!r || r.success === false || !r.days) throw new Error('prefetch'); return r; })
-      .catch(function() { return once().catch(function() { return new Promise(function(res) { setTimeout(res, 800); }).then(once); }); })
+      .catch(function() { return once(); })
       .then(apply);
   }
-  return once()
-    .catch(function() {
-      return new Promise(function(res) { setTimeout(res, 800); }).then(once);
-    })
-    .then(apply);
+  return once().then(apply);
 }
 
 /** その週を表示する（★読んでいれば通信しない） */
@@ -1775,8 +1837,9 @@ function wpGo(ws) {
       reportClientError('空き枠（週表）の読み込みで通信失敗: ' + ((eW && eW.message) ? eW.message : ''), ws + (S.menu ? ' / ' + S.menu.name : ''));   // 📝 0927fail【B】
       // ⚠ 無言で固まらせない。読めなかったことを必ず出す
       if (WP.el) {
-        WP.el.innerHTML = '<div class="loading">空き状況を読み込めませんでした。'
-          + '<br>お手数ですがお電話・LINEでご連絡ください。</div>';
+        // 1002r2【🅓】: 混雑の案内＋[もう一度試す]（同じ週を取り直す）
+        WP.el.innerHTML = '<div class="loading">' + caFailHtml('wpRetryBtn', '空き状況を読み込めませんでした。') + '</div>';
+        var rb = $('wpRetryBtn'); if (rb) rb.addEventListener('click', function() { wpGo(ws); });
       }
       updateNav();
     });
@@ -2090,8 +2153,10 @@ function mpGo(mo) {
       WP.monthBusy = false;
       // ⚠ 無言で固まらせない
       var el = $('wpMonth');
-      if (el) el.innerHTML = '<div class="loading">空き状況を読み込めませんでした。'
-        + '<br>お手数ですがお電話・LINEでご連絡ください。</div>';
+      if (el) {
+        el.innerHTML = '<div class="loading">' + caFailHtml('mpRetryBtn', '空き状況を読み込めませんでした。') + '</div>';
+        var rb = $('mpRetryBtn'); if (rb) rb.addEventListener('click', function() { mpGo(mo); });
+      }
     });
 }
 
@@ -2343,9 +2408,9 @@ function loadSlots() {
     })
     .catch(function(e) {
       S.loading = false;
-      $('dayList').innerHTML = '';
-      showMsg('通信できませんでした: ' + ((e && e.message) ? e.message : '')
-            + ' お手数ですがお電話でご連絡ください。');
+      $('dayList').innerHTML = '<div class="loading">' + caFailHtml('dlRetryBtn', '空き状況を読み込めませんでした。') + '</div>';
+      var rb = $('dlRetryBtn'); if (rb) rb.addEventListener('click', loadSlots);
+      showMsg('');
       reportClientError('空き枠の読み込みで通信失敗: ' + ((e && e.message) ? e.message : ''), S.menu ? S.menu.name : '');   // 📝 0927fail【B】
       updateNav();
     });
@@ -2619,22 +2684,18 @@ function submitBooking() {
     })
     .catch(function(e) {
       var em = (e && e.message) ? e.message : '';
-      // 🔴 1001deadend【D-2/D-5】: 応答が読めなかった（サーバでは成立している場合がある）→ 同じ reqId で1回だけ自動で送り直す
-      //   ・サーバは reqId で冪等＝1回目が成立していれば同じ「完了」が返る（二重にならない）
-      //   ・それでも駄目なら、押し直しても二重にならないことを文言で伝える（「失敗した」と思わせない）
-      if (!S._retriedReq || S._retriedReq !== S.reqId) {
-        S._retriedReq = S.reqId;
-        sendStatusHide();
-        showMsg('応答を受け取れませんでした。同じ内容で確認しています…', 'ok');
-        setTimeout(function() { S.sending = false; submitBooking(); }, 1500);
-        return;
-      }
+      // 🔴 1001deadend【D-2/D-5】→ 1002r2【🅓】: 応答が読めない/時間切れのときは callAction が【同じ reqId】で
+      //   自動で2回送り直している（2秒・4秒）。サーバは reqId で冪等＝1回目が成立していれば同じ「完了」が返る（二重にならない）。
+      //   それでも駄目なら「混み合っています」＋電話・LINE＋[もう一度試す]（同じ reqId のまま＝押し直しても二重にならない）
       btn.disabled = false;
-      btn.textContent = 'この内容で予約する';
+      btn.textContent = 'もう一度試す';
       sendStatusHide();
-      showMsg('通信の途中で応答を受け取れませんでした（' + em + '）。'
-            + 'ご予約が完了している場合があります。「この内容で予約する」をもう一度押しても、同じ内容が二重に登録されることはありません。'
-            + ' ご不明な場合はお電話（089-906-8249）でご確認ください。');
+      var el = $('msg');
+      el.className = 'msg err';
+      el.innerHTML = caFailHtml('sbRetryBtn',
+        'ご予約が完了している場合があります。「もう一度試す」を押しても、同じ内容が二重に登録されることはありません。');
+      var rb = $('sbRetryBtn'); if (rb) rb.addEventListener('click', function() { showMsg(''); submitBooking(); });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       // 📝 0927fail【B】: 予約の送信で通信が失敗＝いちばん知りたい失敗。届く範囲で記録する
       reportClientError('予約の送信で通信失敗: ' + em,
                         (S.datetimeJST || '') + (S.menu ? ' / ' + S.menu.name : ''));
@@ -5653,7 +5714,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-02a）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-02b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5661,7 +5722,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-10-02a";
+    vt.textContent = "版 2026-10-02b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -5683,18 +5744,28 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     document.head.appendChild(bst); document.body.appendChild(boot);
   } catch (eB) {}
   function hideBoot() { try { if (boot && boot.parentNode) boot.parentNode.removeChild(boot); } catch (e) {} }
+  // 🔴 1002r2【🅓】: 12秒で時間切れ（@209 実測: 通常 2〜4秒・最大 5.4秒 → 正常時は再試行しない）
+  var POST_TIMEOUT_MS = 12000;
   function post(body) {
-    return fetch(GAS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(body) }).then(function (r) { return r.text(); })
-      .then(function (t) { return JSON.parse(t); });
+    var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
+    var timer = setTimeout(function () { try { if (ctrl) ctrl.abort(); } catch (e) {} }, POST_TIMEOUT_MS);
+    var opt = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) };
+    if (ctrl) opt.signal = ctrl.signal;
+    return fetch(GAS, opt).then(function (r) { return r.text(); })
+      .then(function (t) { clearTimeout(timer); return JSON.parse(t); },
+            function (e) { clearTimeout(timer); throw (e && e.name === 'AbortError') ? new Error('応答に時間がかかっています') : e; });
   }
-  // 0917err: 読み込み失敗は自動でやり直す（計3回・間隔を空ける。
-  //   LINEアプリから戻った直後は回線の切替中で最初の通信が落ちやすいため）
-  var RETRY_WAITS = [800, 2000];
+  // 0917err→1002r2【🅓】: 読み込み失敗・時間切れは自動でやり直す（2秒・4秒の間隔＝計3回）。
+  //   画面には「混み合っています。自動でもう一度お試ししています…」、2回目は電話・LINEも添える
+  var RETRY_WAITS = [2000, 4000];
+  function bootText(html) { try { var b = document.getElementById('hpBoot'); if (!b) return; var n = b.childNodes[b.childNodes.length - 1]; if (n && n.nodeType === 3) b.removeChild(n); var old = b.querySelector('.hpBootMsg'); if (old) b.removeChild(old); var d = document.createElement('div'); d.className = 'hpBootMsg'; d.innerHTML = html; b.appendChild(d); } catch (e) {} }
+  var CONGEST_TEXT = '混み合っています。自動でもう一度お試ししています…';
+  var CONTACT_HTML = '<div style="margin-top:.5rem;font-weight:700">お急ぎの方はお電話（<a href="tel:089-906-8249">089-906-8249</a>）・LINEでご連絡ください。</div>';
   function postRetry(body) {
     function attempt(i) {
       return post(body).catch(function (e) {
-        if (i >= RETRY_WAITS.length) throw e;
+        if (i >= RETRY_WAITS.length) { var fe = new Error('ただいま混み合っています'); fe.congested = true; throw fe; }
+        bootText(CONGEST_TEXT + (i >= 1 ? CONTACT_HTML : ''));
         return new Promise(function (res) { setTimeout(res, RETRY_WAITS[i]); })
           .then(function () { return attempt(i + 1); });
       });
@@ -5716,17 +5787,6 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   // 🔴 1002speed【🅐】: 土台（メニュー・院情報）は24時間 localStorage に控え、2回目以降は【待たずに】メニューを出す。
   //   裏で必ず取り直し、違っていれば本体（__hpApplySetupRefresh__）が静かに差し替える。空き枠は含まない。
   var SETUP_CACHE_TTL = 24 * 60 * 60 * 1000;
-  // 🔴 1002speed【🅕】: 空き枠（60分＝再診など）の今週＋来週を、ページを開いた瞬間に裏で取り始める
-  //   （本体の wpFetch が同じ範囲を求めたとき、90秒以内なら通信せずに使う）
-  try {
-    var jst = new Date(Date.now() + 9 * 3600 * 1000);
-    var dow = (jst.getUTCDay() + 6) % 7;   // 月=0
-    var mon = new Date(jst.getTime() - dow * 86400000);
-    var ymd = function (d, sep) { return d.getUTCFullYear() + sep + String(d.getUTCMonth() + 1).padStart(2, "0") + sep + String(d.getUTCDate()).padStart(2, "0"); };
-    var toD = new Date(mon.getTime() + 13 * 86400000);
-    window.__HP_SLOTS_PRE__ = { dur: 60, from: ymd(mon, '-'), to: ymd(toD, '-'), at: Date.now(),
-      p: post({ action: 'getOpenSlots', durationMinutes: 60, startDate: ymd(jst, '/'), endDate: ymd(toD, '/') }).catch(function () { return null; }) };
-  } catch (ePre) {}
   var hasPu = !!String(q.get('pu') || '').trim();
   function readSetupCache() {
     if (hasPu) return null;
@@ -5753,6 +5813,37 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     } catch (e) {}
   }
   var cachedSetup = readSetupCache();
+  // 🔴 1002speed【🅕】→ 1002r2【🅑】: 空き枠の今週＋来週を、ページを開いた瞬間に裏で取り始める（先読みは1回のまま）。
+  //   ・札（?auth= / LINE直帰）がある＝再診の方 → 「再診」メニューの所要時間（メニュー設定から。従来の60分と同じ）
+  //   ・札がない＝初めての方 → 「初診」メニューの所要時間（美容鍼初診は見送り。90分の決め打ちはしない）
+  //   ・手元に土台キャッシュがあればそこからメニューを選ぶ。無ければサーバ（menuRole）が同じ規則で選び、応答に所要時間が入る
+  //   ・鮮度の守り（90秒・希望担当なし・佐々田メニューでない）は本体 wpPrefetched のまま
+  try {
+    var preRole = (auth || hasCb) ? 'repeat' : 'initial';
+    var preMenu = null;
+    try {
+      var cms = (cachedSetup && cachedSetup.menus) || [];
+      for (var pi = 0; pi < cms.length && !preMenu; pi++) {
+        var pm = cms[pi], pn = String(pm.name || '');
+        if (!pm || !pm.id || !(Number(pm.durationMinutes) > 0) || pm.owner === 'sasada') continue;
+        if (preRole === 'initial' && pn.indexOf('初診') >= 0 && pn.indexOf('美容鍼') < 0) preMenu = pm;
+        if (preRole === 'repeat'  && pn.indexOf('再診') >= 0) preMenu = pm;
+      }
+    } catch (ePm) {}
+    var jst = new Date(Date.now() + 9 * 3600 * 1000);
+    var dow = (jst.getUTCDay() + 6) % 7;   // 月=0
+    var mon = new Date(jst.getTime() - dow * 86400000);
+    var ymd = function (d, sep) { return d.getUTCFullYear() + sep + String(d.getUTCMonth() + 1).padStart(2, "0") + sep + String(d.getUTCDate()).padStart(2, "0"); };
+    var toD = new Date(mon.getTime() + 13 * 86400000);
+    var preBody = { action: 'getOpenSlots', startDate: ymd(jst, '/'), endDate: ymd(toD, '/') };
+    if (preMenu) { preBody.durationMinutes = Number(preMenu.durationMinutes); preBody.menuId = preMenu.id; } else { preBody.menuRole = preRole; }
+    var pre = { role: preRole, dur: preMenu ? Number(preMenu.durationMinutes) : null, menuId: preMenu ? preMenu.id : '', from: ymd(mon, '-'), to: ymd(toD, '-'), at: Date.now() };
+    pre.p = post(preBody).then(function (r) {
+      try { if (r && r.success && r.durationMinutes) { pre.dur = Number(r.durationMinutes); if (r.menuId) pre.menuId = r.menuId; } } catch (eR) {}
+      return r;
+    }).catch(function () { return null; });
+    window.__HP_SLOTS_PRE__ = pre;
+  } catch (ePre) {}
   function fetchSetup() {
     return postRetry({ action: 'getPatientSetup', pu: String(q.get('pu') || '').trim() })
       .then(function (r) { if (r && r.success && r.setup) writeSetupCache(r.setup); return r; });
@@ -5840,11 +5931,11 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     var m = document.getElementById('msg');
     if (m) {
       m.className = 'msg err';
-      m.innerHTML = '予約ページを読み込めませんでした。電波の良いところで ' +
-        '<a href="' + origUrl + '">もう一度読み込む</a> を押してください。' +
-        '直らない場合は ' +
-        '<a href="' + GAS + '">こちらの予約ページ</a> をご利用いただくか、' +
-        'お電話（089-906-8249）でご予約ください。';
+      // 1002r2【🅓】: 3回とも駄目＝「ただいま混み合っています」＋電話・LINE＋[もう一度試す]（?auth= を保った元のURLで読み直す）
+      m.innerHTML = ((e && e.congested) ? 'ただいま混み合っています。しばらくしてからもう一度お試しください。' : '予約ページを読み込めませんでした。') +
+        CONTACT_HTML +
+        '<div style="margin-top:.6rem"><a class="btn btn-primary" href="' + origUrl + '">もう一度試す</a></div>' +
+        '<div style="margin-top:.5rem;font-size:.9em">直らない場合は <a href="' + GAS + '">こちらの予約ページ</a> もご利用いただけます。</div>';
     }
     if (ml) ml.innerHTML = '';
   });
