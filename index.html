@@ -1685,6 +1685,35 @@ function slotOpen(s) { return s && s.mark === 'o'; }
  *   ⚠ サーバは今日より前・2ヶ月より先を切り落とす。返ってこなかった日は
  *     「読んだが枠が無い」＝ × として扱う（got には立てる）。
  */
+/** 🔴 1002speed【🅕】: 起動役がページを開いた瞬間に先読みした空き枠（60分・今週＋来週）が使えるか
+ *   ・同じ所要時間・希望担当なし・佐々田担当メニューでない・範囲内・取得から90秒以内 のときだけ
+ *   ・古い空きを見せない守り: 90秒を過ぎたものは使わず取り直す。確定時はサーバが必ず再確認（_bkSlotCheck_）*/
+function wpPrefetched(dur, from, to) {
+  try {
+    var pre = window.__HP_SLOTS_PRE__;
+    if (!pre || !pre.p || String(pre.dur) !== String(dur)) return null;
+    if (WP.staff) return null;
+    if (from < pre.from || to > pre.to) return null;
+    if (Date.now() - pre.at > 90000) return null;
+    var mm = (SETUP.menus || []).filter(function(m) { return m.id === WP.menuId; })[0];
+    if (mm && mm.owner === 'sasada') return null;
+    return pre.p;
+  } catch (e) { return null; }
+}
+/** 🔴 1002speed【🅐】: 起動役が裏で取り直した土台（メニュー等）が違っていたら静かに差し替える */
+window.__hpApplySetupRefresh__ = function(s) {
+  try {
+    if (!s || !s.menus || !s.menus.length || typeof SETUP === 'undefined') return;
+    var changed = JSON.stringify(s.menus) !== JSON.stringify(SETUP.menus)
+               || JSON.stringify(s.clinic || null) !== JSON.stringify(SETUP.clinic || null)
+               || s.staffChoice !== SETUP.staffChoice || s.sasadaActive !== SETUP.sasadaActive;
+    if (!changed) return;
+    SETUP.menus = s.menus; if (s.clinic) SETUP.clinic = s.clinic;
+    if (s.staffChoice !== undefined) SETUP.staffChoice = s.staffChoice;
+    if (s.sasadaActive !== undefined) SETUP.sasadaActive = s.sasadaActive;
+    if (S.step === 1 && typeof renderMenus === 'function') renderMenus();
+  } catch (e) {}
+};
 function wpFetch(from, to) {
   var st = wpStore(), dur = WP.dur;
   // 🆕 0918os: 通信が落ちても「空き枠が出ない」を起こさない＝自動で1回やり直す。
@@ -1704,16 +1733,24 @@ function wpFetch(from, to) {
       return r;
     });
   }
+  function apply(r) {
+    if (String(dur) !== String(WP.dur)) return;      // 途中でメニューが変わった
+    (r.days || []).forEach(function(d) { st.day[d.date] = d; });
+    for (var d2 = from; d2 <= to; d2 = wpAddDays(d2, 1)) st.got[d2] = true;
+    if (r.slotStarts && r.slotStarts.length) st.starts = r.slotStarts;
+  }
+  // 🔴 1002speed【🅕】: 先読み済みなら通信しない（失敗していれば今までどおり取りに行く）
+  var pre = wpPrefetched(dur, from, to);
+  if (pre) {
+    return pre.then(function(r) { if (!r || r.success === false || !r.days) throw new Error('prefetch'); return r; })
+      .catch(function() { return once().catch(function() { return new Promise(function(res) { setTimeout(res, 800); }).then(once); }); })
+      .then(apply);
+  }
   return once()
     .catch(function() {
       return new Promise(function(res) { setTimeout(res, 800); }).then(once);
     })
-    .then(function(r) {
-      if (String(dur) !== String(WP.dur)) return;      // 途中でメニューが変わった
-      (r.days || []).forEach(function(d) { st.day[d.date] = d; });
-      for (var d2 = from; d2 <= to; d2 = wpAddDays(d2, 1)) st.got[d2] = true;
-      if (r.slotStarts && r.slotStarts.length) st.starts = r.slotStarts;
-    });
+    .then(apply);
 }
 
 /** その週を表示する（★読んでいれば通信しない） */
@@ -5616,7 +5653,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-09-30e）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-02a）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5624,7 +5661,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-09-30e";
+    vt.textContent = "版 2026-10-02a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -5635,6 +5672,17 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   if (q.get('from') === 'line' && !q.get('auth')) { location.replace(GAS + '?from=line&ret=hp'); return; }
   var ml = document.getElementById('menuList');
   if (ml) ml.innerHTML = '<div class="loading">読み込んでいます…</div>';
+  // 🔴 1002speed【🅖】: 土台が届くまでの間も「動いている」ことを見せる（本体が起動したら消す）
+  var boot = null;
+  try {
+    boot = document.createElement('div');
+    boot.id = 'hpBoot';
+    boot.innerHTML = '<div style="width:22px;height:22px;border:3px solid #cfe3d8;border-top-color:#1a3d2e;border-radius:50%;animation:hpSpin .9s linear infinite;margin:0 auto 10px"></div>予約ページを準備しています…';
+    boot.style.cssText = 'position:fixed;left:0;right:0;top:38%;text-align:center;font-size:14px;color:#1a3d2e;font-family:-apple-system,BlinkMacSystemFont,sans-serif;z-index:9998;';
+    var bst = document.createElement('style'); bst.textContent = '@keyframes hpSpin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(bst); document.body.appendChild(boot);
+  } catch (eB) {}
+  function hideBoot() { try { if (boot && boot.parentNode) boot.parentNode.removeChild(boot); } catch (e) {} }
   function post(body) {
     return fetch(GAS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(body) }).then(function (r) { return r.text(); })
@@ -5664,13 +5712,28 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   //   ・LINEへ行く前の初回取得を保存し、戻ってきた時は【待たずに】メニューを出せる。
   //   🔴 枠の空き(◯×)は setup に含まれない＝キャッシュ対象外（毎回サーバから取る）。
   //   ・5分TTL・?pu=（情報更新リンク）のときは使わない・裏で必ず取り直して更新（すぐ反映）。
-  var SETUP_CACHE_KEY = 'hpSetupBase_v1';
-  var SETUP_CACHE_TTL = 5 * 60 * 1000;
+  var SETUP_CACHE_KEY = 'hpSetupBase_v2';
+  // 🔴 1002speed【🅐】: 土台（メニュー・院情報）は24時間 localStorage に控え、2回目以降は【待たずに】メニューを出す。
+  //   裏で必ず取り直し、違っていれば本体（__hpApplySetupRefresh__）が静かに差し替える。空き枠は含まない。
+  var SETUP_CACHE_TTL = 24 * 60 * 60 * 1000;
+  // 🔴 1002speed【🅕】: 空き枠（60分＝再診など）の今週＋来週を、ページを開いた瞬間に裏で取り始める
+  //   （本体の wpFetch が同じ範囲を求めたとき、90秒以内なら通信せずに使う）
+  try {
+    var jst = new Date(Date.now() + 9 * 3600 * 1000);
+    var dow = (jst.getUTCDay() + 6) % 7;   // 月=0
+    var mon = new Date(jst.getTime() - dow * 86400000);
+    var ymd = function (d, sep) { return d.getUTCFullYear() + sep + String(d.getUTCMonth() + 1).padStart(2, "0") + sep + String(d.getUTCDate()).padStart(2, "0"); };
+    var toD = new Date(mon.getTime() + 13 * 86400000);
+    window.__HP_SLOTS_PRE__ = { dur: 60, from: ymd(mon, '-'), to: ymd(toD, '-'), at: Date.now(),
+      p: post({ action: 'getOpenSlots', durationMinutes: 60, startDate: ymd(jst, '/'), endDate: ymd(toD, '/') }).catch(function () { return null; }) };
+  } catch (ePre) {}
   var hasPu = !!String(q.get('pu') || '').trim();
   function readSetupCache() {
     if (hasPu) return null;
     try {
-      var raw = sessionStorage.getItem(SETUP_CACHE_KEY);
+      var raw = null;
+      try { raw = localStorage.getItem(SETUP_CACHE_KEY); } catch (eL) {}
+      if (!raw) raw = sessionStorage.getItem(SETUP_CACHE_KEY);
       if (!raw) return null;
       var o = JSON.parse(raw);
       if (!o || !o.at || (Date.now() - o.at) > SETUP_CACHE_TTL) return null;
@@ -5684,7 +5747,9 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       // 🔴 保存するのは変わりにくい土台だけ（枠の空きは元々 setup に無い）
       var slim = { menus: setup.menus, clinic: setup.clinic, today: setup.today,
         build: setup.build, lineRequired: setup.lineRequired, execUrl: setup.execUrl };
-      sessionStorage.setItem(SETUP_CACHE_KEY, JSON.stringify({ at: Date.now(), setup: slim }));
+      var packed = JSON.stringify({ at: Date.now(), setup: slim });
+      try { localStorage.setItem(SETUP_CACHE_KEY, packed); } catch (eL2) {}
+      sessionStorage.setItem(SETUP_CACHE_KEY, packed);
     } catch (e) {}
   }
   var cachedSetup = readSetupCache();
@@ -5696,7 +5761,8 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   var setupJob;
   if (cachedSetup) {
     setupJob = Promise.resolve({ success: true, setup: cachedSetup, _cached: true });
-    try { fetchSetup(); } catch (eBg) {}
+    // 裏で取り直し、違っていれば本体に差し替えてもらう（1002speed）
+    try { fetchSetup().then(function (r) { try { if (r && r.success && r.setup && typeof window.__hpApplySetupRefresh__ === "function") window.__hpApplySetupRefresh__(r.setup); } catch (eR) {} }).catch(function () {}); } catch (eBg) {}
   } else {
     setupJob = fetchSetup();
   }
@@ -5736,6 +5802,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     // ---- 予約パス等をURLから消す（履歴・ブックマークに残さない）----
     try { history.replaceState(null, '', location.pathname); } catch (e) {}
     window.__HP_SETUP__ = setup;
+    hideBoot();   // 1002speed
     // ---- 本体を起動（GASでサーバが埋め込んで動かすのと同じ順序になる）----
     var main = document.getElementById('hpMain');
     var s = document.createElement('script');
@@ -5767,6 +5834,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       }
     }
   }).catch(function (e) {
+    hideBoot();   // 1002speed
     // ⚠ 行き止まりにしない: まず再読み込み（?auth= を保ったまま）を案内し、
     //   従来の予約ページ と 電話 も必ず添える
     var m = document.getElementById('msg');
