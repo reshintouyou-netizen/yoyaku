@@ -4950,6 +4950,10 @@ function iqOpen(token, opts) {
   IQ.active = true;
   IQ.standalone = !!opts.standalone;
   IQ.beauty = !!opts.beauty;   // 🎀 0919beauty: メニュー名に「美容鍼」を含む初診か
+  // 🆕 1004intake: 予約に紐づかない問診票（先生が「問診票だけ」を送った場合）。
+  //   ★完了画面で「予約が取れた」と誤解されない文言に切り替えるために持つ。
+  IQ.noBooking = !!opts.noBooking;
+  IQ.presetName = String(opts.presetName || '');
 
   ['screenMenu', 'screenDate', 'screenForm', 'screenConfirm', 'screenDone', 'screenManage']
     .forEach(function(id) { $(id).classList.add('hidden'); });
@@ -4977,6 +4981,10 @@ function iqOpen(token, opts) {
     selectedComplaints = [];
     qPage              = 1;
   }
+  // 🆕 1004intake: 先生が発行時に入れた氏名の下書き（★空欄のときだけ）。
+  //   紐づけ済みの患者さんは、下の carryover で ふりがな等も入る。
+  if (!qFormData.name && IQ.presetName) qFormData.name = IQ.presetName;
+
   // 予約フォームで入力済みの4項目を引き継ぐ（★空欄のときだけ。二度打たせない）
   var pf = opts.prefill || null;
   if (pf) {
@@ -5062,9 +5070,22 @@ function iqFinish(submitted) {
   if (IQ.standalone) {
     // メールのリンクから来た人 → 完了/案内の画面だけ見せる（予約完了画面の情報は無い）
     $('iqDoneTitle').textContent = submitted ? '問診票を送信しました' : '問診票はあとでご記入いただけます';
-    $('iqDoneMsg').innerHTML = submitted
-      ? 'ご記入ありがとうございました。<br>ご来院をお待ちしております。'
-      : '確認メールに記載のリンクから、いつでもご記入いただけます。<br>（ご来院時にご記入いただくこともできます）';
+    var _tel2 = '';
+    try { _tel2 = (SETUP.clinic && SETUP.clinic.tel) ? String(SETUP.clinic.tel) : ''; } catch (eT2) {}
+    if (IQ.noBooking) {
+      // 🆕 1004intake: 予約に紐づかない問診票。🔴「予約が取れた」と誤解されない文言にする。
+      $('iqDoneMsg').innerHTML = submitted
+        ? 'ご記入ありがとうございました。<br>内容をお預かりしました。<br><br>'
+          + '<b>※ これはご予約ではありません。</b><br>'
+          + 'ご予約の日時は院からあらためてご連絡いたします。'
+          + (_tel2 ? ('<br>お急ぎの方は 📞 ' + _tel2 + ' までお電話ください。') : '')
+        : 'このリンクから、いつでもご記入いただけます。'
+          + (_tel2 ? ('<br>ご不明な点は 📞 ' + _tel2 + ' までお問い合わせください。') : '');
+    } else {
+      $('iqDoneMsg').innerHTML = submitted
+        ? 'ご記入ありがとうございました。<br>ご来院をお待ちしております。'
+        : '確認メールに記載のリンクから、いつでもご記入いただけます。<br>（ご来院時にご記入いただくこともできます）';
+    }
     $('screenIntakeDone').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
@@ -5440,7 +5461,10 @@ function iqSubmit() {
   var errEl2 = document.getElementById('q-page-err');
   if (errEl2) errEl2.innerHTML = '';
 
-  callAction('submitIntake', { token: IQ.token, answers: payload })
+  // 🆕 1004intake: 送信ごとの冪等キー（通信が再試行されても問診票の行が二重にならない）。
+  //   ★同じ送信のあいだは同じ値を使い回す（押し直しでは作り直さない）。
+  if (!IQ.reqId) IQ.reqId = 'iq' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  callAction('submitIntake', { token: IQ.token, answers: payload, reqId: IQ.reqId })
     .then(function(res) {
       if (!res || !res.success) {
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '送信する'; }
@@ -5616,10 +5640,17 @@ if (SETUP.intakeToken && !SETUP.manageToken) {
         // 🎀 0919beauty: サーバが返す menuName に「美容鍼」を含めば美容鍼専用の問診
         iqOpen(SETUP.intakeToken, { standalone: true, submittedBefore: !!r.submitted,
                                     beauty: /美容鍼/.test(String((r && r.menuName) || '')),
+                                    // 🆕 1004intake: 予約に紐づかない問診票か・氏名の下書き
+                                    noBooking: !!(r && r.standalone),
+                                    presetName: (r && r.presetName) || '',
                                     // 🆕 0921carry: 前回の問診票から共通項目を引き継ぐ（無ければ found:false）
                                     carryover: r.carryover });
       } else {
-        showMsg('問診票のリンクの有効期限が切れています。お手数ですが、ご来院時にご記入ください。');
+        // 🆕 1004intake: 行き止まりにしない（@208 の掟）。必ず連絡先を添える。
+        var _tel = '';
+        try { _tel = (SETUP.clinic && SETUP.clinic.tel) ? String(SETUP.clinic.tel) : ''; } catch (eT) {}
+        showMsg('このリンクは有効期限が切れています。お手数ですが院にご連絡ください。'
+                + (_tel ? ('　📞 ' + _tel) : ''));
       }
     })
     .catch(function() {
@@ -5714,7 +5745,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-02c）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-04b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5722,7 +5753,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-10-02c";
+    vt.textContent = "版 2026-10-04b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
