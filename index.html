@@ -4959,6 +4959,13 @@ function iqOpen(token, opts) {
     .forEach(function(id) { $(id).classList.add('hidden'); });
   $('navRow').classList.add('hidden');
   $('stepBar').classList.add('hidden');
+  // 🔴 1004-401: 「問診票だけ」のリンクでは、予約の流れの飾りを出さない。
+  //   ★「① ご本人確認」は予約の段階表示なので、予約が無いのに出ると迷わせる。
+  //   ★予約に紐づく従来の問診票では【今までどおり】出す（挙動を変えない）。
+  if (IQ.noBooking) {
+    try { var _sl2 = $('stepLabel'); if (_sl2) _sl2.classList.add('hidden'); } catch (e1) {}
+    try { var _lp2 = $('linePromo'); if (_lp2) _lp2.classList.add('hidden'); } catch (e2) {}
+  }
   $('screenIntakeDone').classList.add('hidden');
   $('screenIntake').classList.remove('hidden');
   showMsg('');
@@ -5043,15 +5050,27 @@ function iqOpen(token, opts) {
   }
 
   // 案内文（★予約が成立していることを必ず伝える＝途中でやめても不安にさせない）
+  //   🔴 1004-401: ただし「問診票だけ」のリンク（予約に紐づかない＝IQ.noBooking）では
+  //     予約は1件も無い。ここで「ご予約は確定しています」と出すと嘘になるので必ず分ける。
   $('iqBanner').innerHTML = (opts.submittedBefore
     ? '✅ この問診票はご提出済みです。<br>内容を修正して再送信すると、新しい内容が院に届きます。'
-    : '✅ ご予約は確定しています。<br>続けて、初診の問診票のご記入をお願いいたします（5〜10分）。')
+    : (IQ.noBooking
+        ? '📋 問診票のご記入をお願いいたします（5〜10分）。<br><b>※ これはご予約ではありません。</b>ご予約の日時は院からあらためてご連絡いたします。'
+        : '✅ ご予約は確定しています。<br>続けて、初診の問診票のご記入をお願いいたします（5〜10分）。'))
     + (IQ.carriedOver
         ? '<div style="margin-top:0.6rem;padding:0.6rem 0.8rem;background:#eef6ff;border-radius:8px;'
           + 'font-size:0.85rem;color:var(--text);line-height:1.6;">'
           + '💬 前回ご記入いただいた内容をもとに、いくつかの項目にあらかじめ入力しています。'
           + '変更があれば書き換えてください。</div>'
         : '');
+
+  // 🔴 1004-401: 「あとで入力する」の添え書きも、予約が無いときは「確定」と言わない
+  try {
+    var _sk = document.getElementById('iqSkipBtn');
+    if (_sk) _sk.textContent = IQ.noBooking
+      ? 'あとで入力する（このリンクからいつでも書けます）'
+      : 'あとで入力する（ご予約はこのまま確定しています）';
+  } catch (eSk) {}
 
   // 🎀 0919beauty: フォーム種別が違う下書き（鍼灸↔美容鍼）はページだけ1に戻す（違うページを出さない）。
   if (draft && (!!draft.beauty !== IQ.beauty)) qPage = 1;
@@ -5483,7 +5502,7 @@ function iqSubmit() {
       var e3 = document.getElementById('q-page-err');
       if (e3) {
         e3.innerHTML = '<div class="msg-err">通信エラーが発生しました。もう一度お試しください。' +
-          '（ご予約は確定しています）</div>';
+          (IQ.noBooking ? '' : '（ご予約は確定しています）') + '</div>';
         e3.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
@@ -5745,7 +5764,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-04b）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-04c）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5753,7 +5772,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-10-04b";
+    vt.textContent = "版 2026-10-04c";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
