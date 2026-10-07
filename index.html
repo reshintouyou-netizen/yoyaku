@@ -1298,6 +1298,9 @@ window.__hpApplyAuth__ = function (rc) {
     if (rc && rc.success && rc.auth && rc.user && rc.user.name) {
       // 連携済み（カルテ紐づけ）＝氏名は分かっている。そのまま予約できる。
       AUTH.token = rc.auth; AUTH.user = rc.user; AUTH.needName = false; AUTH.presetName = '';
+      // 🔒 1007rm: この人に許可された限定メニュー（応答にだけ乗る・キャッシュしない）。メニュー画面なら静かに足す
+      SETUP.bookingRestricted = (rc.restrictedMenus && rc.restrictedMenus.length) ? rc.restrictedMenus : [];
+      try { if (S.step === 1 && typeof renderMenus === 'function') renderMenus(); } catch (eRm) {}
       try { sessionStorage.removeItem('cbfail'); } catch (e) {}
       if (resume) resume(true);   // 確定待ちなら進める
       // 🔴 0928ux【2】: 「次へ」を押して裏の確認を待っていた人は、そのまま④確認へ進める
@@ -1308,6 +1311,7 @@ window.__hpApplyAuth__ = function (rc) {
       //   （今までは氏名の後にメニュー①へ戻され、選んだ内容が消えたように見えた）
       AUTH._afterWhoSubmit = !!resume;
       AUTH.token = rc.auth; AUTH.needName = true; AUTH.presetName = String(rc.preset || '');
+      SETUP.bookingRestricted = [];   // 🔒 1007rm: 紐づけ前の方には限定メニューは出ない
       AUTH.confirmed = false;
       AUTH.user = rc.preset ? { name: rc.preset, kana: '', phone: '', email: '' } : null;
       try { sessionStorage.removeItem('cbfail'); } catch (e) {}
@@ -1512,9 +1516,31 @@ function menuDispMin(m) {
   return Number(m && m.treatmentMinutes) || Number(m && m.durationMinutes) || 0;
 }
 
+// 🔒 1007rm: 画面に出すメニュー ＝ 全員共通の SETUP.menus ＋ この人に許可された限定メニュー（SETUP.bookingRestricted）。
+//   ・限定は【札（本人確認）の応答】にだけ乗る（getBookingAuthUser / lineMenuCallback / GASページの埋め込み）。
+//     全員共通の setup（サーバ10分キャッシュ・端末の土台キャッシュ localStorage）には乗らない＝起動役は SETUP.menus だけを控える。
+//   ・画面では印を付けない（普通のメニューと同じ見た目）。並びは sortOrder。
+function menusForDisplay() {
+  var base = SETUP.menus || [];
+  var extra = SETUP.bookingRestricted || [];
+  if (!extra.length) return base;
+  var seen = {};
+  base.forEach(function(m) { seen[m.id] = true; });
+  var out = base.slice();
+  extra.forEach(function(m) {
+    if (!m || !m.id || seen[m.id]) return;
+    seen[m.id] = true;
+    var c = {}; for (var k in m) c[k] = m[k];
+    c.restricted = true;   // 先読み（wpPrefetched）を使わない目印（画面には出さない）
+    out.push(c);
+  });
+  out.sort(function(a, b) { return (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0); });
+  return out;
+}
+
 function renderMenus() {
   var h = '';
-  SETUP.menus.forEach(function(m) {
+  menusForDisplay().forEach(function(m) {
     // 🔴 0924sasada: 佐々田先生が未稼働（SETUP.sasadaActive が false）なら佐々田担当メニューは出さない
     //   （サーバ側 getBookingSetup_ でも除いているが、画面でも念のため守る）
     if (SETUP.sasadaActive === false && m.owner === 'sasada') return;
@@ -1539,7 +1565,7 @@ function renderMenus() {
 
 function pickMenu(id) {
   var m = null;
-  SETUP.menus.forEach(function(x) { if (x.id === id) m = x; });
+  menusForDisplay().forEach(function(x) { if (x.id === id) m = x; });
   if (!m) return;
   S.menu = m;
   // ⚠ メニュー＝所要時間が変わると選べる枠が変わる。前の結果を必ず捨てる。
@@ -1754,8 +1780,9 @@ function wpPrefetched(dur, from, to) {
     if (WP.staff) return null;
     if (from < pre.from || to > pre.to) return null;
     if (Date.now() - pre.at > 90000) return null;
-    var mm = (SETUP.menus || []).filter(function(m) { return m.id === WP.menuId; })[0];
+    var mm = menusForDisplay().filter(function(m) { return m.id === WP.menuId; })[0];
     if (mm && mm.owner === 'sasada') return null;
+    if (mm && mm.restricted) return null;   // 🔒 1007rm: 限定メニューは先読みを使わない（札つきで取り直す）
     // 🔴 1002r2【🅑】: 先読みの所要時間は「札あり→再診・札なし→初診」をメニュー設定から引く（起動役）。
     //   手元の土台キャッシュが無い初めての方は、サーバ（menuRole）が決めて応答に durationMinutes が入る＝応答を待って照合。
     if (pre.dur != null && pre.dur !== '') return (String(pre.dur) === String(dur)) ? pre.p : null;
@@ -1793,6 +1820,8 @@ function wpFetch(from, to) {
     if (WP.menuId) payload.menuId = WP.menuId;
     // 👤 0923choice: 希望担当（スイッチ ON・共通メニューのときだけ WP.staff が入る。'' なら送らない）
     if (WP.staff) payload.staff = WP.staff;
+    // 🔒 1007rm: 札があれば添える（限定メニューの空き枠はサーバが札＋許可を確かめてからしか返さない）
+    if (AUTH.token) payload.auth = AUTH.token;
     return callAction('getOpenSlots', payload).then(function(r) {
       if (!r || r.success === false) throw new Error((r && r.error) || '');
       return r;
@@ -2390,7 +2419,8 @@ function loadSlots() {
       durationMinutes: S.menu.durationMinutes,
       startDate: SETUP.today,      // ★指定しないと当日1日分しか返らない
       endDate:   horizonDate(),    // ★2ヶ月先まで
-      menuId:    S.menu.id         // 👥 0921owner 第2段-B-2
+      menuId:    S.menu.id,        // 👥 0921owner 第2段-B-2
+      auth:      AUTH.token || undefined   // 🔒 1007rm: 限定メニューの空き枠は札＋許可が要る（無ければ送らない）
     })
     .then(function(r) {
       S.loading = false;
@@ -2627,6 +2657,8 @@ function submitBooking() {
         // 🔴 0907line: 予約パスが無い/切れた → ゲートに戻して LINE で開き直してもらう
         if (r && r.needLine) {
           AUTH.token = ''; AUTH.user = null; AUTH.confirmed = false;
+          SETUP.bookingRestricted = [];   // 🔒 1007rm: 札が切れたら限定メニューも畳む（選択中なら外す）
+          if (S.menu && S.menu.restricted) { S.menu = null; S.datetimeJST = ''; }
           showGateScreen(r.error || '');
           return;
         }
@@ -5764,7 +5796,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-04c）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-07a）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5772,7 +5804,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-10-04c";
+    vt.textContent = "版 2026-10-07a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -5929,9 +5961,12 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     setup.prefill = null;
     setup.lineNoticeGate = false;
     setup.bookingAuth = ''; setup.bookingUser = null; setup.bookingNeedName = false; setup.bookingPresetName = '';
+    // 🔒 1007rm: 許可された限定メニューは【札の応答（getBookingAuthUser）にだけ】乗る。土台キャッシュには保存しない（writeSetupCache は menus 等だけ）
+    setup.bookingRestricted = [];
     var authNetFail = false;   // 0917err: 本人確認の照会が通信で落ちた（札が無効だったのとは別）
     if (auth && rs[1] && rs[1].success && rs[1].user && rs[1].user.name) {
       setup.bookingAuth = auth; setup.bookingUser = rs[1].user;
+      setup.bookingRestricted = (rs[1].restrictedMenus && rs[1].restrictedMenus.length) ? rs[1].restrictedMenus : [];   // 🔒 1007rm
     } else if (auth && rs[1] && rs[1].success && rs[1].needName) {
       setup.bookingAuth = auth; setup.bookingNeedName = true;   // 🆕 0917new: 氏名だけ入力してもらう
       setup.bookingPresetName = String(rs[1].preset || '');   // 🆕 0917name: 前回の氏名（確認に出す）
