@@ -119,12 +119,36 @@
   }
   .note-box .tel{font-size:16px;font-weight:700;display:inline-block;margin-top:4px}
 
+  /* 🗓 1017batch: まとめて予約の切り替え・選んだ日時・続けて予約 */
+  .bt-toggle{display:flex;gap:6px;margin:0 0 10px}
+  .bt-toggle .bt-btn{flex:1 1 0;min-height:44px;padding:8px 6px;border-radius:10px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);font-size:14px;font-family:inherit;cursor:pointer}
+  .bt-toggle .bt-btn.on{border-color:var(--green);background:#E4EEE8;color:var(--green);font-weight:700}
+  .bt-note{font-size:13px;color:var(--gray);margin:0 0 10px;line-height:1.6}
+  .bt-bar{background:#fff;border:1px solid var(--green);border-radius:12px;padding:12px 14px;margin:12px 0 4px}
+  .bt-bar h3{font-size:15px;margin:0 0 6px;color:var(--green)}
+  .bt-list{list-style:none;margin:0;padding:0}
+  .bt-list li{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;
+    border-bottom:1px solid #eef1ee;font-size:14px;font-weight:600}
+  .bt-list li:last-child{border-bottom:none}
+  .bt-rm{min-height:36px;min-width:60px;border:1px solid var(--line);background:#fff;border-radius:8px;
+    color:var(--gray);font-size:13px;font-family:inherit;cursor:pointer;flex-shrink:0}
+  .bt-empty{font-size:13px;color:var(--gray);margin:0}
+  .done-list{list-style:none;margin:10px 0 0;padding:0}
+  .done-list li{padding:7px 0;border-top:1px solid #eef1ee;font-size:15px;font-weight:600}
+  .done-list .ng{color:var(--red)}
+  .done-list .ng small{display:block;font-size:12px;color:var(--gray);font-weight:400;margin-top:2px}
+  .done-more{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin:18px 0 0}
+  .done-more .btn{width:100%;min-height:52px;font-size:16px}
+  .done-more .bt-link{background:none;border:none;color:var(--green2);text-decoration:underline;font-size:14px;
+    font-family:inherit;min-height:44px;cursor:pointer}
+
   /* 確認 */
   .confirm{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
   .crow{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #eef1ee;font-size:14px}
   .crow:last-child{border-bottom:none}
   .ckey{width:6.5em;color:var(--gray);flex-shrink:0}
-  .cval{font-weight:600;word-break:break-all}
+  .cval{font-weight:600;word-break:break-all;white-space:pre-line}   /* 1017batch: まとめて予約の日時を1件1行で（他の値は改行を含まない＝見た目不変） */
 
   /* 完了 */
   .done{text-align:center;padding:28px 16px}
@@ -298,6 +322,9 @@
   /* 🗂 0830b の「―」用。0830c で ◯× の2種類に統一したので使っていない（消していない） */
   .wpc.n { color:#d3dad5; cursor:default; }
   .wpc.on { background:var(--green); color:#fff; border-radius:8px; }
+  /* 🗓 1017batch: まとめて予約で選んだ枠（✓）・この画面で予約した枠（済） */
+  .wpc.sel { background:var(--green); color:#fff; border-radius:8px; }
+  .wpc.bk { color:var(--green); font-size:12px; font-weight:700; cursor:default; background:#E4EEE8; border-radius:8px; }
 
   /* 🔴 0921wait: 自分が登録中のキャンセル待ち */
   .wl-mine-box { background:#fffbeb; border:1px solid #fcd34d; border-radius:10px;
@@ -756,9 +783,17 @@
         <button type="button" class="sc-btn" data-staff="sasada" role="radio" aria-checked="false">佐々田先生</button>
       </div>
     </div>
+    <!-- 🗓 1017batch: 1件だけ／まとめて予約（4件まで）。初期は「1件だけ」＝今までどおり。はじめての方のメニューでは出さない -->
+    <div id="batchToggle" class="bt-toggle hidden" role="radiogroup" aria-label="予約のしかた">
+      <button type="button" class="bt-btn on" data-batch="0" role="radio" aria-checked="true">1件だけ予約</button>
+      <button type="button" class="bt-btn" data-batch="1" role="radio" aria-checked="false">まとめて予約（4件まで）</button>
+    </div>
+    <p id="batchNote" class="bt-note hidden">表の ○ を押すと選べます（もう一度押すと外れます）。選び終わったら下の「次へ」を押してください。</p>
     <!-- 🔴 0921wait: 自分が登録中のキャンセル待ち（無ければ非表示・最低限の取り消し導線） -->
     <div id="wlMineBox" class="wl-mine-box hidden"></div>
     <div id="dayList"><div class="loading">空き状況を読み込んでいます…</div></div>
+    <!-- 🗓 1017batch: まとめて予約で選んだ日時（まとめて予約のときだけ出す） -->
+    <div id="batchBar" class="bt-bar hidden" aria-live="polite"></div>
   </section>
 
   <!-- ③ 入力 -->
@@ -818,10 +853,17 @@
       <div class="done-box">
         <div class="done-dt" id="doneDt"></div>
         <div class="done-menu" id="doneMenu"></div>
+        <!-- 🗓 1017batch: まとめて予約の結果（○ 予約できました ／ × お取りできませんでした） -->
+        <ul class="done-list hidden" id="doneBatchList"></ul>
       </div>
       <p id="doneMail" style="font-size:14px;color:var(--gray);margin:0"></p>
       <!-- 0903a 第7段階-1: 問診票の結果の一言（送信済み/あとで） -->
       <p id="doneIntakeNote" class="hidden" style="font-size:14px;color:var(--green2);margin:8px 0 0"></p>
+      <!-- 🗓 1017batch: 続けて予約（お名前・お電話・メニューは入ったまま。端末には保存しない） -->
+      <div class="done-more" id="doneMore">
+        <button type="button" class="btn btn-primary" id="btnContinue">続けて別の日も予約する</button>
+        <button type="button" class="bt-link" id="btnChangeMenu">メニューを変えて予約する</button>
+      </div>
     </div>
 
     <!-- 🔴 0830g: LINE連携の入口（★予約が取れた直後の いちばん見える場所）
@@ -1183,7 +1225,8 @@ function reportClientError(reason, context) {
 //   ・3回とも駄目なら Error('ただいま混み合っています')（e.congested=true）。呼び出し側が[もう一度試す]を出す
 // ============================================================
 var CA_TIMEOUT_READ_MS = 12000, CA_TIMEOUT_WRITE_MS = 25000, CA_RETRY_WAITS = [2000, 4000];
-var CA_WRITE_ACTIONS = /^(createBooking|updateMyBooking|cancelMyBooking|submitIntake|submitRevisit|submitPatientUpdate|joinWaitlist|cancelMyWaitlistEntry|rememberBookingName|requestBookingLink)$/;
+var CA_TIMEOUT_BATCH_MS = 70000;   // 🗓 1017batch: まとめて予約は1件ずつ登録するため長め（4件で30秒前後）
+var CA_WRITE_ACTIONS = /^(createBooking|createBookingBatch|updateMyBooking|cancelMyBooking|submitIntake|submitRevisit|submitPatientUpdate|joinWaitlist|cancelMyWaitlistEntry|rememberBookingName|requestBookingLink)$/;
 var CA_PHONE = '089-906-8249';
 function caLineUrl() { try { return (SETUP.clinic && SETUP.clinic.lineUrl) || ''; } catch (e) { return ''; } }
 /** 混雑時の連絡先（HTML）。big=true で2回目以降の「お急ぎの方は」を大きく */
@@ -1215,7 +1258,8 @@ function callAction(action, payload) {
   var body = {};
   for (var k in (payload || {})) body[k] = payload[k];
   body.action = action;
-  var tmo = CA_WRITE_ACTIONS.test(action) ? CA_TIMEOUT_WRITE_MS : CA_TIMEOUT_READ_MS;
+  var tmo = (action === 'createBookingBatch') ? CA_TIMEOUT_BATCH_MS   // 🗓 1017batch
+          : CA_WRITE_ACTIONS.test(action) ? CA_TIMEOUT_WRITE_MS : CA_TIMEOUT_READ_MS;
   var raw = JSON.stringify(body);   // ★再試行は同じ内容（reqId も同じ）
   function once() {
     var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
@@ -1249,6 +1293,9 @@ function callAction(action, payload) {
 
 var SHOW_DAYS_STEP = 14;   // 一度に描く日数（スマホで重くならないように）
 var S = { step: 1, menu: null, datetimeJST: '', days: [], loading: false, showDays: SHOW_DAYS_STEP };
+// 🗓 1017batch: まとめて予約（batch・選んだ日時）と、この画面で予約した日時（booked＝「済」の印）。
+//   🔴 画面の中だけ（localStorage に書かない）。閉じれば消える。
+S.batch = false; S.batchSlots = []; S.booked = [];
 
 function $(id) { return document.getElementById(id); }
 function esc(s) {
@@ -1573,6 +1620,7 @@ function pickMenu(id) {
   S.datetimeJST = '';
   S.showDays = SHOW_DAYS_STEP;
   S.staff = 'any';   // 👤 0923choice: メニューを選び直したら希望担当は「どちらでも」に戻す（既定）
+  S.batchSlots = [];   // 🗓 1017batch: メニュー（所要時間）が変われば選んだ日時も捨てる
   Array.prototype.forEach.call($('menuList').querySelectorAll('.menu-btn'), function(b) {
     b.classList.toggle('on', b.getAttribute('data-id') === id);
   });
@@ -1971,10 +2019,14 @@ function wpRender() {
       //   枠そのものが無い（過去・3時間以内で間引かれた・範囲外）ときも × にする。
       //   ⚠ 定休日か昼休みかは患者に伝えない。取れないことが分かればよい。
       var dt = ymd.replace(/-/g, '/') + ' ' + hm;
-      if (slot && wpMark(slot) === 'o') {
-        var on = (WP.picked === dt) ? ' on' : '';
-        h += '<td><button type="button" class="wpc o' + on + '" data-dt="' + esc(dt) + '"'
-           + ' aria-label="' + esc(wpLabel(ymd, hm)) + ' 空きあり">○</button></td>';
+      var bx = wpCellExtra(dt);   // 🗓 1017batch: 'booked'（この画面で予約済み）／'sel'（まとめて予約で選択中）／''
+      if (bx === 'booked') {
+        h += '<td><span class="wpc bk" aria-label="' + esc(wpLabel(ymd, hm)) + ' ご予約済み">済</span></td>';
+      } else if (slot && wpMark(slot) === 'o') {
+        var on = (WP.picked === dt && !btActive()) ? ' on' : '';
+        var sel = (bx === 'sel') ? ' sel' : '';
+        h += '<td><button type="button" class="wpc o' + on + sel + '" data-dt="' + esc(dt) + '"'
+           + ' aria-label="' + esc(wpLabel(ymd, hm)) + (sel ? ' 選択中（押すと外れます）">✓' : ' 空きあり">○') + '</button></td>';
       } else if (WP.enableWaitlist) {
         // 🔴 0921wait: ×でもタップできる（キャンセル待ちに登録）。過去かどうか等はサーバが判定する。
         h += '<td><button type="button" class="wpc x wait" data-dt="' + esc(dt) + '"'
@@ -1991,6 +2043,8 @@ function wpRender() {
   h += '<div class="wp-legend">'
      + '<span><b>○</b> 空きあり</span>'
      + '<span><b style="color:#b9c2bb">×</b> 空きなし</span>'
+     + (btActive() ? '<span><b>✓</b> 選んだ日時</span>' : '')   // 🗓 1017batch
+     + ((WP.enableWaitlist && S.booked.length) ? '<span><b style="color:var(--green)">済</b> ご予約済み</span>' : '')
      + '</div>';
   // 🔴 0922wlnotify【A】: ×からキャンセル待ちに登録できることの常時表示の説明
   //   （折りたたみ・ポップアップにしない＝先生の指示）。enableWaitlistの画面だけに出す
@@ -2396,9 +2450,12 @@ function mountWeekPickerForNew() {
   // 👤 0923choice: 選択を出す場面だけ希望担当を週表に渡す（OFF・固定メニューでは '' ＝今までどおり送らない）
   paintStaffChoice();
   WP.staff = staffChoiceShown() ? (S.staff || 'any') : '';
+  paintBatchToggle();   // 🗓 1017batch
   wpStart($('dayList'), S.menu.durationMinutes, function(dt, label) {
+    if (btActive()) { btToggleSlot(dt); return; }   // 🗓 1017batch: まとめて予約では ○ が「選ぶ／外す」
     cfOpenNew(dt, label);
-  }, S.datetimeJST, S.menu.id, true);   // 🔴 0921wait: 新規予約の日時選択だけ ×からキャンセル待ちに登録できる
+  }, (S.batch ? (S.batchSlots[0] || '') : S.datetimeJST), S.menu.id, true);
+  btRenderBar();   // 🔴 0921wait: 新規予約の日時選択だけ ×からキャンセル待ちに登録できる
   try { wlRefreshMine(); } catch (e) {}
 }
 
@@ -2516,6 +2573,131 @@ function renderDays() {
   });
 }
 
+// ============================================================
+// 🗓 1017batch: まとめて予約（4件まで）・続けて予約
+// ------------------------------------------------------------
+//   ・初期は「1件だけ」＝今までどおり。切り替えたときだけ ○ が「選ぶ／外す」になる。
+//   ・選んだ日時・お名前・お電話は画面の中だけ（localStorage に書かない）。閉じれば消える。
+//   ・空き・二重予約・重なりの最終判定はサーバが1件ずつ行う（createBookingBatch）。
+//     ここは「選び間違いを防ぐ案内」だけ（5件目・同じ日に重なる時間は選ばせない）。
+// ============================================================
+var BT_MAX = 4;
+/** はじめての方（初診）のメニューか（サーバの _itIsInitialMenu_ と同じ見分け方）。初診はまとめて予約を出さない */
+function btIsInitialMenu(m) {
+  return !!m && (m.isInitial === true || String(m.id) === 'first' || /はじめて|初診|初回/.test(String(m.name || '')));
+}
+function btAllowed() { return !!S.menu && !btIsInitialMenu(S.menu); }
+/** ②日時の画面で、まとめて予約を選んでいる最中か */
+function btActive() {
+  return !!S.batch && btAllowed() && S.step === 2 && $('screenManage').classList.contains('hidden');
+}
+/** 確認・送信で「まとめて」を使うか（選んだ日時があるとき） */
+function btOn() { return !!S.batch && btAllowed() && S.batchSlots.length > 0; }
+/** 週表の1マスの印（新規予約の週表だけ）: 'booked'＝この画面で予約済み ／ 'sel'＝選択中 ／ '' */
+function wpCellExtra(dt) {
+  if (!WP.enableWaitlist) return '';   // 予約の変更画面（mgPickDays）には出さない
+  if (S.booked.indexOf(dt) >= 0) return 'booked';
+  if (btActive() && S.batchSlots.indexOf(dt) >= 0) return 'sel';
+  return '';
+}
+function paintBatchToggle() {
+  var box = $('batchToggle');
+  if (!box) return;
+  var show = btAllowed();
+  if (!show) { S.batch = false; S.batchSlots = []; }
+  box.classList.toggle('hidden', !show);
+  $('batchNote').classList.toggle('hidden', !(show && S.batch));
+  Array.prototype.forEach.call(box.querySelectorAll('.bt-btn'), function(b) {
+    var on = (b.getAttribute('data-batch') === '1') === !!S.batch;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+  });
+}
+function setBatchMode(on) {
+  on = !!on;
+  if (S.batch === on) return;
+  S.batch = on;
+  S.batchSlots = [];
+  S.datetimeJST = '';
+  WP.picked = '';
+  S.reqId = ''; S._retriedReq = '';
+  showMsg('');
+  paintBatchToggle();
+  if (WP.el) wpRender();
+  btRenderBar();
+  updateNav();
+}
+function btMin(dt) { var m = /\s(\d{2}):(\d{2})$/.exec(String(dt)); return m ? Number(m[1]) * 60 + Number(m[2]) : -1; }
+/** 同じ日に時間が重なる選択済みの日時（端が接するだけは重ならない）。無ければ '' */
+function btOverlapWith(dt) {
+  var dur = Number(S.menu && S.menu.durationMinutes) || 60, day = String(dt).slice(0, 10), s = btMin(dt);
+  return S.batchSlots.filter(function(x) {
+    if (x.slice(0, 10) !== day) return false;
+    var t = btMin(x);
+    return s < t + dur && t < s + dur;
+  })[0] || '';
+}
+function btToggleSlot(dt) {
+  var i = S.batchSlots.indexOf(dt);
+  if (i >= 0) {
+    S.batchSlots.splice(i, 1);
+  } else if (S.batchSlots.length >= BT_MAX) {
+    showMsg('まとめてのご予約は' + BT_MAX + '件までです。');
+    return;
+  } else {
+    var ov = btOverlapWith(dt);
+    if (ov) { showMsg('同じ日に時間が重なる日時は選べません（' + fmtJP(ov) + ' と重なります）。'); return; }
+    S.batchSlots.push(dt);
+    S.batchSlots.sort();
+  }
+  showMsg('');
+  S.reqId = ''; S._retriedReq = '';           // 選び直したら新しい冪等キー
+  S.datetimeJST = S.batchSlots[0] || '';      // 「次へ」・戻り先の判定は今までの S.datetimeJST を使う
+  wpRender();
+  btRenderBar();
+  updateNav();
+}
+function btRenderBar() {
+  var bar = $('batchBar');
+  if (!bar) return;
+  if (!btActive()) { bar.classList.add('hidden'); bar.innerHTML = ''; return; }
+  var n = S.batchSlots.length;
+  var h = '<h3>選んだ日時（' + n + '/' + BT_MAX + '）</h3>';
+  if (!n) {
+    h += '<p class="bt-empty">まだ選ばれていません。表の ○ を押してください。</p>';
+  } else {
+    h += '<ul class="bt-list">' + S.batchSlots.map(function(dt) {
+      return '<li><span>' + esc(fmtJP(dt)) + '</span>'
+           + '<button type="button" class="bt-rm" data-dt="' + esc(dt) + '">外す</button></li>';
+    }).join('') + '</ul>';
+  }
+  bar.innerHTML = h;
+  bar.classList.remove('hidden');
+  Array.prototype.forEach.call(bar.querySelectorAll('.bt-rm'), function(b) {
+    b.addEventListener('click', function() { btToggleSlot(b.getAttribute('data-dt')); });
+  });
+}
+function btMarkBooked(dts) {
+  (dts || []).forEach(function(dt) { if (dt && S.booked.indexOf(dt) < 0) S.booked.push(dt); });
+}
+/** 完了画面の「続けて別の日も予約する」／「メニューを変えて予約する」
+ *   お名前・お電話（入力欄・LINEの本人情報）はそのまま。日時と選んだ枠だけ空にする。 */
+function btContinue(changeMenu) {
+  S.datetimeJST = ''; WP.picked = '';
+  S.batchSlots = [];
+  S.reqId = ''; S._retriedReq = '';
+  S.confirmSasada = false;
+  WP.cache = {};   // 🔴 取ったばかりの枠を反映するため、空き枠は取り直す（キャッシュしない）
+  $('doneBatchList').classList.add('hidden');
+  if (changeMenu) {
+    S.menu = null; S.batch = false;
+    Array.prototype.forEach.call($('menuList').querySelectorAll('.menu-btn'), function(b) { b.classList.remove('on'); });
+    goStep(1);
+  } else {
+    goStep(2);
+  }
+}
+
 // ---- ③ 入力 ----
 function readForm() {
   return {
@@ -2547,7 +2729,9 @@ function renderConfirm() {
   var au = !!(AUTH.token && AUTH.user);
   var f = au ? AUTH.user : readForm();
   var rows = [
-    ['日時', fmtJP(S.datetimeJST)],
+    // 🗓 1017batch: まとめて予約は全件の日時を1件1行で並べる（1件だけのときは今までどおり）
+    btOn() ? ['日時（' + S.batchSlots.length + '件）', S.batchSlots.map(fmtJP).join('\n')]
+           : ['日時', fmtJP(S.datetimeJST)],
     ['メニュー', S.menu.name + '（施術 約' + menuDispMin(S.menu) + '分）'],   // 🔴 0906a: 枠は見せない
   ];
   // 👤 0923choice: 選択を出しているときだけ、希望の担当者を確認に載せる（OFF では行ごと出ない）
@@ -2622,6 +2806,8 @@ function submitBooking() {
     showWhoScreen();
     return;
   }
+  // 🗓 1017batch: まとめて予約は別の送り方（1回の送信で N 件・サーバが1件ずつ同じ判定）
+  if (btOn()) { submitBatch(); return; }
   // 🔴 0928ux【1】: 二重送信の防止（押し直し・ダブルタップ）。送信中は何もしない
   if (S.sending) return;
   S.sending = true;
@@ -2682,6 +2868,8 @@ function submitBooking() {
         return;
       }
       S.reqId = '';   // 1001deadend: 成立したら次の予約は新しいキー
+      btMarkBooked([r.datetimeJST || S.datetimeJST]);   // 🗓 1017batch: 続けて予約で「済」と分かるように
+      $('doneBatchList').classList.add('hidden');
       $('doneDt').textContent   = r.datetimeLabel || fmtJP(r.datetimeJST);
       // 🔴 0906a: 完了画面も治療時間（サーバ応答の r.durationMinutes は枠なので使わない。
       //   この画面に来るとき S.menu は必ず選択済み）
@@ -2731,6 +2919,95 @@ function submitBooking() {
       // 📝 0927fail【B】: 予約の送信で通信が失敗＝いちばん知りたい失敗。届く範囲で記録する
       reportClientError('予約の送信で通信失敗: ' + em,
                         (S.datetimeJST || '') + (S.menu ? ' / ' + S.menu.name : ''));
+    });
+}
+
+// ---- 🗓 1017batch: まとめて予約の送信 ----
+//   ・1回の送信で選んだ日時を全部送る。サーバは1件ずつ 1件予約と同じ判定（空き・二重予約・ロック）を通し、
+//     取れた分だけ確定して結果の一覧を返す。通知はサーバが最後に1通だけ送る。
+//   ・冪等キー（reqId）は選んだ内容ごとに1つ。送り直しても二重にならない（1件ずつのキーもサーバが作る）。
+function submitBatch() {
+  if (S.sending) return;
+  S.sending = true;
+  var f = (AUTH.token && AUTH.user) ? AUTH.user : readForm();
+  var btn = $('btnNext');
+  btn.disabled = true;
+  btn.textContent = '送信中…';
+  var bb = $('btnBack'); if (bb) bb.disabled = true;
+  var n = S.batchSlots.length;
+  sendStatusShow();
+  // まとめて予約は件数ぶん時間がかかる（実測の目安: 1件 7〜10 秒）。文言を件数に合わせる
+  if (SEND_STATUS_T) { clearTimeout(SEND_STATUS_T.a); clearTimeout(SEND_STATUS_T.b); }
+  var tx = $('sendStatusText');
+  if (tx) tx.innerHTML = n + '件のご予約を登録しています<br>' + (n * 10) + '秒ほどお待ちください';
+  SEND_STATUS_T = { a: setTimeout(function() { if (S.sending && tx) tx.innerHTML = 'まだ登録しています<br>このまま画面を閉じずにお待ちください'; }, n * 10000 + 5000), b: null };
+  showMsg('');
+  if (!S.reqId) S.reqId = 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  callAction('createBookingBatch', {
+      reqId: S.reqId,
+      menuId: S.menu.id, slots: S.batchSlots.slice(),
+      auth: AUTH.token,
+      name: f.name, kana: f.kana, phone: f.phone, email: f.email,
+      address: f.address || '',
+      staff: staffChoiceShown() ? (S.staff || 'any') : undefined
+    })
+    .then(function(r) {
+      btn.disabled = false;
+      btn.textContent = 'この内容で予約する';
+      sendStatusHide();
+      if (!r || !r.success) {
+        if (r && r.needLine) {
+          AUTH.token = ''; AUTH.user = null; AUTH.confirmed = false;
+          SETUP.bookingRestricted = [];
+          if (S.menu && S.menu.restricted) { S.menu = null; S.datetimeJST = ''; S.batchSlots = []; }
+          showGateScreen(r.error || '');
+          return;
+        }
+        var why = (r && r.error) ? r.error : 'ご予約を確定できませんでした。お手数ですがお電話でご連絡ください。';
+        var det = ((r && r.results) || []).filter(function(x) { return !x.ok; })
+          .map(function(x) { return x.label + '：' + x.reason; }).join('／');
+        S.batchSlots = []; S.datetimeJST = ''; WP.picked = ''; WP.cache = {}; S.reqId = '';
+        goStep(2);
+        showMsg(why + (det ? '（' + det + '）' : ''));
+        return;
+      }
+      S.reqId = '';
+      var okList = (r.results || []).filter(function(x) { return x.ok; });
+      btMarkBooked(okList.map(function(x) { return x.datetimeJST; }));
+      $('doneDt').textContent = r.createdCount + '件のご予約を承りました'
+        + (r.failedCount ? '（' + r.failedCount + '件はお取りできませんでした）' : '');
+      var sl = okList.length && okList[0].staffLabel ? okList[0].staffLabel : '';
+      $('doneMenu').textContent = r.menuName + '（施術 約' + (S.menu ? menuDispMin(S.menu) : r.durationMinutes) + '分）'
+        + (sl ? '　担当: ' + sl : '');
+      var list = $('doneBatchList');
+      list.innerHTML = (r.results || []).map(function(x) {
+        return x.ok
+          ? '<li>○ ' + esc(x.label) + '　予約できました</li>'
+          : '<li class="ng">× ' + esc(x.label) + '　お取りできませんでした<small>' + esc(x.reason || '') + '</small></li>';
+      }).join('');
+      list.classList.remove('hidden');
+      $('doneMail').textContent = r.mailSent
+        ? (String(r.notifyVia || '').indexOf('line') === 0
+            ? '確認のお知らせをLINEにお送りしました（' + r.createdCount + '件をまとめて1通）。'
+            : '確認のメールをお送りしました（' + r.createdCount + '件をまとめて1通）。')
+        : ('⚠ ' + (r.mailError || '確認メールをお送りできませんでした') + '（ご予約は承っています）');
+      showDoneLineLink(r.lineStartUrl);
+      S.batchSlots = [];
+      if (r.revisitToken) rvOpen(r.revisitToken);
+      else goStep(5);
+    })
+    .catch(function(e) {
+      var em = (e && e.message) ? e.message : '';
+      btn.disabled = false;
+      btn.textContent = 'もう一度試す';
+      sendStatusHide();
+      var el = $('msg');
+      el.className = 'msg err';
+      el.innerHTML = caFailHtml('sbRetryBtn',
+        'ご予約が完了している場合があります。「もう一度試す」を押しても、同じ内容が二重に登録されることはありません。');
+      var rb = $('sbRetryBtn'); if (rb) rb.addEventListener('click', function() { showMsg(''); submitBatch(); });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      reportClientError('まとめて予約の送信で通信失敗: ' + em, n + '件' + (S.menu ? ' / ' + S.menu.name : ''));
     });
 }
 
@@ -3201,6 +3478,11 @@ function updateNav() {
     //   ここは「選んだあとに進み直す」ための控え。選ぶ前は押せない。
     next.textContent = '次へ';
     next.disabled = !S.datetimeJST || WP.loading;
+    // 🗓 1017batch: まとめて予約は選んだ件数を出す（1件も無ければ押せない）
+    if (btActive()) {
+      next.textContent = '次へ（' + S.batchSlots.length + '件）';
+      next.disabled = !S.batchSlots.length || WP.loading;
+    }
   } else if (S.step === 3) {
     next.textContent = '確認へ';
     next.disabled = false;
@@ -3357,6 +3639,13 @@ function showConfirmOwnerFallback(r) {
     }
   });
 }
+
+// 🗓 1017batch: 「1件だけ予約／まとめて予約」の切り替えと、完了画面の「続けて予約」
+Array.prototype.forEach.call(document.querySelectorAll('#batchToggle .bt-btn'), function(b) {
+  b.addEventListener('click', function() { setBatchMode(b.getAttribute('data-batch') === '1'); });
+});
+$('btnContinue').addEventListener('click', function() { btContinue(false); });
+$('btnChangeMenu').addEventListener('click', function() { btContinue(true); });
 
 // 👤 0923choice: 担当者の選択ボタン（出ているときだけ押せる。OFF では箱ごと hidden）
 Array.prototype.forEach.call(document.querySelectorAll('#staffChoiceBox .sc-btn'), function(b) {
@@ -5796,7 +6085,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-07a）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-17a）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -5804,7 +6093,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-10-07a";
+    vt.textContent = "版 2026-10-17a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
