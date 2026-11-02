@@ -670,6 +670,30 @@
        ・screenWho    … 連携済みの方の氏名確認（★黙って情報入力を飛ばさない）。
        ⚠ 見た目の出し分けだけ。強制はサーバ（createBooking の予約パス必須）が担保する。
        ============================================================ -->
+  <!-- 🆕 2026-11-02 1102rm【A】: 空き状況（今日から7日分）。?view=slots で開いた時だけ出す（ほかの入口は今までどおり）
+       ・空きはサーバ（getOpenSlots・今の判定のまま）を開いた時に読む。端末にはしまわない。
+       ・時刻を押す → その日時を覚えて LINE の本人確認 → メニューを選ぶと、その日時の確認が出る。 -->
+  <style>
+    .av-day{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 10px}
+    .av-day h3{margin:0 0 6px;font-size:15px;color:var(--green)}
+    .av-times{display:flex;flex-wrap:wrap;gap:6px}
+    .av-t{border:1px solid var(--green2);background:#fff;color:var(--green2);border-radius:8px;padding:7px 0;width:4.6em;font-size:15px;font-weight:600;cursor:pointer}
+    .av-t:active{background:var(--green2);color:#fff}
+    .av-none{font-size:13px;color:var(--gray)}
+    .av-note{font-size:12px;color:var(--gray);margin:2px 0 12px}
+  </style>
+  <section class="sec hidden" id="screenAvail">
+    <h2>空き状況（今日から1週間）</h2>
+    <p class="av-note" id="avNote">ご希望の時間を押すと、ご予約に進みます。<br>
+      ※ 1時間ぶん空いている時間です。メニューによってはお取りできない場合があります。</p>
+    <div id="avList"><div class="loading">空き状況を読み込んでいます…</div></div>
+    <a class="gate-line-btn" id="avBookBtn" href="#" target="_top" rel="noopener" style="background:var(--green2)">メニューを選んで予約する</a>
+    <div class="gate-tel-box">
+      📞 お電話でのご予約<br>
+      <a class="tel-big" id="avTel" href="tel:"><span id="avTelText"></span></a>
+    </div>
+  </section>
+
   <section class="sec hidden" id="screenGate">
     <!-- 🆕 0917name(問題③): 謝罪から始めず、メリットを先に伝える -->
     <h2>ご予約はLINEからが便利です</h2>
@@ -1721,6 +1745,9 @@ function wpStart(el, dur, onPick, picked, menuId, enableWaitlist) {
   WP.el = el;
   WP.dur = dur;
   WP.menuId = menuId || '';
+  // 🆕 2026-11-02 1102chg: 変更画面（startEdit）だけ「変更する本人の予約」を渡す。ほかの呼び出しでは必ず空に戻す
+  WP.changeFor = WP.nextChangeFor || null;
+  WP.nextChangeFor = null;
   // 👤 0923choice: 変更画面（startEdit）など他の呼び出し元は希望担当を持たない＝'' に戻す。
   //   新規予約は mountWeekPickerForNew が wpStart の直前に WP.staff を入れ、ここでは触らない。
   if (!(S.step === 2 && staffChoiceShown())) WP.staff = '';
@@ -1783,7 +1810,8 @@ function wpPrefetchAhead(ws) {
  *   👤 0923choice: 鍵に メニューID と 希望担当 も入れる。同じ所要時間でも担当者（メニューの owner／選んだ担当）が
  *   違えば ◯× が違うので、取り置きを混ぜない（OFF・固定メニューでは staff は '' ＝今までと同じ鍵の形）。 */
 function wpStore() {
-  var k = String(WP.dur) + '|' + (WP.menuId || '') + '|' + (WP.staff || '');
+  var k = String(WP.dur) + '|' + (WP.menuId || '') + '|' + (WP.staff || '')
+        + (WP.changeFor ? '|chg:' + WP.changeFor.rid : '');   // 🆕 1102chg: 変更画面の空きは新規予約と混ぜない
   if (!WP.cache[k]) WP.cache[k] = { day: {}, got: {}, starts: [] };
   return WP.cache[k];
 }
@@ -1825,6 +1853,7 @@ function wpPrefetched(dur, from, to) {
   try {
     var pre = window.__HP_SLOTS_PRE__;
     if (!pre || !pre.p) return null;
+    if (WP.changeFor) return null;   // 🆕 1102chg: 変更画面は先読み（本人の予約を数えた空き）を使わない
     if (WP.staff) return null;
     if (from < pre.from || to > pre.to) return null;
     if (Date.now() - pre.at > 90000) return null;
@@ -1870,6 +1899,14 @@ function wpFetch(from, to) {
     if (WP.staff) payload.staff = WP.staff;
     // 🔒 1007rm: 札があれば添える（限定メニューの空き枠はサーバが札＋許可を確かめてからしか返さない）
     if (AUTH.token) payload.auth = AUTH.token;
+    // 🆕 2026-11-02 1102chg: 変更画面は「変更する本人の予約」を除いた空きをもらう（サーバがトークンと本人の予約を確かめる）
+    if (WP.changeFor) {
+      return callAction('getMyChangeSlots', { token: WP.changeFor.token, reservationId: WP.changeFor.rid,
+                                              startDate: payload.startDate, endDate: payload.endDate }).then(function(r) {
+        if (!r || r.success === false) throw new Error((r && r.error) || '');
+        return r;
+      });
+    }
     return callAction('getOpenSlots', payload).then(function(r) {
       if (!r || r.success === false) throw new Error((r && r.error) || '');
       return r;
@@ -1937,6 +1974,7 @@ function wpAfterLoad(ws) {
   }
   WP.auto = false;   // ★以降はユーザーの操作にまかせる
   wpRender();
+  if (WP.avPending) avAfterWeek();   // 🆕 2026-11-02 1102rm【A】: 空き状況で選んだ日時があれば確かめる（無ければ何もしない）
 }
 
 /** 通信で「埋まっていた」と分かったときに使う。表を取り直す。 */
@@ -2451,10 +2489,12 @@ function mountWeekPickerForNew() {
   paintStaffChoice();
   WP.staff = staffChoiceShown() ? (S.staff || 'any') : '';
   paintBatchToggle();   // 🗓 1017batch
+  var avDt = (!S.batch && !S.datetimeJST) ? avTakePreset() : '';   // 🆕 2026-11-02 1102rm【A】: 空き状況で選んだ日時（無ければ ''）
+  WP.avPending = avDt;
   wpStart($('dayList'), S.menu.durationMinutes, function(dt, label) {
     if (btActive()) { btToggleSlot(dt); return; }   // 🗓 1017batch: まとめて予約では ○ が「選ぶ／外す」
     cfOpenNew(dt, label);
-  }, (S.batch ? (S.batchSlots[0] || '') : S.datetimeJST), S.menu.id, true);
+  }, (S.batch ? (S.batchSlots[0] || '') : (S.datetimeJST || avDt)), S.menu.id, true);
   btRenderBar();   // 🔴 0921wait: 新規予約の日時選択だけ ×からキャンセル待ちに登録できる
   try { wlRefreshMine(); } catch (e) {}
 }
@@ -3256,6 +3296,8 @@ function startEdit(b) {
     b.datetimeLabel + ' のご予約を、空いているお時間へ変更いたします。○を押してください。';
   // 🔴 新規予約とまったく同じ週表を使う（部品は1つ）。
   //   ★空き枠は既存の getOpenSlots をそのまま使う（新しい計算は作らない）。
+  //   🆕 2026-11-02 1102chg: ただし変更する本人の予約は数えない（getMyChangeSlots。19:00 の予約を 18:30 へ動かせるように）
+  WP.nextChangeFor = { token: MG.token, rid: b.reservationId };
   wpStart($('mgPickDays'), b.durationMinutes || 60, function(dt, label) {
     cfOpenEdit(b, dt, label);   // 🔴 押した瞬間には変更しない。確認シートを挟む。
   }, '');
@@ -6000,6 +6042,121 @@ if (SETUP.intakeToken && !SETUP.manageToken) {
 }
 
 // ============================================================
+// 🆕 2026-11-02 1102rm【A】空き状況（今日から7日分）… 接頭辞 av
+// ------------------------------------------------------------
+//   ・入口は ?view=slots（LINE のリッチメニュー「空き状況」）。それ以外では一切動かない。
+//   ・🔴 空きの判定は今の getOpenSlots をそのまま使う（画面で作らない・端末にしまわない）。
+//     長さは AV_DUR 分（再診と同じ1時間）。メニューを選んだ後、その長さで入らなければ知らせる。
+//   ・時刻を押す → 日時を端末に30分だけ覚える（localStorage）→ LINE の本人確認（?from=line）
+//     → メニューを選ぶ → 週表がその週で開き、まだ○ならそのまま「この日時でよろしいですか？」。
+//     ×なら「先に埋まってしまいました」と出して、ほかの○から選んでもらう。
+//   ・確定はいつもの submitBooking（サーバの二重予約の守り _bkSlotCheck_ はそのまま）。
+// ============================================================
+var AV_DUR = 60;
+var AV_DAYS = 7;
+var AV_KEY = 'rishin_av_preset';
+var AV_MAX_AGE_MS = 30 * 60 * 1000;
+
+/** HPページの起動役が URL から受けた印（SETUP.view）。GAS のページでは入らない＝出さない */
+function avWanted() {
+  try { return SETUP.view === 'slots'; } catch (e) { return false; }
+}
+/** ?view=slots で、まだ本人確認の途中でない時だけ空き状況を出す（出したら true） */
+function avMaybeShow() {
+  try {
+    if (!avWanted()) return false;
+    if (AUTH.token || AUTH.authPending) return false;
+    hideBookingFlow();
+    ['screenGate', 'screenNotice', 'screenWho'].forEach(function(id) { $(id).classList.add('hidden'); });
+    $('screenAvail').classList.remove('hidden');
+    var tel = String((SETUP.clinic && SETUP.clinic.tel) || '');
+    $('avTel').href = 'tel:' + tel.replace(/[^0-9+]/g, '');
+    $('avTelText').textContent = tel;
+    $('avBookBtn').addEventListener('click', function(ev) { ev.preventDefault(); avClearPreset(); avGoBook(); });
+    avLoad();
+    return true;
+  } catch (e) { return false; }   // 何かあれば今までの入口へ
+}
+function avLoad() {
+  var from = SETUP.today, to = wpAddDays(SETUP.today, AV_DAYS - 1);
+  $('avList').innerHTML = '<div class="loading">空き状況を読み込んでいます…</div>';
+  callAction('getOpenSlots', { durationMinutes: AV_DUR, startDate: from, endDate: to })
+    .then(function(r) {
+      if (!r || r.success === false) throw new Error((r && r.error) || '');
+      avRender(r.days || [], from);
+    })
+    .catch(function(e) {
+      $('avList').innerHTML = '<div class="loading">' + caFailHtml('avRetryBtn', '空き状況を読み込めませんでした。') + '</div>';
+      var rb = $('avRetryBtn'); if (rb) rb.addEventListener('click', avLoad);
+      reportClientError('空き状況（7日）の読み込みで通信失敗: ' + ((e && e.message) ? e.message : ''), '');
+    });
+}
+function avRender(days, from) {
+  var by = {};
+  days.forEach(function(d) { by[d.date] = d; });
+  var h = '';
+  for (var i = 0; i < AV_DAYS; i++) {
+    var ymd = wpAddDays(from, i);
+    var d = by[ymd];
+    var p = ymd.split('-');
+    h += '<div class="av-day"><h3>' + Number(p[1]) + '月' + Number(p[2]) + '日（' + WP_DOW[wpDow(ymd)] + '）'
+       + (i === 0 ? ' 今日' : '') + '</h3>';
+    if (!d || d.isBusinessDay === false) { h += '<div class="av-none">お休み</div></div>'; continue; }
+    var open = (d.slots || []).filter(function(s) { return wpMark(s) === 'o'; });
+    if (!open.length) { h += '<div class="av-none">空きがありません</div></div>'; continue; }
+    h += '<div class="av-times">';
+    open.forEach(function(s) {
+      var dt = ymd.replace(/-/g, '/') + ' ' + s.start;
+      h += '<button type="button" class="av-t" data-dt="' + esc(dt) + '">' + esc(String(s.start).replace(/^0/, '')) + '</button>';
+    });
+    h += '</div></div>';
+  }
+  $('avList').innerHTML = h;
+  Array.prototype.forEach.call($('avList').querySelectorAll('.av-t'), function(b) {
+    b.addEventListener('click', function() { avPick(b.getAttribute('data-dt')); });
+  });
+}
+function avPick(dt) {
+  try { localStorage.setItem(AV_KEY, JSON.stringify({ dt: dt, at: Date.now() })); } catch (e) {}
+  avGoBook();
+}
+/** 予約へ進む（HPページは LINE の本人確認へ。GAS のページではいつもの入口） */
+function avGoBook() {
+  if (typeof window.__HP_SETUP__ !== 'undefined') {
+    location.replace(location.pathname + '?from=line');
+    return;
+  }
+  $('screenAvail').classList.add('hidden');
+  routeEntry();
+}
+function avClearPreset() { try { localStorage.removeItem(AV_KEY); } catch (e) {} }
+/** 覚えている日時を1回だけ取り出す（30分より古い・今日より前は捨てる） */
+function avTakePreset() {
+  var v = null;
+  try { v = JSON.parse(localStorage.getItem(AV_KEY) || 'null'); } catch (e) { v = null; }
+  avClearPreset();
+  if (!v || !v.dt || !(Date.now() - Number(v.at) < AV_MAX_AGE_MS)) return '';
+  var dt = String(v.dt);
+  if (!/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/.test(dt)) return '';
+  if (dt.slice(0, 10).replace(/\//g, '-') < SETUP.today) return '';
+  return dt;
+}
+/** 週表を読み終えた時：覚えていた日時がこのメニューで○なら確認を出す・×なら知らせる */
+function avAfterWeek() {
+  var dt = WP.avPending;
+  WP.avPending = '';
+  if (!dt || WP.el !== $('dayList') || S.step !== 2) return;
+  var ymd = dt.slice(0, 10).replace(/\//g, '-'), hm = dt.slice(11);
+  var day = wpDay(ymd), slot = null;
+  if (day) (day.slots || []).forEach(function(s) { if (s.start === hm) slot = s; });
+  if (slot && wpMark(slot) === 'o') { cfOpenNew(dt, fmtJP(dt)); return; }
+  WP.picked = '';
+  wpRender();
+  showMsg('選んでいただいた ' + fmtJP(dt) + ' は、先に埋まってしまったか、このメニューの長さではお取りできませんでした。'
+        + 'ほかの○のお時間からお選びください。');
+}
+
+// ============================================================
 // 🔴 0915nolineA: トークン無しの通常入口（LINE必須化はやめた）
 // ------------------------------------------------------------
 //   ・?t=（確認・変更）・?pu=（情報更新）・?intake=（問診票）で来た人は今まで通り上で処理済み。
@@ -6008,7 +6165,7 @@ if (SETUP.intakeToken && !SETUP.manageToken) {
 //     未連携はそのままメニューへ（★LINEのおすすめ linePromo は出すが止めない）。
 // ============================================================
 if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.intakeToken) {
-  routeEntry();
+  if (!avMaybeShow()) routeEntry();   // 🆕 2026-11-02 1102rm【A】: ?view=slots の時だけ空き状況（それ以外は今までどおり）
 }
 
 // ============================================================
@@ -6085,7 +6242,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-10-17a）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-02g）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -6093,7 +6250,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-10-17a";
+    vt.textContent = "版 2026-11-02g";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -6247,6 +6404,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     var ln = String(q.get('line') || '').trim();
     setup.lineNotice = ['linked','already','friend','conflict','error','unlinked','cancelled'].indexOf(ln) >= 0 ? ln : '';
     setup.lineHint = (ln === 'guest');   // LINE経由で未連携だった人への控えめなヒント
+    setup.view = (String(q.get('view') || '') === 'slots') ? 'slots' : '';   // 2026-11-02 1102rm: 空き状況（リッチメニュー）。知らない値は捨てる
     setup.prefill = null;
     setup.lineNoticeGate = false;
     setup.bookingAuth = ''; setup.bookingUser = null; setup.bookingNeedName = false; setup.bookingPresetName = '';
