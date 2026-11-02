@@ -275,6 +275,14 @@
     overflow-x:auto; -webkit-overflow-scrolling:touch;
     border:1px solid var(--line); border-radius:12px; background:#fff;
   }
+  /* 🆕 2026-11-02 1102sticky: 下にスクロールしても日付の行（曜日）が画面の上に残るように。
+     ⚠ .wp-scroll が overflow-x:auto のままだと、sticky は「この箱の中」でしか効かない（箱は縦に動かない＝効かない）。
+     ・表が幅に収まる時（wp-fit）… スクロールしない箱（clip）にする → 日付の行が画面の上にくっつく
+     ・収まらない時（wp-wide）… 箱の高さを画面までにして、箱の中で 日付の行・左の時刻の列 の両方を残す
+     切り替えは wpStickyFit_()（表を描いた後・画面の幅が変わった時）。 */
+  .wp-scroll.wp-fit { overflow:visible; overflow:clip; }
+  .wp-scroll.wp-wide { overflow:auto; max-height:calc(100vh - 24px); }
+  .wp-tbl thead th.wp-th-time { left:0; z-index:3; }
   .wp-tbl { width:100%; min-width:322px; border-collapse:collapse; table-layout:fixed; }
   .wp-tbl th, .wp-tbl td { padding:0; text-align:center; }
   .wp-tbl thead th {
@@ -1833,6 +1841,21 @@ function wpDayOpen(ymd) {
 }
 
 /** 🔴 記号はサーバの mark をそのまま使う（◯ か × の2種類だけ） */
+/** 🆕 2026-11-02 1102sticky: 表が幅に収まるか見て、日付の行の残し方を切り替える（CSS の .wp-fit / .wp-wide）
+ *   ⚠ 失敗しても表はそのまま使える（今までの見た目に戻るだけ） */
+function wpStickyFit_() {
+  try {
+    var sc = $('wpScroll'); if (!sc) return;
+    var tb = sc.querySelector('.wp-tbl'); if (!tb) return;
+    var wide = tb.offsetWidth > sc.clientWidth + 1;
+    sc.classList.toggle('wp-wide', wide);
+    sc.classList.toggle('wp-fit', !wide);
+    if (!WP._stickyResize) {
+      WP._stickyResize = true;
+      window.addEventListener('resize', function() { wpStickyFit_(); });
+    }
+  } catch (e) {}
+}
 function wpMark(slot) {
   if (!slot) return 'x';
   return (slot.mark === 'o' || (slot.mark === undefined && slot.available)) ? 'o' : 'x';
@@ -2104,6 +2127,7 @@ function wpRender() {
   // 横スクロールが要るときだけ案内を出す
   var sc = $('wpScroll'), hint = $('wpScrollHint');
   if (sc && hint && sc.scrollWidth > sc.clientWidth + 1) hint.classList.remove('hidden');
+  wpStickyFit_();   // 🆕 2026-11-02 1102sticky: 日付の行を画面の上に残す
 
   Array.prototype.forEach.call(WP.el.querySelectorAll('.wpc.o'), function(b) {
     b.addEventListener('click', function() {
@@ -6242,7 +6266,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-02i）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-02j）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -6250,7 +6274,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-11-02i";
+    vt.textContent = "版 2026-11-02j";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
