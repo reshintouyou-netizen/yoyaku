@@ -6242,7 +6242,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-02g）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-02i）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -6250,7 +6250,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-11-02g";
+    vt.textContent = "版 2026-11-02i";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -6423,7 +6423,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     // 🆕 0918spd2: LINE直帰は 本人確認(lineMenuCallback)を裏で走らせる＝メニューを先に見せる。
     setup.authPending = !!cbPromise;
     // ---- 予約パス等をURLから消す（履歴・ブックマークに残さない）----
-    try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname + (setup.view === 'slots' ? '?view=slots' : '')); } catch (e) {}   // 2026-11-02 1102av: 空き状況は開き直しても空き状況のまま（それ以外は今までどおり全部消す）
     window.__HP_SETUP__ = setup;
     hideBoot();   // 1002speed
     // ---- 本体を起動（GASでサーバが埋め込んで動かすのと同じ順序になる）----
