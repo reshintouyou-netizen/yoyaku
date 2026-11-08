@@ -690,27 +690,15 @@
     .av-none{font-size:13px;color:var(--gray)}
     .av-note{font-size:12px;color:var(--gray);margin:2px 0 12px}
   </style>
-  <!-- 🆕 2026-11-08 1108ai: 「AIに聞く」欄（空き状況のいちばん上）。接頭辞 aa。空きはサーバ（aiAsk → 今の getOpenSlots）から -->
+  <!-- 🆕 2026-11-08 1108ai: LINE 連携の案内（A-4）と予約の相談の画面の見た目。
+       ※「AIに聞く」欄は同日 LINE のトークで作り直すため外した（1108aioff・サーバ側 AiAssist.js は残す） -->
   <style>
-    .aa-box{background:#fff;border:2px solid var(--green2);border-radius:12px;padding:12px;margin:0 0 16px}
-    .aa-title{font-weight:700;color:var(--green);font-size:15px;margin:0 0 6px}
-    .aa-in{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:16px;font-family:inherit;resize:vertical;min-height:52px}
-    .aa-send{display:block;width:100%;margin-top:8px;min-height:46px;border:0;border-radius:10px;background:var(--green2);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
-    .aa-send[disabled]{opacity:.6}
-    .aa-out{margin-top:10px}
     .aa-line{margin:0 0 6px;font-size:14px;line-height:1.7}
-    .aa-times{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
-    .aa-t{border:1px solid var(--green2);background:#fff;color:var(--green2);border-radius:8px;padding:7px 10px;font-size:14px;font-weight:600;cursor:pointer}
-    .aa-cons{border:1px dashed #c9a96a;background:#fffaf0;border-radius:10px;padding:10px;margin:0 0 8px;font-size:13px;line-height:1.7}
-    .aa-cons b{font-size:14px}
-    .aa-cbtn{display:block;width:100%;margin-top:6px;min-height:42px;border:1px solid #b88a3a;background:#fff;color:#8a5a12;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
     .aa-form{margin-top:8px}
     .aa-form label{display:block;font-size:12px;color:var(--gray);margin:6px 0 2px}
     .aa-form input,.aa-form select{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:16px;font-family:inherit;background:#fff}
-    .aa-note{font-size:12px;color:var(--gray);margin:8px 0 0}
     .aa-intro{background:#f0faf3;border:1px solid #bfe3cb;border-radius:12px;padding:14px;margin:0 0 14px;font-size:14px;line-height:1.8}
     .aa-intro .gate-line-btn{margin-top:10px}
-    .aa-toplink{display:inline-block;margin:0 0 10px;padding:6px 12px;border:1px solid var(--green2);border-radius:999px;background:#fff;color:var(--green2);font-size:13px;font-weight:600;cursor:pointer}
   </style>
   <section class="sec hidden" id="screenAvail">
     <div class="aa-intro hidden" id="aaIntro">
@@ -718,15 +706,6 @@
       <span id="aaIntroWhat"></span>LINE の画面で「許可する」を押すと、選んだ内容のまま続きに戻ります。
       <a class="gate-line-btn" id="aaIntroGo" href="#" target="_top" rel="noopener">LINEで連携して続ける</a>
       <button type="button" class="btn btn-ghost" id="aaIntroBack" style="width:100%;margin-top:8px;min-height:44px">選び直す</button>
-    </div>
-    <div class="aa-box" id="aaBox">
-      <div class="aa-title">💬 AIに聞く</div>
-      <form id="aaForm" autocomplete="off">
-        <textarea class="aa-in" id="aaInput" maxlength="200" rows="2" placeholder="ご希望を入れてください（例：来週の火曜の午後／土曜の朝いちばん／平日18時以降）"></textarea>
-        <button type="submit" class="aa-send" id="aaSend">空きを探す</button>
-      </form>
-      <div class="aa-out" id="aaOut"></div>
-      <p class="aa-note">※ ご予約の日時のご相談だけお受けします（お体のことはお電話で）。空きは予約表から探します。</p>
     </div>
     <h2>空き状況（今日から1週間）</h2>
     <p class="av-note" id="avNote">ご希望の時間を押すと、ご予約に進みます。<br>
@@ -846,7 +825,6 @@
   </section>
 
   <section class="sec" id="screenMenu">
-    <button type="button" class="aa-toplink" id="aaTopLink">💬 AIに空きを聞く</button>
     <h2>メニューをお選びください</h2>
     <p class="lead">ご予約の内容を選んでください。</p>
     <div id="menuList"></div>
@@ -6274,80 +6252,7 @@ function aaPeekConsult() {
   return v;
 }
 
-function aaAsk() {
-  if (AA.busy) return;
-  var text = String($('aaInput').value || '').trim();
-  if (!text) { $('aaOut').innerHTML = '<p class="aa-line">ご希望を入れてください（例：来週の火曜の午後）</p>'; return; }
-  AA.busy = true;
-  $('aaSend').disabled = true;
-  $('aaOut').innerHTML = '<div class="loading">空きを探しています…</div>';
-  callAction('aiAsk', { text: text, deviceId: aaDeviceId(), clarified: AA.clarified })
-    .then(function(r) {
-      AA.busy = false; $('aaSend').disabled = false;
-      if (!r || r.success === false) {
-        $('aaOut').innerHTML = '<p class="aa-line">' + esc((r && r.error) || '今は使えません。下の空き状況からお選びください。') + '</p>';
-        return;
-      }
-      AA.clarified = (r.kind === 'clarify');
-      aaRender(r);
-    })
-    .catch(function() {
-      AA.busy = false; $('aaSend').disabled = false;
-      $('aaOut').innerHTML = '<p class="aa-line">今は使えません。下の空き状況からお選びください。</p>';
-    });
-}
-function aaTimesHtml(list) {
-  return '<div class="aa-times">' + list.map(function(o) {
-    return '<button type="button" class="aa-t" data-dt="' + esc(o.dt) + '">' + esc(o.label) + '</button>';
-  }).join('') + '</div>';
-}
-function aaRender(r) {
-  var h = (r.lines || []).map(function(t) { return '<p class="aa-line">' + esc(t) + '</p>'; }).join('');
-  if ((r.open || []).length) h += aaTimesHtml(r.open);
-  (r.consult || []).forEach(function(c, i) {
-    h += '<div class="aa-cons" data-i="' + i + '"><b>' + esc(c.label) + '</b><br>' + esc(c.msg)
-       + '<button type="button" class="aa-cbtn" data-ci="' + i + '">この時間で相談する</button><div class="aa-form hidden"></div></div>';
-  });
-  if ((r.near || []).length) h += aaTimesHtml(r.near);
-  if (r.waitlist) h += '<p class="aa-line" style="font-size:12px;color:var(--gray)">' + esc('×の時間は、ご予約の画面（メニューを選んだ後の表）で×を押すと「キャンセル待ち」に登録できます。') + '</p>';
-  if (r.tel) {
-    var tel = String((SETUP.clinic && SETUP.clinic.tel) || '089-906-8249');
-    h += '<p class="aa-line" style="font-size:13px">📞 お電話でのご相談：<a href="tel:' + esc(tel.replace(/[^0-9+]/g, '')) + '">' + esc(tel) + '</a></p>';
-  }
-  $('aaOut').innerHTML = h;
-  Array.prototype.forEach.call($('aaOut').querySelectorAll('.aa-t'), function(b) {
-    b.addEventListener('click', function() { avPick(b.getAttribute('data-dt')); });
-  });
-  Array.prototype.forEach.call($('aaOut').querySelectorAll('.aa-cbtn'), function(b) {
-    b.addEventListener('click', function() { aaOpenConsultForm(b, r.consult[Number(b.getAttribute('data-ci'))]); });
-  });
-}
-/** ［この時間で相談する］→ ほかの候補（2つまで）・メニュー（分かれば）を書ける欄 */
-function aaOpenConsultForm(btn, item) {
-  var box = btn.parentNode.querySelector('.aa-form');
-  if (!box || !item) return;
-  btn.classList.add('hidden');
-  var opts = '<option value="">分からない・先生と相談</option>';
-  menusForDisplay().forEach(function(m) {
-    if (SETUP.sasadaActive === false && m.owner === 'sasada') return;
-    if (m.restricted) return;
-    opts += '<option value="' + esc(m.id) + '">' + esc(m.name) + '</option>';
-  });
-  box.innerHTML = '<label>ほかにご希望の候補（あれば・2つまで）</label>'
-    + '<input type="text" class="aa-alt" maxlength="40" placeholder="例：11/18 の午後">'
-    + '<input type="text" class="aa-alt" maxlength="40" placeholder="例：土曜の朝" style="margin-top:6px">'
-    + '<label>メニュー（分かれば）</label><select class="aa-menu">' + opts + '</select>'
-    + '<button type="button" class="aa-send aa-go">LINE で本人確認して相談する</button>';
-  box.classList.remove('hidden');
-  box.querySelector('.aa-go').addEventListener('click', function() {
-    var alts = Array.prototype.map.call(box.querySelectorAll('.aa-alt'), function(x) { return String(x.value || '').trim(); }).filter(Boolean).slice(0, 2);
-    var sel = box.querySelector('.aa-menu');
-    var mid = sel ? sel.value : '';
-    var mname = (sel && sel.selectedIndex > 0) ? sel.options[sel.selectedIndex].text : '';
-    aaStartConsult({ dt: item.dt, label: item.label, type: item.type, alts: alts, menuId: mid, menuName: mname,
-                     reqId: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 10) });
-  });
-}
+// 🆕 2026-11-08 1108aioff: 「AIに聞く」欄とトップの入口は外した（LINE のトークで作り直すため）。aaAsk/aaRender/aaOpenConsultForm/aaOpenFromTop も一緒に外した。相談の画面・連携の案内は残す
 function aaStartConsult(c) {
   aaSaveConsult(c);
   avClearPreset();   // 予約の日時（空き状況のボタン）と取り違えない
@@ -6480,30 +6385,12 @@ function aaOnAuth(rc) {
     return true;
   } catch (e) { return false; }
 }
-/** トップの「💬 AIに空きを聞く」→ 空き状況（AIに聞く欄つき）を出す */
-function aaOpenFromTop() {
-  hideBookingFlow();
-  ['screenGate', 'screenNotice', 'screenWho', 'screenConsult'].forEach(function(id) { $(id).classList.add('hidden'); });
-  $('screenAvail').classList.remove('hidden');
-  var tel = String((SETUP.clinic && SETUP.clinic.tel) || '');
-  $('avTel').href = 'tel:' + tel.replace(/[^0-9+]/g, '');
-  $('avTelText').textContent = tel;
-  if (!AA.bookBound && !avWanted()) {
-    AA.bookBound = true;
-    $('avBookBtn').addEventListener('click', function(ev) { ev.preventDefault(); avClearPreset(); aaAfterPick(); });
-  }
-  avLoad();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  try { $('aaInput').focus(); } catch (e) {}
-}
 (function aaBind() {
   try {
-    $('aaForm').addEventListener('submit', function(ev) { ev.preventDefault(); aaAsk(); });
     $('aaIntroGo').addEventListener('click', function(ev) { ev.preventDefault(); avGoBook(); });
     $('aaIntroBack').addEventListener('click', aaHideIntro);
     $('aaCsSend').addEventListener('click', aaSendConsult);
     $('aaCsHome').addEventListener('click', aaGoHome);
-    $('aaTopLink').addEventListener('click', aaOpenFromTop);
     // GAS のページで本人確認済み（埋め込み）なら、この端末の印を付ける
     if (SETUP.bookingAuth && SETUP.bookingUser && SETUP.bookingUser.name) aaSetLinked(true);
   } catch (e) {}
@@ -6595,7 +6482,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-08b）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-08c）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -6603,7 +6490,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-11-08b";
+    vt.textContent = "版 2026-11-08c";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
