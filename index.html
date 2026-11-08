@@ -690,7 +690,44 @@
     .av-none{font-size:13px;color:var(--gray)}
     .av-note{font-size:12px;color:var(--gray);margin:2px 0 12px}
   </style>
+  <!-- 🆕 2026-11-08 1108ai: 「AIに聞く」欄（空き状況のいちばん上）。接頭辞 aa。空きはサーバ（aiAsk → 今の getOpenSlots）から -->
+  <style>
+    .aa-box{background:#fff;border:2px solid var(--green2);border-radius:12px;padding:12px;margin:0 0 16px}
+    .aa-title{font-weight:700;color:var(--green);font-size:15px;margin:0 0 6px}
+    .aa-in{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:16px;font-family:inherit;resize:vertical;min-height:52px}
+    .aa-send{display:block;width:100%;margin-top:8px;min-height:46px;border:0;border-radius:10px;background:var(--green2);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+    .aa-send[disabled]{opacity:.6}
+    .aa-out{margin-top:10px}
+    .aa-line{margin:0 0 6px;font-size:14px;line-height:1.7}
+    .aa-times{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+    .aa-t{border:1px solid var(--green2);background:#fff;color:var(--green2);border-radius:8px;padding:7px 10px;font-size:14px;font-weight:600;cursor:pointer}
+    .aa-cons{border:1px dashed #c9a96a;background:#fffaf0;border-radius:10px;padding:10px;margin:0 0 8px;font-size:13px;line-height:1.7}
+    .aa-cons b{font-size:14px}
+    .aa-cbtn{display:block;width:100%;margin-top:6px;min-height:42px;border:1px solid #b88a3a;background:#fff;color:#8a5a12;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer}
+    .aa-form{margin-top:8px}
+    .aa-form label{display:block;font-size:12px;color:var(--gray);margin:6px 0 2px}
+    .aa-form input,.aa-form select{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:16px;font-family:inherit;background:#fff}
+    .aa-note{font-size:12px;color:var(--gray);margin:8px 0 0}
+    .aa-intro{background:#f0faf3;border:1px solid #bfe3cb;border-radius:12px;padding:14px;margin:0 0 14px;font-size:14px;line-height:1.8}
+    .aa-intro .gate-line-btn{margin-top:10px}
+    .aa-toplink{display:inline-block;margin:0 0 10px;padding:6px 12px;border:1px solid var(--green2);border-radius:999px;background:#fff;color:var(--green2);font-size:13px;font-weight:600;cursor:pointer}
+  </style>
   <section class="sec hidden" id="screenAvail">
+    <div class="aa-intro hidden" id="aaIntro">
+      <b>LINE と連携すると、次からすぐご予約できます。</b><br>
+      <span id="aaIntroWhat"></span>LINE の画面で「許可する」を押すと、選んだ内容のまま続きに戻ります。
+      <a class="gate-line-btn" id="aaIntroGo" href="#" target="_top" rel="noopener">LINEで連携して続ける</a>
+      <button type="button" class="btn btn-ghost" id="aaIntroBack" style="width:100%;margin-top:8px;min-height:44px">選び直す</button>
+    </div>
+    <div class="aa-box" id="aaBox">
+      <div class="aa-title">💬 AIに聞く</div>
+      <form id="aaForm" autocomplete="off">
+        <textarea class="aa-in" id="aaInput" maxlength="200" rows="2" placeholder="ご希望を入れてください（例：来週の火曜の午後／土曜の朝いちばん／平日18時以降）"></textarea>
+        <button type="submit" class="aa-send" id="aaSend">空きを探す</button>
+      </form>
+      <div class="aa-out" id="aaOut"></div>
+      <p class="aa-note">※ ご予約の日時のご相談だけお受けします（お体のことはお電話で）。空きは予約表から探します。</p>
+    </div>
     <h2>空き状況（今日から1週間）</h2>
     <p class="av-note" id="avNote">ご希望の時間を押すと、ご予約に進みます。<br>
       ※ 1時間ぶん空いている時間です。メニューによってはお取りできない場合があります。</p>
@@ -795,7 +832,21 @@
     <a class="lp-btn" id="linePromoBtn" href="#" target="_top" rel="noopener">LINEで続ける</a>
   </div>
 
+  <!-- 🆕 2026-11-08 1108ai: 予約の相談（×の時間）を送る画面。LINE の本人確認の後に出る -->
+  <section class="sec hidden" id="screenConsult">
+    <h2>ご予約のご相談</h2>
+    <p class="aa-line" id="aaCsWhat"></p>
+    <div id="aaCsName" class="aa-form hidden">
+      <label for="aaCsNameIn">お名前</label>
+      <input type="text" id="aaCsNameIn" maxlength="60" autocomplete="name">
+    </div>
+    <p class="aa-line" id="aaCsMsg"></p>
+    <button type="button" class="btn btn-primary hidden" id="aaCsSend">この内容で相談する</button>
+    <button type="button" class="btn btn-ghost hidden" id="aaCsHome" style="margin-top:10px">ご予約の画面へ</button>
+  </section>
+
   <section class="sec" id="screenMenu">
+    <button type="button" class="aa-toplink" id="aaTopLink">💬 AIに空きを聞く</button>
     <h2>メニューをお選びください</h2>
     <p class="lead">ご予約の内容を選んでください。</p>
     <div id="menuList"></div>
@@ -1258,7 +1309,7 @@ function reportClientError(reason, context) {
 // ============================================================
 var CA_TIMEOUT_READ_MS = 12000, CA_TIMEOUT_WRITE_MS = 25000, CA_RETRY_WAITS = [2000, 4000];
 var CA_TIMEOUT_BATCH_MS = 70000;   // 🗓 1017batch: まとめて予約は1件ずつ登録するため長め（4件で30秒前後）
-var CA_WRITE_ACTIONS = /^(createBooking|createBookingBatch|updateMyBooking|cancelMyBooking|submitIntake|submitRevisit|submitPatientUpdate|joinWaitlist|cancelMyWaitlistEntry|rememberBookingName|requestBookingLink)$/;
+var CA_WRITE_ACTIONS = /^(createBooking|createBookingBatch|updateMyBooking|cancelMyBooking|submitIntake|submitRevisit|submitPatientUpdate|joinWaitlist|cancelMyWaitlistEntry|rememberBookingName|requestBookingLink|aiConsultSubmit|aiAsk)$/;   // 2026-11-08 1108ai: aiConsultSubmit・aiAsk を足した（AI＋空きで数秒かかるため書き込みと同じ待ち時間）
 var CA_PHONE = '089-906-8249';
 function caLineUrl() { try { return (SETUP.clinic && SETUP.clinic.lineUrl) || ''; } catch (e) { return ''; } }
 /** 混雑時の連絡先（HTML）。big=true で2回目以降の「お急ぎの方は」を大きく */
@@ -1374,6 +1425,7 @@ window.__hpApplyAuth__ = function (rc) {
     //   （連携済みの人＝もう来ている人に見せない）。
     var _lp = document.getElementById('linePromo'); if (_lp) _lp.classList.add('hidden');
     var resume = AUTH._resumeSubmit; AUTH._resumeSubmit = null;
+    if (typeof aaOnAuth === 'function' && aaOnAuth(rc)) return;   // 🆕 2026-11-08 1108ai: 相談の途中なら結果は相談の画面で受ける（それ以外は今までどおり）
     if (rc && rc.success && rc.auth && rc.user && rc.user.name) {
       // 連携済み（カルテ紐づけ）＝氏名は分かっている。そのまま予約できる。
       AUTH.token = rc.auth; AUTH.user = rc.user; AUTH.needName = false; AUTH.presetName = '';
@@ -1498,6 +1550,7 @@ function showWhoScreen() {
  *   ⚠ ?t=（確認・変更）・?pu=（情報更新）・?intake=（問診票）は今まで通りで、ここは通らない。
  */
 function routeEntry() {
+  if (typeof aaRouteConsult === 'function' && aaRouteConsult()) return true;   // 🆕 2026-11-08 1108ai: 相談の途中なら相談の画面（無ければ何もしない）
   // 🆕 0918spd2: LINEから直接戻った直後は、本人確認を裏で走らせつつ【先にメニューを見せる】。
   //   ・氏名の確認/入力（needName）や失敗の案内は __hpApplyAuth__ が後から出す。
   //   ・確定（予約作成）の直前に必ず本人確認の完了を待つ（下の submitBooking）。
@@ -6142,7 +6195,7 @@ function avRender(days, from) {
 }
 function avPick(dt) {
   try { localStorage.setItem(AV_KEY, JSON.stringify({ dt: dt, at: Date.now() })); } catch (e) {}
-  avGoBook();
+  aaAfterPick();   // 🆕 2026-11-08 1108ai【A-4】: 前は avGoBook()。連携済みの端末はそのまま LINE へ・初めての端末は案内を1枚（aaAfterPick → avGoBook）
 }
 /** 予約へ進む（HPページは LINE の本人確認へ。GAS のページではいつもの入口） */
 function avGoBook() {
@@ -6179,6 +6232,282 @@ function avAfterWeek() {
   showMsg('選んでいただいた ' + fmtJP(dt) + ' は、先に埋まってしまったか、このメニューの長さではお取りできませんでした。'
         + 'ほかの○のお時間からお選びください。');
 }
+
+// ============================================================
+// 🆕 2026-11-08 1108ai「AIに聞いて予約」… 接頭辞 aa
+// ------------------------------------------------------------
+//   ・ご希望の文をサーバ（aiAsk）に送る → サーバが条件に直し、今の getOpenSlots の空きだけを返す（画面で空きを作らない）。
+//   ・○のボタン → 今の空き状況と同じ流れ（avPick：日時を覚える → 本人確認 → メニュー → 確定）。🔴 AI は予約を作らない。
+//   ・［この時間で相談する］→ 内容を端末に30分だけ覚える → LINE の本人確認 → 送信（aiConsultSubmit）。
+//   ・【A-4】この端末で LINE の本人確認が済んだことがある（rishin_line_ok）→ そのまま LINE へ（案内を出さない）。
+//     無い（初めて・別の端末・連携をやめた）→「LINE と連携すると、次からすぐご予約できます」の案内 → LINE へ。
+//     🔴 端末に残すのは「済んだことがある」の印だけ（名前・LINE の ID などは残さない）。判定のために新しく何も聞かない。
+// ============================================================
+var AA_CONSULT_KEY = 'rishin_aa_consult';
+var AA_LINKED_KEY = 'rishin_line_ok';
+var AA_DEV_KEY = 'rishin_aa_dev';
+var AA = { clarified: false, busy: false, sending: false, bookBound: false, consult: null };
+
+function aaDeviceId() {
+  try {
+    var v = localStorage.getItem(AA_DEV_KEY) || '';
+    if (!/^[0-9a-f]{24}$/.test(v)) {
+      v = '';
+      for (var i = 0; i < 24; i++) v += Math.floor(Math.random() * 16).toString(16);
+      localStorage.setItem(AA_DEV_KEY, v);
+    }
+    return v;
+  } catch (e) { return ''; }
+}
+function aaLinkedDevice() { try { return localStorage.getItem(AA_LINKED_KEY) === '1'; } catch (e) { return false; } }
+function aaSetLinked(on) { try { if (on) localStorage.setItem(AA_LINKED_KEY, '1'); else localStorage.removeItem(AA_LINKED_KEY); } catch (e) {} }
+function aaSaveConsult(c) { try { c.at = Date.now(); localStorage.setItem(AA_CONSULT_KEY, JSON.stringify(c)); } catch (e) {} AA.consult = c; }
+function aaClearConsult() { try { localStorage.removeItem(AA_CONSULT_KEY); } catch (e) {} AA.consult = null; }
+/** 覚えている相談（30分より古いもの・今日より前の日時は捨てる） */
+function aaPeekConsult() {
+  if (AA.consult) return AA.consult;
+  var v = null;
+  try { v = JSON.parse(localStorage.getItem(AA_CONSULT_KEY) || 'null'); } catch (e) { v = null; }
+  if (!v || !v.dt || !(Date.now() - Number(v.at) < AV_MAX_AGE_MS) || !/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/.test(String(v.dt))
+      || String(v.dt).slice(0, 10).replace(/\//g, '-') < SETUP.today) { aaClearConsult(); return null; }
+  AA.consult = v;
+  return v;
+}
+
+function aaAsk() {
+  if (AA.busy) return;
+  var text = String($('aaInput').value || '').trim();
+  if (!text) { $('aaOut').innerHTML = '<p class="aa-line">ご希望を入れてください（例：来週の火曜の午後）</p>'; return; }
+  AA.busy = true;
+  $('aaSend').disabled = true;
+  $('aaOut').innerHTML = '<div class="loading">空きを探しています…</div>';
+  callAction('aiAsk', { text: text, deviceId: aaDeviceId(), clarified: AA.clarified })
+    .then(function(r) {
+      AA.busy = false; $('aaSend').disabled = false;
+      if (!r || r.success === false) {
+        $('aaOut').innerHTML = '<p class="aa-line">' + esc((r && r.error) || '今は使えません。下の空き状況からお選びください。') + '</p>';
+        return;
+      }
+      AA.clarified = (r.kind === 'clarify');
+      aaRender(r);
+    })
+    .catch(function() {
+      AA.busy = false; $('aaSend').disabled = false;
+      $('aaOut').innerHTML = '<p class="aa-line">今は使えません。下の空き状況からお選びください。</p>';
+    });
+}
+function aaTimesHtml(list) {
+  return '<div class="aa-times">' + list.map(function(o) {
+    return '<button type="button" class="aa-t" data-dt="' + esc(o.dt) + '">' + esc(o.label) + '</button>';
+  }).join('') + '</div>';
+}
+function aaRender(r) {
+  var h = (r.lines || []).map(function(t) { return '<p class="aa-line">' + esc(t) + '</p>'; }).join('');
+  if ((r.open || []).length) h += aaTimesHtml(r.open);
+  (r.consult || []).forEach(function(c, i) {
+    h += '<div class="aa-cons" data-i="' + i + '"><b>' + esc(c.label) + '</b><br>' + esc(c.msg)
+       + '<button type="button" class="aa-cbtn" data-ci="' + i + '">この時間で相談する</button><div class="aa-form hidden"></div></div>';
+  });
+  if ((r.near || []).length) h += aaTimesHtml(r.near);
+  if (r.waitlist) h += '<p class="aa-line" style="font-size:12px;color:var(--gray)">' + esc('×の時間は、ご予約の画面（メニューを選んだ後の表）で×を押すと「キャンセル待ち」に登録できます。') + '</p>';
+  if (r.tel) {
+    var tel = String((SETUP.clinic && SETUP.clinic.tel) || '089-906-8249');
+    h += '<p class="aa-line" style="font-size:13px">📞 お電話でのご相談：<a href="tel:' + esc(tel.replace(/[^0-9+]/g, '')) + '">' + esc(tel) + '</a></p>';
+  }
+  $('aaOut').innerHTML = h;
+  Array.prototype.forEach.call($('aaOut').querySelectorAll('.aa-t'), function(b) {
+    b.addEventListener('click', function() { avPick(b.getAttribute('data-dt')); });
+  });
+  Array.prototype.forEach.call($('aaOut').querySelectorAll('.aa-cbtn'), function(b) {
+    b.addEventListener('click', function() { aaOpenConsultForm(b, r.consult[Number(b.getAttribute('data-ci'))]); });
+  });
+}
+/** ［この時間で相談する］→ ほかの候補（2つまで）・メニュー（分かれば）を書ける欄 */
+function aaOpenConsultForm(btn, item) {
+  var box = btn.parentNode.querySelector('.aa-form');
+  if (!box || !item) return;
+  btn.classList.add('hidden');
+  var opts = '<option value="">分からない・先生と相談</option>';
+  menusForDisplay().forEach(function(m) {
+    if (SETUP.sasadaActive === false && m.owner === 'sasada') return;
+    if (m.restricted) return;
+    opts += '<option value="' + esc(m.id) + '">' + esc(m.name) + '</option>';
+  });
+  box.innerHTML = '<label>ほかにご希望の候補（あれば・2つまで）</label>'
+    + '<input type="text" class="aa-alt" maxlength="40" placeholder="例：11/18 の午後">'
+    + '<input type="text" class="aa-alt" maxlength="40" placeholder="例：土曜の朝" style="margin-top:6px">'
+    + '<label>メニュー（分かれば）</label><select class="aa-menu">' + opts + '</select>'
+    + '<button type="button" class="aa-send aa-go">LINE で本人確認して相談する</button>';
+  box.classList.remove('hidden');
+  box.querySelector('.aa-go').addEventListener('click', function() {
+    var alts = Array.prototype.map.call(box.querySelectorAll('.aa-alt'), function(x) { return String(x.value || '').trim(); }).filter(Boolean).slice(0, 2);
+    var sel = box.querySelector('.aa-menu');
+    var mid = sel ? sel.value : '';
+    var mname = (sel && sel.selectedIndex > 0) ? sel.options[sel.selectedIndex].text : '';
+    aaStartConsult({ dt: item.dt, label: item.label, type: item.type, alts: alts, menuId: mid, menuName: mname,
+                     reqId: String(Date.now()) + '-' + Math.random().toString(36).slice(2, 10) });
+  });
+}
+function aaStartConsult(c) {
+  aaSaveConsult(c);
+  avClearPreset();   // 予約の日時（空き状況のボタン）と取り違えない
+  if (AUTH.token && !AUTH.authPending) { aaShowConsultScreen(c); return; }
+  aaNeedLine('ご相談の内容：' + c.label + '。');
+}
+/** 時刻のボタンの後（avPick から）。この画面で本人確認が済んでいれば、そのままメニューへ */
+function aaAfterPick() {
+  aaClearConsult();
+  if (AUTH.token && !AUTH.authPending) {
+    $('screenAvail').classList.add('hidden');
+    if (AUTH.needName && !AUTH.confirmed) { showWhoScreen(); return; }
+    AUTH.confirmed = true;
+    $('stepBar').classList.remove('hidden');
+    goStep(1);
+    return;
+  }
+  var dt = '';
+  try { dt = (JSON.parse(localStorage.getItem(AV_KEY) || 'null') || {}).dt || ''; } catch (e) { dt = ''; }
+  aaNeedLine(dt ? ('選んだ日時：' + fmtJP(dt) + '。') : '');
+}
+/** 【A-4】LINE へ（この端末で済んだことがあれば案内なし・無ければ案内を1枚） */
+function aaNeedLine(what) {
+  if (aaLinkedDevice()) { avGoBook(); return; }
+  $('aaIntroWhat').textContent = what ? what + ' ' : '';
+  $('aaIntro').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function aaHideIntro() { $('aaIntro').classList.add('hidden'); aaClearConsult(); avClearPreset(); }
+
+/** 相談の画面（本人確認の後） */
+function aaShowConsultScreen(c) {
+  hideBookingFlow();
+  ['screenGate', 'screenNotice', 'screenWho', 'screenAvail'].forEach(function(id) { $(id).classList.add('hidden'); });
+  $('screenConsult').classList.remove('hidden');
+  var alts = (c.alts || []).filter(Boolean);
+  $('aaCsWhat').textContent = 'ご希望：' + c.label + (alts.length ? '／ほかの候補：' + alts.join('、') : '') + (c.menuName ? '／メニュー：' + c.menuName : '');
+  $('aaCsSend').classList.add('hidden'); $('aaCsHome').classList.add('hidden'); $('aaCsName').classList.add('hidden');
+  if (AUTH.authPending && !AUTH.token) { $('aaCsMsg').textContent = 'LINE の情報を確認しています…'; return; }
+  aaConsultReady();
+}
+function aaConsultReady() {
+  var c = aaPeekConsult();
+  if (!c) { $('aaCsMsg').textContent = 'ご相談の内容の有効期限が切れました。お手数ですが、もう一度お選びください。'; $('aaCsHome').classList.remove('hidden'); return; }
+  if (AUTH.needName && !AUTH.presetName) {
+    $('aaCsName').classList.remove('hidden');
+    $('aaCsMsg').textContent = 'お名前を入れて「この内容で相談する」を押してください。';
+    $('aaCsSend').classList.remove('hidden');
+    return;
+  }
+  aaSendConsult();   // 【A-4】LINE で本人と分かっている方は、そのまま送る
+}
+function aaSendConsult() {
+  var c = aaPeekConsult();
+  if (!c || AA.sending) return;
+  var name = String(($('aaCsNameIn') && $('aaCsNameIn').value) || '').trim();
+  if (AUTH.needName && !AUTH.presetName && !name) { $('aaCsMsg').textContent = 'お名前を入れてください。'; return; }
+  AA.sending = true;
+  $('aaCsSend').disabled = true;
+  $('aaCsMsg').textContent = 'ご相談を送っています…';
+  callAction('aiConsultSubmit', { auth: AUTH.token, dt: c.dt, alts: c.alts || [], menuId: c.menuId || '', name: name, reqId: c.reqId })
+    .then(function(r) {
+      AA.sending = false; $('aaCsSend').disabled = false;
+      if (r && r.success) {
+        aaClearConsult();
+        $('aaCsName').classList.add('hidden'); $('aaCsSend').classList.add('hidden');
+        $('aaCsMsg').textContent = r.message || 'ご相談を受け付けました。先生が確認して、LINE でご連絡いたします。';
+        $('aaCsHome').classList.remove('hidden');
+        return;
+      }
+      if (r && r.needName) { $('aaCsName').classList.remove('hidden'); $('aaCsSend').classList.remove('hidden'); $('aaCsMsg').textContent = r.error || 'お名前を入れてください。'; return; }
+      if (r && r.open) {
+        aaClearConsult();
+        try { localStorage.setItem(AV_KEY, JSON.stringify({ dt: c.dt, at: Date.now() })); } catch (e) {}
+        $('aaCsMsg').textContent = r.error;
+        $('aaCsHome').textContent = 'この日時でメニューを選ぶ';
+        $('aaCsHome').classList.remove('hidden');
+        return;
+      }
+      if (r && r.needLine) {
+        $('aaCsMsg').innerHTML = esc(r.error || '') + ' <a href="' + esc(SETUP.execUrl) + '?from=line">もう一度LINEで続ける</a>';
+        return;
+      }
+      $('aaCsMsg').textContent = (r && r.error) || 'ご相談を送れませんでした。お手数ですが、お電話（089-906-8249）でご相談ください。';
+      $('aaCsHome').classList.remove('hidden');
+    })
+    .catch(function() {
+      AA.sending = false; $('aaCsSend').disabled = false;
+      $('aaCsMsg').textContent = 'ただいま混み合っています。少しおいて「この内容で相談する」を押してください（お急ぎの方はお電話 089-906-8249）。';
+      $('aaCsSend').classList.remove('hidden');
+    });
+}
+function aaGoHome() {
+  $('screenConsult').classList.add('hidden');
+  if (AUTH.token && !AUTH.authPending) { AUTH.confirmed = AUTH.confirmed || !AUTH.needName; $('stepBar').classList.remove('hidden'); goStep(1); return; }
+  routeEntry();
+}
+
+/** routeEntry の最初に呼ぶ：本人確認の後で相談の内容を覚えていれば、相談の画面を出す（出したら true）。
+ *  【A-4】空き状況で日時を選んでから来た LINE 連携済みの方は、氏名の確認画面を出さない（そのままメニューへ） */
+function aaRouteConsult() {
+  try {
+    if (!AUTH.token && !AUTH.authPending) return false;
+    var c = aaPeekConsult();
+    if (c) { aaShowConsultScreen(c); return true; }
+    if (AUTH.token && AUTH.user && AUTH.user.name && !AUTH.needName) {
+      var v = null;
+      try { v = JSON.parse(localStorage.getItem(AV_KEY) || 'null'); } catch (e) { v = null; }
+      if (v && v.dt && (Date.now() - Number(v.at) < AV_MAX_AGE_MS)) AUTH.confirmed = true;
+    }
+  } catch (e) {}
+  return false;
+}
+/** __hpApplyAuth__ の最初に呼ぶ：端末の印を更新し、相談の途中なら結果をここで受ける（受けたら true） */
+function aaOnAuth(rc) {
+  try {
+    if (rc && rc.success && rc.auth) aaSetLinked(!!((rc.user && rc.user.name) || rc.preset));
+    else if (rc && !rc.netFail && rc.success === false) aaSetLinked(false);
+    if ($('screenConsult').classList.contains('hidden')) return false;
+    var lp = $('linePromo'); if (lp) lp.classList.add('hidden');
+    if (rc && rc.success && rc.auth) {
+      AUTH.token = rc.auth;
+      AUTH.needName = !!rc.needName && !(rc.user && rc.user.name);
+      AUTH.presetName = String(rc.preset || '');
+      AUTH.user = (rc.user && rc.user.name) ? rc.user : (rc.preset ? { name: rc.preset, kana: '', phone: '', email: '' } : null);
+      aaConsultReady();
+    } else {
+      $('aaCsMsg').innerHTML = 'ご本人確認がうまくいきませんでした。<a href="' + esc(SETUP.execUrl) + '?from=line">もう一度LINEで続ける</a>（お急ぎの方はお電話 089-906-8249）';
+    }
+    return true;
+  } catch (e) { return false; }
+}
+/** トップの「💬 AIに空きを聞く」→ 空き状況（AIに聞く欄つき）を出す */
+function aaOpenFromTop() {
+  hideBookingFlow();
+  ['screenGate', 'screenNotice', 'screenWho', 'screenConsult'].forEach(function(id) { $(id).classList.add('hidden'); });
+  $('screenAvail').classList.remove('hidden');
+  var tel = String((SETUP.clinic && SETUP.clinic.tel) || '');
+  $('avTel').href = 'tel:' + tel.replace(/[^0-9+]/g, '');
+  $('avTelText').textContent = tel;
+  if (!AA.bookBound && !avWanted()) {
+    AA.bookBound = true;
+    $('avBookBtn').addEventListener('click', function(ev) { ev.preventDefault(); avClearPreset(); aaAfterPick(); });
+  }
+  avLoad();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  try { $('aaInput').focus(); } catch (e) {}
+}
+(function aaBind() {
+  try {
+    $('aaForm').addEventListener('submit', function(ev) { ev.preventDefault(); aaAsk(); });
+    $('aaIntroGo').addEventListener('click', function(ev) { ev.preventDefault(); avGoBook(); });
+    $('aaIntroBack').addEventListener('click', aaHideIntro);
+    $('aaCsSend').addEventListener('click', aaSendConsult);
+    $('aaCsHome').addEventListener('click', aaGoHome);
+    $('aaTopLink').addEventListener('click', aaOpenFromTop);
+    // GAS のページで本人確認済み（埋め込み）なら、この端末の印を付ける
+    if (SETUP.bookingAuth && SETUP.bookingUser && SETUP.bookingUser.name) aaSetLinked(true);
+  } catch (e) {}
+})();
 
 // ============================================================
 // 🔴 0915nolineA: トークン無しの通常入口（LINE必須化はやめた）
@@ -6266,7 +6595,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
 </script>
 <script>
 // ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-02j）
+// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-08b）
 //   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
 // ============================================================
 (function () {
@@ -6274,7 +6603,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-11-02j";
+    vt.textContent = "版 2026-11-08b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
