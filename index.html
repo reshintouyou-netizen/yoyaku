@@ -5324,6 +5324,10 @@ function avMaybeShow() {
     $('avTelText').textContent = tel;
     $('avBookBtn').addEventListener('click', function(ev) { ev.preventDefault(); avClearPreset(); avGoBook(); });
     avLoad();
+    try {
+      var pd = String(SETUP.presetDt || '');
+      if (/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/.test(pd) && pd.slice(0, 10).replace(/\//g, '-') >= SETUP.today) avPick(pd);
+    } catch (ePd) {}
     return true;
   } catch (e) { return false; }
 }
@@ -5634,7 +5638,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-11-08c";
+    vt.textContent = "版 2026-11-10b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -5763,6 +5767,8 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     setup.lineNotice = ['linked','already','friend','conflict','error','unlinked','cancelled'].indexOf(ln) >= 0 ? ln : '';
     setup.lineHint = (ln === 'guest');
     setup.view = (String(q.get('view') || '') === 'slots') ? 'slots' : '';
+    var pdt = String(q.get('dt') || '');
+    setup.presetDt = (setup.view === 'slots' && /^[0-9]{12}$/.test(pdt)) ? (pdt.slice(0, 4) + '/' + pdt.slice(4, 6) + '/' + pdt.slice(6, 8) + ' ' + pdt.slice(8, 10) + ':' + pdt.slice(10, 12)) : '';
     setup.prefill = null;
     setup.lineNoticeGate = false;
     setup.bookingAuth = ''; setup.bookingUser = null; setup.bookingNeedName = false; setup.bookingPresetName = '';
