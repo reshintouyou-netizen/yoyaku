@@ -23,25 +23,21 @@
   .hero h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.02em}
   .hero p{margin:6px 0 0;font-size:13px;opacity:.85}
 
-  /* 進行状況 */
   .steps{display:flex;gap:6px;padding:14px 16px 0}
   .step{flex:1;height:4px;border-radius:2px;background:var(--line)}
   .step.on{background:var(--green2)}
-  /* 🆕 0917auth: 進捗バーの上に「今どの段階か」を出す（1番目=ご本人確認） */
   .step-label{padding:10px 16px 0;font-size:12px;color:var(--gray);font-weight:600}
 
   .sec{padding:18px 16px 0}
   .sec h2{font-size:16px;font-weight:600;margin:0 0 4px}
   .sec .lead{font-size:13px;color:var(--gray);margin:0 0 12px}
 
-  /* ボタン共通（★タップ領域 44px 以上） */
   .btn{
     display:block;width:100%;min-height:52px;border-radius:10px;
     font-size:16px;font-weight:600;cursor:pointer;border:1px solid transparent;
     padding:12px 16px;
   }
   .btn-primary{background:var(--green);color:#fff}
-  /* 🔴 0928ux【1】: 送信中の進捗（控えめ・--green 系） */
   .send-status{display:flex;align-items:center;gap:10px;margin:10px 4px 0;font-size:14px;color:var(--gray);line-height:1.6}
   .send-spin{width:18px;height:18px;flex:0 0 18px;border:2px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:sendspin .9s linear infinite}
   @keyframes sendspin{to{transform:rotate(360deg)}}
@@ -50,14 +46,12 @@
   .btn-row{display:flex;gap:10px;padding:16px}
   .btn-row .btn{flex:1}
 
-  /* メニュー */
   .menu-btn{
     display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);
     border-radius:12px;padding:16px;margin-bottom:10px;cursor:pointer;min-height:64px;
   }
   .menu-btn:active{background:#eef3ef}
   .menu-btn.on{border-color:var(--green);box-shadow:0 0 0 2px rgba(26,61,46,.14)}
-  /* 👤 0923choice: 担当者の選択（ミニマル・--green 系。375px では3つ横並び、収まらなければ折り返す） */
   .staff-choice{margin:0 0 12px}
   .staff-choice .sc-label{font-size:14px;color:var(--gray);margin:0 0 6px}
   .staff-choice .sc-btns{display:flex;flex-wrap:wrap;gap:6px}
@@ -67,11 +61,9 @@
     box-shadow:0 0 0 2px rgba(26,61,46,.14)}
   .menu-name{font-size:16px;font-weight:600;display:block}
   .menu-meta{font-size:13px;color:var(--gray);margin-top:3px;display:block}
-  /* 0905b: メニューに料金・説明 */
   .menu-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
   .menu-price{font-size:14px;font-weight:700;color:var(--green);white-space:nowrap}
   .menu-desc{font-size:12.5px;color:var(--gray);margin-top:5px;display:block;line-height:1.6}
-  /* 0906a: コース特典（★目立ちすぎない薄い枠。特典が無いメニューには出さない） */
   .menu-benefit{
     display:block;margin-top:7px;padding:6px 9px;font-size:12.5px;line-height:1.6;
     color:var(--green);background:rgba(26,61,46,.05);
@@ -79,7 +71,6 @@
   }
   .menu-benefit b{font-weight:700;margin-right:.4em}
 
-  /* 日付 */
   .day{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
   .day-hd{display:flex;align-items:baseline;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);background:#fafcfa}
   .day-date{font-size:15px;font-weight:600}
@@ -103,12 +94,11 @@
     background:#eef3ef;border-top:1px solid var(--line);line-height:1.6;
   }
 
-  /* 入力 */
   .fg{margin-bottom:16px}
   .fg label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
   .req{color:var(--red);font-size:12px;margin-left:4px}
   .fg input{
-    width:100%;min-height:50px;font-size:16px;   /* ★16px 未満だと iOS が拡大する */
+    width:100%;min-height:50px;font-size:16px;
     padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;
   }
   .fg input:focus{outline:2px solid var(--green2);outline-offset:-1px}
@@ -119,7 +109,6 @@
   }
   .note-box .tel{font-size:16px;font-weight:700;display:inline-block;margin-top:4px}
 
-  /* 🗓 1017batch: まとめて予約の切り替え・選んだ日時・続けて予約 */
   .bt-toggle{display:flex;gap:6px;margin:0 0 10px}
   .bt-toggle .bt-btn{flex:1 1 0;min-height:44px;padding:8px 6px;border-radius:10px;border:1px solid var(--line);
     background:#fff;color:var(--ink);font-size:14px;font-family:inherit;cursor:pointer}
@@ -143,14 +132,12 @@
   .done-more .bt-link{background:none;border:none;color:var(--green2);text-decoration:underline;font-size:14px;
     font-family:inherit;min-height:44px;cursor:pointer}
 
-  /* 確認 */
   .confirm{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
   .crow{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #eef1ee;font-size:14px}
   .crow:last-child{border-bottom:none}
   .ckey{width:6.5em;color:var(--gray);flex-shrink:0}
-  .cval{font-weight:600;word-break:break-all;white-space:pre-line}   /* 1017batch: まとめて予約の日時を1件1行で（他の値は改行を含まない＝見た目不変） */
+  .cval{font-weight:600;word-break:break-all;white-space:pre-line}
 
-  /* 完了 */
   .done{text-align:center;padding:28px 16px}
   .done .mark{font-size:40px;line-height:1}
   .done h2{font-size:19px;margin:12px 0 6px}
@@ -161,7 +148,6 @@
   .done-dt{font-size:18px;font-weight:700}
   .done-menu{font-size:14px;color:var(--gray);margin-top:4px}
 
-  /* 常設の案内 */
   .help{
     margin:22px 16px 0;background:#fff;border:1px solid var(--line);
     border-radius:12px;padding:16px;font-size:13.5px;line-height:1.75;
@@ -180,7 +166,6 @@
   .msg.warn{background:#fdf8ec;border:1px solid #d9a441;color:#79591a;display:block}
   .loading{padding:28px 16px;text-align:center;color:var(--gray);font-size:14px}
   .hidden{display:none !important}
-  /* ── 予約の確認・変更（0830a 第5段階）── */
   .mg-note { font-size: 13px; color: var(--gray); line-height: 1.8; margin: 10px 0 0; }
   .mg-empty { font-size: 15px; color: var(--gray); line-height: 1.9; text-align: center; padding: 18px 0; }
   .mg-card {
@@ -201,8 +186,6 @@
   }
   .mg-slot.on { background: var(--green); color: #fff; border-color: var(--green); }
 
-  /* ── LINEで通知を受け取る（0830f 第6段階-1）──
-       🔴 予約の確認・変更の【下】に置く。紐づけ前でも上の操作は今まで通り使えること。 */
   .ln-msg {
     margin: 0 0 14px; padding: 12px 14px; border-radius: 10px;
     font-size: 14px; line-height: 1.7; background: #eef6f1;
@@ -215,7 +198,6 @@
   }
   .ln-state { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
   .ln-sub { font-size: 13px; color: var(--gray); line-height: 1.8; margin: 0 0 12px; }
-  /* ★LINEの緑（#06C755）は LINE 側の指定色。ボタンだと一目で分かる */
   .btn-line {
     display: block; width: 100%; box-sizing: border-box; text-align: center;
     background: #06C755; color: #fff; text-decoration: none;
@@ -227,19 +209,14 @@
     color: var(--gray); text-decoration: underline;
   }
   .ln-note { font-size: 13px; color: var(--gray); line-height: 1.8; margin: 12px 0 0; }
-  /* 予約完了画面に置くとき（0830g）。★.sec の左右余白と揃える */
   .ln-done { margin: 4px 16px 0; }
 
-  /* ── リッチメニューから来たとき（0831a）──
-       🔴 どちらも「予約の邪魔をしない」大きさに留める。ボタンにはしない。 */
   .ln-hint {
     margin: 12px 16px 0; padding: 10px 12px; border-radius: 10px;
     background: #f2f7f4; border: 1px solid #dde9e2; color: #3c5a4b;
     font-size: 13px; line-height: 1.7;
   }
   .ln-hint .t { color: var(--gray); }
-  /* ── 🔴 0915nolineA: LINEのおすすめ（未連携・メニュー画面だけ）──
-       予約は止めない。「省ける」ことを伝える控えめな箱＋小さめのボタン。 */
   .ln-promo {
     margin: 12px 16px 0; padding: 10px 12px; border-radius: 10px;
     background: #f2f7f4; border: 1px solid #dde9e2; color: #3c5a4b;
@@ -256,12 +233,6 @@
     font-size: 13px; line-height: 1.7;
   }
 
-  /* ============================================================
-     週表（0830b 第6段階）★新規予約と「日時の変更」で共用する1つの部品
-       🔴 色は患者画面の既存パレット（--green ほか）だけを使う。
-          先生用の週カレンダー（茶系 #7B5C3E）の色は持ち込まない。
-       🔴 ◯× の記号そのもので判別できるようにする（色だけに頼らない）。
-     ============================================================ */
   .wp-nav { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
   .wp-nav .wp-arrow {
     min-width:56px; min-height:44px; border-radius:10px; font-size:15px; font-weight:600;
@@ -275,11 +246,6 @@
     overflow-x:auto; -webkit-overflow-scrolling:touch;
     border:1px solid var(--line); border-radius:12px; background:#fff;
   }
-  /* 🆕 2026-11-02 1102sticky: 下にスクロールしても日付の行（曜日）が画面の上に残るように。
-     ⚠ .wp-scroll が overflow-x:auto のままだと、sticky は「この箱の中」でしか効かない（箱は縦に動かない＝効かない）。
-     ・表が幅に収まる時（wp-fit）… スクロールしない箱（clip）にする → 日付の行が画面の上にくっつく
-     ・収まらない時（wp-wide）… 箱の高さを画面までにして、箱の中で 日付の行・左の時刻の列 の両方を残す
-     切り替えは wpStickyFit_()（表を描いた後・画面の幅が変わった時）。 */
   .wp-scroll.wp-fit { overflow:visible; overflow:clip; }
   .wp-scroll.wp-wide { overflow:auto; max-height:calc(100vh - 24px); }
   .wp-tbl thead th.wp-th-time { left:0; z-index:3; }
@@ -288,9 +254,6 @@
   .wp-tbl thead th {
     position:sticky; top:0; z-index:2; background:#fafcfa;
     border-bottom:1px solid var(--line);
-    /* ⚠ 6/5 の非対称は border-bottom:1px の埋め合わせ（box-sizing:border-box のため）。
-       実測: 6/5 → 中身は箱の中心から -0.75px、6/6 にすると -1.25px と【悪くなる】。
-       7列は互いに完全に水平（列間 0.00px）なので、このままにする。 */
     padding:6px 0 5px;
     font-size:12px; font-weight:600; line-height:1.35;
   }
@@ -308,14 +271,6 @@
     background:#fafcfa; border-right:1px solid var(--line);
     position:sticky; left:0; z-index:1;
   }
-  /* 枠のマス（★指で押す。44px 以上）
-     🔴 0830d: 中身を上下中央に固定する。
-     ⚠ ずれていた原因（実測）：○ は <button>、× は <span>。
-       ブラウザは button の中身だけを自動で上下中央に置くため、
-       同じ 44px の箱でも ×（span）だけ上に寄っていた（375/360px とも 13.5px）。
-     ★flex で「中身が何であっても中央」にする。
-       🔴 文字ごとに margin をずらす直し方はしない（フォントや端末が変わると また ずれる）。
-     ⚠ 箱の大きさ（min-height:44px / width:100%）は変えていない＝タップ領域はそのまま。 */
   .wpc {
     display:flex; align-items:center; justify-content:center;
     width:100%; min-height:44px; border:none; background:transparent;
@@ -323,18 +278,14 @@
   }
   .wpc.o { color:var(--green2); font-weight:700; cursor:pointer; }
   .wpc.o:active { background:#eef3ef; }
-  .wpc.x { color:#b9c2bb; cursor:default; }   /* 空きなし … 押せないことが薄さで分かる */
-  /* 🔴 0921wait: キャンセル待ちに登録できる×だけ、タップできる色にする */
+  .wpc.x { color:#b9c2bb; cursor:default; }
   .wpc.x.wait { color:#d97706; cursor:pointer; }
   .wpc.x.wait:active { background:#fef3e2; }
-  /* 🗂 0830b の「―」用。0830c で ◯× の2種類に統一したので使っていない（消していない） */
   .wpc.n { color:#d3dad5; cursor:default; }
   .wpc.on { background:var(--green); color:#fff; border-radius:8px; }
-  /* 🗓 1017batch: まとめて予約で選んだ枠（✓）・この画面で予約した枠（済） */
   .wpc.sel { background:var(--green); color:#fff; border-radius:8px; }
   .wpc.bk { color:var(--green); font-size:12px; font-weight:700; cursor:default; background:#E4EEE8; border-radius:8px; }
 
-  /* 🔴 0921wait: 自分が登録中のキャンセル待ち */
   .wl-mine-box { background:#fffbeb; border:1px solid #fcd34d; border-radius:10px;
     padding:.6rem .8rem; margin-bottom:.8rem; font-size:.86rem; }
   .wl-mine-title { font-weight:700; color:#92400e; margin-bottom:.3rem; }
@@ -344,7 +295,6 @@
     border-radius:6px; padding:.25rem .6rem; font-size:.78rem; cursor:pointer; font-family:inherit;
     min-height:32px; }
 
-  /* ── 月表示（0830c）★既定は閉じている ── */
   .wp-mtoggle {
     display:block; width:100%; min-height:46px; margin-bottom:10px;
     border:1px solid var(--line); border-radius:10px; background:#fff;
@@ -366,7 +316,6 @@
   .mp-tbl th.sun { color:var(--red); }
   .mp-tbl td { padding:2px 1px; text-align:center; }
   .mp-blank { }
-  /* 日のマス（★週表の○と同じくらいの大きさ） */
   .mpc {
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     width:100%; min-height:46px; gap:1px; padding:2px 0;
@@ -378,15 +327,14 @@
   .mpc.o { color:var(--green2); cursor:pointer; }
   .mpc.o .mp-m { font-weight:700; }
   .mpc.o:active { background:#eef3ef; }
-  .mpc.x { color:#b9c2bb; cursor:default; }        /* 押せないことが薄さで分かる */
+  .mpc.x { color:#b9c2bb; cursor:default; }
   .mpc.x .mp-n { color:#c8cfc9; }
-  .mpc.inweek { border-color:var(--green2); background:#eef3ef; }  /* いま週表に出ている7日 */
+  .mpc.inweek { border-color:var(--green2); background:#eef3ef; }
   .mpc.today .mp-n { color:var(--green2); font-weight:700; }
   .mp-hint { font-size:12px; color:var(--gray); line-height:1.7; margin:8px 2px 4px; }
 
   .wp-legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12.5px; color:var(--gray); }
   .wp-legend b { color:var(--green2); font-size:14px; }
-  /* 🔴 0922wlnotify【A】: ×→キャンセル待ちの常時案内（折りたたみ・ポップアップにしない） */
   .wp-wait-note { margin:4px 0 0; padding:0; font-size:11.5px; color:var(--gray); line-height:1.4; }
   .wp-hint { font-size:12.5px; color:var(--gray); line-height:1.7; margin:8px 0 0; }
   .wp-scrollhint { font-size:12px; color:var(--gray); margin:0 0 6px; }
@@ -396,7 +344,6 @@
     color:var(--green); font-size:13px; font-family:inherit; cursor:pointer;
   }
 
-  /* 確認シート（★押した瞬間に実行しない） */
   .cf-back {
     position:fixed; inset:0; background:rgba(20,30,25,.45);
     display:flex; align-items:flex-end; justify-content:center; z-index:50; padding:0;
@@ -415,10 +362,6 @@
   .cf-to { font-size:19px; font-weight:700; color:var(--ink); line-height:1.4; }
   .cf-actions { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
 
-  /* ============================================================
-     🔴 0922wlnotify【B】: キャンセル待ち登録完了モーダル
-     ・自動で消えない（showMsgのトースト置き換え）。閉じるボタン＋ESCのみで閉じる。
-     ============================================================ */
   .wl-modal-overlay {
     position:fixed; inset:0; background:rgba(20,30,25,.55);
     display:flex; align-items:center; justify-content:center;
@@ -434,14 +377,6 @@
   .wl-modal-menu { font-size:14px; color:var(--gray); margin-top:2px; }
   .wl-modal-body { font-size:13.5px; color:var(--ink); line-height:1.8; white-space:pre-line; margin:16px 0 20px; }
   .modal-close { margin-top:0; }
-  /* ============================================================
-     🔴 0903a 第7段階-1: 初診の問診票（旧booking.htmlの7ページを移植）
-     ------------------------------------------------------------
-     ・見た目はこの予約画面のトーン（緑）に合わせる:
-       旧CSSの変数（--accent 等）を #screenIntake の上でこの画面の色に差し替え、
-       旧のクラス定義は #screenIntake 配下だけに効かせる（他画面と衝突させない）。
-     ・クラス名・構造は旧booking.htmlのまま（移植したJSがそのまま動くように）。
-     ============================================================ */
   #screenIntake{
     --accent:var(--green2); --accent-hover:var(--green);
     --surface:#fff; --muted:var(--gray); --text:var(--ink);
@@ -582,7 +517,6 @@
   }
 
 
-  /* 0904a 第7段階-3: 情報更新画面 */
   #screenPU .pu-head{margin-bottom:14px}
   #screenPU .pu-greet{font-size:17px;font-weight:700;color:var(--green);margin-bottom:6px}
   #screenPU .pu-lead{font-size:14px;color:var(--ink);line-height:1.7;margin:0}
@@ -598,7 +532,6 @@
   #screenPU input[type=date]{width:100%;min-height:50px;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff}
   #screenPUDone .pu-done-msg{font-size:14px;color:var(--gray);line-height:1.8}
 
-  /* 🔴 0906k 第7段階-4: 再診の事前入力（B主訴の見た目を再利用・自己完結） */
   #screenRevisit{--accent:var(--green2);--muted:var(--gray);--radius:12px}
   #screenRevisit .rv-banner{background:#eef5f1;border:1px solid var(--green2);border-radius:12px;
     padding:.8rem 1rem;font-size:14px;line-height:1.7;color:var(--ink);margin-bottom:1rem}
@@ -611,7 +544,6 @@
   #screenRevisit textarea,#screenRevisit select{width:100%;box-sizing:border-box;font-family:inherit;
     font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
   #screenRevisit textarea{resize:vertical;line-height:1.7;min-height:80px}
-  /* 0907rv3: 例文（入力欄の下に薄く並べる・案A） */
   #screenRevisit .rv-examples{font-size:.8rem;color:var(--gray);line-height:1.9;margin-top:.55rem}
   #screenRevisit .rv-pain{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:15px}
   #screenRevisit .rv-pain select{width:auto;min-width:72px}
@@ -645,7 +577,6 @@
     font-family:inherit;font-size:16px;font-weight:600;padding:13px 18px;cursor:pointer}
   #screenRevisit .btn-submit:disabled{background:#aaa;cursor:default}
   #screenRevisit .msg-err{background:#fdecea;color:#b3413a;border-radius:8px;padding:.7rem .9rem;font-size:14px;margin-top:.8rem}
-  /* 🔴 0907line 案A: 入口ゲート・システム変更のご案内・氏名確認 */
   .gate-line-btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#06c755;color:#fff;font-size:16px;font-weight:700;padding:14px;border-radius:10px;text-decoration:none;margin:14px 0 6px}
   .gate-tel-box{background:#f6f8f7;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:14px;line-height:1.7}
   .gate-tel-box .tel-big{display:inline-block;font-size:20px;font-weight:700;color:var(--green2);text-decoration:none;margin-top:4px}
@@ -662,7 +593,6 @@
     <p>オンラインでご予約いただけます</p>
   </div>
 
-  <!-- 🆕 0917auth: 4段階＝①ご本人確認 ②メニュー ③日時 ④ご確認 -->
   <div class="step-label" id="stepLabel">① ご本人確認</div>
   <div class="steps" id="stepBar">
     <div class="step on" id="st1"></div><div class="step" id="st2"></div>
@@ -671,16 +601,6 @@
 
   <div id="msg" class="msg"></div>
 
-  <!-- ============================================================
-       🔴 0907line 案A: ネット予約は LINE の本人確認から始める
-       ・screenGate   … 入口（「LINEで続ける」）。トークン無しで開いた人は必ずここから。
-       ・screenNotice … 未連携の方への「システム変更のご案内」（その場では予約できない）。
-       ・screenWho    … 連携済みの方の氏名確認（★黙って情報入力を飛ばさない）。
-       ⚠ 見た目の出し分けだけ。強制はサーバ（createBooking の予約パス必須）が担保する。
-       ============================================================ -->
-  <!-- 🆕 2026-11-02 1102rm【A】: 空き状況（今日から7日分）。?view=slots で開いた時だけ出す（ほかの入口は今までどおり）
-       ・空きはサーバ（getOpenSlots・今の判定のまま）を開いた時に読む。端末にはしまわない。
-       ・時刻を押す → その日時を覚えて LINE の本人確認 → メニューを選ぶと、その日時の確認が出る。 -->
   <style>
     .av-day{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 10px}
     .av-day h3{margin:0 0 6px;font-size:15px;color:var(--green)}
@@ -690,8 +610,6 @@
     .av-none{font-size:13px;color:var(--gray)}
     .av-note{font-size:12px;color:var(--gray);margin:2px 0 12px}
   </style>
-  <!-- 🆕 2026-11-08 1108ai: LINE 連携の案内（A-4）と予約の相談の画面の見た目。
-       ※「AIに聞く」欄は同日 LINE のトークで作り直すため外した（1108aioff・サーバ側 AiAssist.js は残す） -->
   <style>
     .aa-line{margin:0 0 6px;font-size:14px;line-height:1.7}
     .aa-form{margin-top:8px}
@@ -719,7 +637,6 @@
   </section>
 
   <section class="sec hidden" id="screenGate">
-    <!-- 🆕 0917name(問題③): 謝罪から始めず、メリットを先に伝える -->
     <h2>ご予約はLINEからが便利です</h2>
     <ul class="gate-merits" style="list-style:none;padding:0;margin:8px 0 14px;line-height:2">
       <li>✓ お名前の入力が不要になります</li>
@@ -729,7 +646,6 @@
     <a class="gate-line-btn" id="gateLineBtn" href="#" target="_top" rel="noopener">LINEで続ける</a>
     <p style="font-size:12px;color:var(--gray);margin:4px 0 0">
       LINEの画面が開きます。「許可する」を押すと、そのまま予約に進めます。</p>
-    <!-- 🆕 0917auth: LINE必須OFF のときだけ「LINEを使わない」入口を出す（今までどおり5項目で予約） -->
     <button type="button" id="gateNoLine" class="btn btn-ghost" style="width:100%;margin-top:12px;display:none">
       LINEを使わずに予約する</button>
     <p id="gateNoLineNote" style="font-size:12px;color:var(--gray);margin:4px 0 0;display:none">
@@ -769,20 +685,16 @@
 
   <section class="sec hidden" id="screenWho">
     <h2>ご本人の確認</h2>
-    <!-- 氏名の確認（連携済み＝カルテ / 2回目以降＝前回の氏名） -->
     <div id="whoConfirmBlock">
       <p class="lead" id="whoConfirmLead">LINEのご登録から、お客様の情報をお預かりしています。</p>
       <div class="who-name" id="whoName"></div>
       <p class="lead" style="text-align:center;margin-top:0">様でお間違いないですか？</p>
       <button class="btn btn-primary" id="whoOk" type="button" style="width:100%">はい、予約にすすむ</button>
-      <!-- 🆕 0917name: 前回の氏名のときだけ「別の名前にする」を出す（家族で同じLINE等） -->
       <button class="btn btn-ghost" id="whoChangeName" type="button" style="width:100%;margin-top:8px;display:none">別の名前にする</button>
     </div>
-    <!-- 🆕 0917new: カルテ未紐づけ（初めての方など）: 氏名だけ入力してもらう -->
     <div id="whoInputBlock" class="hidden">
       <p class="lead">ご予約に使うお名前を教えてください<br><span style="font-size:13px;color:var(--gray)">（LINEのお名前とは別に承っております）</span></p>
       <label for="whoNameInput">お名前<span class="req">必須</span></label>
-      <!-- 🆕 0917name(問題④): 入力欄の高さ・文字を大きく（44px以上・16pxでiOS自動ズーム防止） -->
       <input type="text" id="whoNameInput" autocomplete="name" placeholder="例：山田 花子"
              style="width:100%;box-sizing:border-box;height:52px;font-size:16px;padding:12px 14px">
       <button class="btn btn-primary" id="whoNameOk" type="button" style="width:100%;margin-top:12px">この名前で予約にすすむ</button>
@@ -793,25 +705,16 @@
       <a id="whoTel" href="tel:" style="color:var(--green2);font-weight:600;text-decoration:none">📞 <span id="whoTelText"></span></a></p>
   </section>
 
-  <!-- ① メニュー -->
-  <!-- 🔴 0831a: リッチメニューから来た未連携の方への控えめな案内
-       ⚠ ここから直接は連携できない（連携には予約完了メールのリンクが必要）。
-         ★「メールが届く人＝本人」が本人確認の根拠なので、ここを崩さない。 -->
   <p class="ln-hint hidden" id="lineHint">
     💬 LINEで連携すると、次回から入力が省けます。<span class="t">ご予約完了後にご案内します。</span></p>
 
-  <!-- 🆕 0918spd2: LINEから戻った直後、本人確認を裏で確認している間の表示（メニューは先に見せる） -->
   <p class="ln-hint hidden" id="authPendingNote"><span class="send-spin" style="display:inline-block;width:14px;height:14px;vertical-align:-3px;margin-right:6px" aria-hidden="true"></span>LINEの情報を確認しています。メニュー・日時はそのままお選びいただけます。</p>
 
-  <!-- 🔴 0915nolineA: 未連携の方へのLINEのおすすめ（★必須ではない。押さなくても予約できる）
-       ・宛先は既存の ?from=line（サーバが id_token を検証する入口）。新しい入口は作らない。
-       ・LINE経由で来た未連携の方（lineHint）には出さない（押しても同じ画面に戻るだけのため）。 -->
   <div class="ln-promo hidden" id="linePromo">
     💬 <b>LINE登録がお済みの方は、LINEから続けるとご本人情報の入力が省けます。</b><br>
     <a class="lp-btn" id="linePromoBtn" href="#" target="_top" rel="noopener">LINEで続ける</a>
   </div>
 
-  <!-- 🆕 2026-11-08 1108ai: 予約の相談（×の時間）を送る画面。LINE の本人確認の後に出る -->
   <section class="sec hidden" id="screenConsult">
     <h2>ご予約のご相談</h2>
     <p class="aa-line" id="aaCsWhat"></p>
@@ -830,12 +733,9 @@
     <div id="menuList"></div>
   </section>
 
-  <!-- ② 日時 -->
   <section class="sec hidden" id="screenDate">
     <h2>日時をお選びください</h2>
     <p class="lead" id="dateLead"></p>
-    <!-- 👤 0923choice: 担当者の選択（★サーバのスイッチ STAFF_CHOICE_ENABLED が ON かつ共通メニューのときだけ出す。
-         既定は OFF＝この箱は hidden のまま。既定の選択は「どちらでも」） -->
     <div id="staffChoiceBox" class="staff-choice hidden">
       <div class="sc-label">担当者をお選びください</div>
       <div class="sc-btns" role="radiogroup" aria-label="担当者">
@@ -844,24 +744,19 @@
         <button type="button" class="sc-btn" data-staff="sasada" role="radio" aria-checked="false">佐々田先生</button>
       </div>
     </div>
-    <!-- 🗓 1017batch: 1件だけ／まとめて予約（4件まで）。初期は「1件だけ」＝今までどおり。はじめての方のメニューでは出さない -->
     <div id="batchToggle" class="bt-toggle hidden" role="radiogroup" aria-label="予約のしかた">
       <button type="button" class="bt-btn on" data-batch="0" role="radio" aria-checked="true">1件だけ予約</button>
       <button type="button" class="bt-btn" data-batch="1" role="radio" aria-checked="false">まとめて予約（4件まで）</button>
     </div>
     <p id="batchNote" class="bt-note hidden">表の ○ を押すと選べます（もう一度押すと外れます）。選び終わったら下の「次へ」を押してください。</p>
-    <!-- 🔴 0921wait: 自分が登録中のキャンセル待ち（無ければ非表示・最低限の取り消し導線） -->
     <div id="wlMineBox" class="wl-mine-box hidden"></div>
     <div id="dayList"><div class="loading">空き状況を読み込んでいます…</div></div>
-    <!-- 🗓 1017batch: まとめて予約で選んだ日時（まとめて予約のときだけ出す） -->
     <div id="batchBar" class="bt-bar hidden" aria-live="polite"></div>
   </section>
 
-  <!-- ③ 入力 -->
   <section class="sec hidden" id="screenForm">
     <h2>お客様の情報</h2>
     <p class="lead" id="formLead"></p>
-    <!-- 🔴 0831a: リッチメニュー経由で本人と分かったときだけ出す（★書き換えられる） -->
     <p class="pf-note hidden" id="prefillNote">
       💬 LINEの連携から、前回のご予約の内容を入れてあります。<br>
       別の方がご予約される場合や、変わった場合は書き換えてください。</p>
@@ -877,8 +772,6 @@
       <label for="fPhone">電話番号<span class="req">必須</span></label>
       <input type="tel" id="fPhone" inputmode="tel" autocomplete="tel" placeholder="例：090-0000-0000">
     </div>
-    <!-- 🔴 0915nolineA: ご住所（未連携の方の予約をカルテと照合するために先生が使う。
-         🔴 カルテには書かない。予約データに残すだけ） -->
     <div class="fg">
       <label for="fAddress">ご住所<span class="req">必須</span></label>
       <input type="text" id="fAddress" autocomplete="street-address" placeholder="例：松山市◯◯町1-2-3">
@@ -899,14 +792,12 @@
     </div>
   </section>
 
-  <!-- ④ 確認 -->
   <section class="sec hidden" id="screenConfirm">
     <h2>ご予約内容の確認</h2>
     <p class="lead">この内容でお間違いなければ、確定してください。</p>
     <div class="confirm" id="confirmBox"></div>
   </section>
 
-  <!-- ⑤ 完了 -->
   <section class="hidden" id="screenDone">
     <div class="done">
       <div class="mark">✅</div>
@@ -914,23 +805,16 @@
       <div class="done-box">
         <div class="done-dt" id="doneDt"></div>
         <div class="done-menu" id="doneMenu"></div>
-        <!-- 🗓 1017batch: まとめて予約の結果（○ 予約できました ／ × お取りできませんでした） -->
         <ul class="done-list hidden" id="doneBatchList"></ul>
       </div>
       <p id="doneMail" style="font-size:14px;color:var(--gray);margin:0"></p>
-      <!-- 0903a 第7段階-1: 問診票の結果の一言（送信済み/あとで） -->
       <p id="doneIntakeNote" class="hidden" style="font-size:14px;color:var(--green2);margin:8px 0 0"></p>
-      <!-- 🗓 1017batch: 続けて予約（お名前・お電話・メニューは入ったまま。端末には保存しない） -->
       <div class="done-more" id="doneMore">
         <button type="button" class="btn btn-primary" id="btnContinue">続けて別の日も予約する</button>
         <button type="button" class="bt-link" id="btnChangeMenu">メニューを変えて予約する</button>
       </div>
     </div>
 
-    <!-- 🔴 0830g: LINE連携の入口（★予約が取れた直後の いちばん見える場所）
-         ⚠ ここは「お知らせの受け取り方」の設定であって、予約の成立とは無関係。
-           押さなくても予約は完了していることが分かる文言にすること。
-         ⚠ すでに紐づけ済みの患者・LINE未設定のときは サーバが URL を空で返すので出ない。 -->
     <div class="ln-box ln-done hidden" id="doneLineLink">
       <div class="ln-state">LINEでお知らせを受け取れます</div>
       <p class="ln-sub">
@@ -954,11 +838,6 @@
     </div>
   </section>
 
-  <!-- ============================================================
-       🔴 0903a 第7段階-1: 初診の問診票（旧booking.htmlの7ページを移植）
-       ・予約が成立した【あと】に出す（途中でやめても予約は残る）
-       ・中身のHTMLはJS（renderQPage1〜7）が #qContent に描く
-       ============================================================ -->
   <section class="sec hidden" id="screenIntake">
     <div class="iq-banner" id="iqBanner"></div>
     <div class="iq-skip">
@@ -967,7 +846,6 @@
     <div id="qContent"></div>
   </section>
 
-  <!-- 問診票の完了・案内（★メールのリンクから来た人用。予約完了画面とは別） -->
   <section class="sec hidden" id="screenIntakeDone">
     <div class="done">
       <div class="mark">✅</div>
@@ -976,26 +854,14 @@
     </div>
   </section>
 
-  <!-- ============================================================
-       🔴 0906k 第7段階-4: 再診の事前入力（経過・新しい症状）
-       ・予約成立後に出す（再診メニューのみ）。全項目 任意・飛ばせる。
-       ・B主訴の部位別ピッカー（SYMPTOM_CATEGORIES）を使い回す。
-       ・🔴 カルテには入れない（保存先は予約SSの再診事前入力シート）。
-       ============================================================ -->
-  <!-- 🔴 0907rv3: 先生の指示で簡素化。
-       順番: ①入力せず終わる（上・控えめ） ②自由記入（見出し・例文つき） ③新しい症状 ④送信。
-       痛みの程度・施術後の変化・日常生活は【画面から廃止】（サーバ・列は互換のため残す）。 -->
   <section class="sec hidden" id="screenRevisit">
     <div class="rv-banner" id="rvBanner"></div>
-    <!-- ①「入力せずに終わる」…予約は確定済みなので、書きたくない人がすぐ終われるように上へ。
-         ★ただし全員が押すと意味がないため、ボタンではなく控えめな文字リンク風にする -->
     <div style="text-align:right;margin:-2px 0 10px">
       <button type="button" id="rvSkipBtn"
         style="background:none;border:none;color:var(--gray);font-size:13px;text-decoration:underline;cursor:pointer;padding:6px 4px">
         入力せずに終わる →</button>
     </div>
 
-    <!-- ② 自由記入（見出し・例文つき。例文は入力欄の【下】に薄く並べる＝案A） -->
     <div class="q-card">
       <label>前回の施術後、お身体の様子はいかがでしたか<span class="q-optional">（任意）</span></label>
       <p style="font-size:.85rem;color:var(--gray);margin:0 0 .6rem">気になることがあれば、お聞かせください。</p>
@@ -1009,7 +875,6 @@
       </div>
     </div>
 
-    <!-- ③ 新しい症状（7-1「B 主訴」の部位別ピッカーを使い回し・最大3つ） -->
     <div class="q-card">
       <label>その他に症状が新たに出た場合<span class="q-optional">（任意・最大3つ）</span></label>
       <p style="font-size:.85rem;color:var(--gray);margin:0 0 .6rem">あてはまる部位があれば選んでください。</p>
@@ -1022,12 +887,6 @@
     </div>
   </section>
 
-  <!-- ============================================================
-       🔴 0904a 第7段階-3: 患者情報の更新（先生が発行したリンクから開く）
-       ・住所/電話/生年月日/メールは表示しない（空欄で入力してもらう）
-       ・氏名/ふりがなは本人確認のため表示OK
-       ============================================================ -->
-  <!-- 🔴 0905d: 情報更新は【LINE先行】。未連携ならまずLINEで続ける（入力はそのあと） -->
   <section class="sec hidden" id="screenPULine">
     <div class="pu-head">
       <div class="pu-greet" id="puLineGreet"></div>
@@ -1082,7 +941,6 @@
     <button class="btn btn-primary" id="puSubmit" type="button" style="width:100%">この内容で送信する</button>
   </section>
 
-  <!-- 更新の完了画面 -->
   <section class="sec hidden" id="screenPUDone">
     <div class="done">
       <div class="mark">✅</div>
@@ -1101,15 +959,11 @@
     <button class="btn btn-ghost" id="btnBack" type="button">戻る</button>
     <button class="btn btn-primary" id="btnNext" type="button">次へ</button>
   </div>
-  <!-- 🔴 0928ux【1】: 送信中の進捗（実測 7〜10 秒。押し直しを防ぐ） -->
   <div class="send-status hidden" id="sendStatus" role="status" aria-live="polite">
     <span class="send-spin" aria-hidden="true"></span>
     <span id="sendStatusText">ご予約を登録しています<br>10秒ほどお待ちください</span>
   </div>
 
-  <!-- 🔴 予約の確認・変更（0830a 第5段階）
-       ★メールに届いたリンクを押すこと自体が本人確認。
-       ★メールを入れただけでは絶対に入れない。 -->
   <section class="sec hidden" id="screenManage">
 
     <div class="hidden" id="mgAsk">
@@ -1136,12 +990,9 @@
 
     <div class="hidden" id="mgList">
       <h2>ご予約の確認・変更</h2>
-      <!-- 🔴 0830f: LINE連携から戻ってきたときの一言（サーバが判定した結果だけ） -->
       <p class="ln-msg hidden" id="mgLineMsg"></p>
       <div id="mgListBody"></div>
 
-      <!-- 🔴 0830f 第6段階-1: LINEで通知を受け取る
-           ★ここが出なくても、上の「確認・変更・キャンセル」は今まで通り使えること -->
       <div class="ln-box hidden" id="mgLine">
         <div class="ln-state" id="mgLineState"></div>
         <p class="ln-sub" id="mgLineSub"></p>
@@ -1165,8 +1016,6 @@
       <h2>日時の変更</h2>
       <p class="lead" id="mgPickLead"></p>
       <div id="mgPickDays"></div>
-      <!-- 🔴 0830b: ◯を押すと確認シートが出るので、この決定ボタンは使わない。
-           ★コードは消していない。押せてしまうと確認を飛ばせるので隠す。 -->
       <button class="btn btn-primary hidden" id="mgSave" type="button" style="width:100%" disabled>
         この時間に変更する</button>
       <button class="btn btn-ghost" id="mgPickBack" type="button" style="width:100%;margin-top:10px">
@@ -1185,7 +1034,6 @@
 
   </section>
 
-  <!-- 🔴 常設の案内（場合分けをせず、これ1つで足りるようにする） -->
   <div class="help" id="helpBox">
     <h3>ご希望の日時が見つからないとき</h3>
     ご希望の日時が見つからない場合や、お急ぎの場合は<br>
@@ -1194,16 +1042,12 @@
       <a class="help-btn" id="helpTel" href="tel:">📞 <span id="helpTelText"></span></a>
       <a class="help-btn line hidden" id="helpLine" href="#" target="_blank" rel="noopener">💬 LINEで連絡する</a>
     </div>
-    <!-- 🔴 0830a: すでにご予約のある方の入口 -->
     <div class="help-actions" style="margin-top:6px">
       <button class="help-btn" id="btnManage" type="button">🗓 予約の確認・変更</button>
     </div>
   </div>
 </div>
 
-<!-- 🔴 確認シート（0830b 第6段階）
-     ★◯を押した瞬間に予約・変更を実行しない。必ずここを挟む。
-     ★新規予約と「日時の変更」で共用する（同じものを2つ作らない）。 -->
 <div class="cf-back hidden" id="cfSheet" role="dialog" aria-modal="true" aria-labelledby="cfTitle">
   <div class="cf-box">
     <h3 id="cfTitle">この日時でよろしいですか？</h3>
@@ -1216,7 +1060,6 @@
   </div>
 </div>
 
-<!-- 🔴 0922wlnotify【B】: キャンセル待ち登録完了モーダル（自動で消えない・閉じるボタン/ESCのみ） -->
 <div class="wl-modal-overlay hidden" id="wlDoneModal" role="dialog" aria-modal="true" aria-labelledby="wlDoneTitle">
   <div class="wl-modal-box">
     <h3 id="wlDoneTitle">⏳ キャンセル待ちに登録しました</h3>
@@ -1228,30 +1071,8 @@
 </div>
 
 <script type="text/plain" id="hpMain">
-// ============================================================
-//  患者の予約画面（0829d 第2段階）
-//   ⚠ サーバに投げるのは getOpenSlots / createBooking の2つだけ。
-//     患者を検索するアクションは【存在しない】。
-//   設定（メニュー・院の連絡先・LINE）はサーバがHTMLに埋め込んだものを使う。
-//
-//   🔴 通信は必ず fetch → doPost（/exec）を使う。google.script.run は使わない。
-//     ⚠ google.script.run は【プロジェクト内の任意のグローバル関数】を呼べてしまうため、
-//       doPost の ALLOWED_ACTIONS を迂回できる。旧システムの action* 関数が
-//       まだ残っているこのプロジェクトでは、それが穴になる。
-//     ⚠ Content-Type は text/plain。CORS プリフライト(OPTIONS)を発生させないため
-//       （GAS は OPTIONS を受け取れない。既存システムと同じやり方）。
-// ============================================================
-// ⚠ 出力はエスケープしない形（! 付き）のスクリプトレットで埋め込む。
-//   ! を付けないとサーバが " を &quot; に変換してしまい、JSON として読めなくなる。
-//   ⚠ このコメントにスクリプトレットの記号を書かないこと（テンプレートが解釈して壊れる）。
-//   閉じタグ対策はサーバ側(コード.js)で置換済み。
 var SETUP = window.__HP_SETUP__;
 
-// 🔴 0906e: 入力欄の文字をドラッグして枠の外に落とすと画面が飛ぶ事故を止める。
-//   予約の入力（氏名・電話・メール）・問診票・情報更新のどの textarea/input でも
-//   同じブラウザ既定動作が起きるため、患者ページでも同じ一手を入れる。
-//   ★通常の文字選択・コピペには影響しない（外へドロップしたときの遷移だけ止める）。
-//   このアプリは drag&drop 機能を1つも使っていないので、常に既定動作を殺してよい。
 (function() {
   function _stopDnd(e) {
     e.preventDefault();
@@ -1261,9 +1082,6 @@ var SETUP = window.__HP_SETUP__;
   document.addEventListener('drop', _stopDnd, false);
 })();
 
-/** doPost に action を投げる（★ここを通る＝許可リストの検査を必ず受ける） */
-// 📝 0927fail【B】: 画面で「通信できませんでした」等が出たとき、届く範囲でサーバに1本だけ記録を投げる。
-//   ★失敗しても何もしない（画面を止めない・患者さんに何も出さない）。通信そのものが落ちていれば届かないが、それでよい。
 function reportClientError(reason, context) {
   try {
     var body = { action: 'reportClientError',
@@ -1276,28 +1094,17 @@ function reportClientError(reason, context) {
   } catch (e) {}
 }
 
-// ============================================================
-// 🔴 1002r2【🅓】: Google側の停滞を「待たせない」＝時間切れ → 自動で再試行（2秒・4秒）→ 混雑のご案内
-// ------------------------------------------------------------
-//   ・読む系（空き枠・設定など）は 12秒で時間切れ（@209 実測: 通常 2〜4秒・最大 5.4秒 → その2倍より長い＝正常時は再試行しない）
-//   ・書く系（予約の送信など）は 25秒（送信は実測 7〜10秒。通知の送信を含むため長め。「混み合っているときは20秒ほど」の案内と整合）
-//   ・再試行は【同じ内容・同じ reqId】で送る（createBooking はサーバが reqId で冪等＝二重にならない。1001deadend D-3）
-//   ・画面: 1回目の再試行「混み合っています。自動でもう一度お試ししています…」/ 2回目は電話・LINEを添える
-//   ・3回とも駄目なら Error('ただいま混み合っています')（e.congested=true）。呼び出し側が[もう一度試す]を出す
-// ============================================================
 var CA_TIMEOUT_READ_MS = 12000, CA_TIMEOUT_WRITE_MS = 25000, CA_RETRY_WAITS = [2000, 4000];
-var CA_TIMEOUT_BATCH_MS = 70000;   // 🗓 1017batch: まとめて予約は1件ずつ登録するため長め（4件で30秒前後）
-var CA_WRITE_ACTIONS = /^(createBooking|createBookingBatch|updateMyBooking|cancelMyBooking|submitIntake|submitRevisit|submitPatientUpdate|joinWaitlist|cancelMyWaitlistEntry|rememberBookingName|requestBookingLink|aiConsultSubmit|aiAsk)$/;   // 2026-11-08 1108ai: aiConsultSubmit・aiAsk を足した（AI＋空きで数秒かかるため書き込みと同じ待ち時間）
+var CA_TIMEOUT_BATCH_MS = 70000;
+var CA_WRITE_ACTIONS = /^(createBooking|createBookingBatch|updateMyBooking|cancelMyBooking|submitIntake|submitRevisit|submitPatientUpdate|joinWaitlist|cancelMyWaitlistEntry|rememberBookingName|requestBookingLink|aiConsultSubmit|aiAsk)$/;
 var CA_PHONE = '089-906-8249';
 function caLineUrl() { try { return (SETUP.clinic && SETUP.clinic.lineUrl) || ''; } catch (e) { return ''; } }
-/** 混雑時の連絡先（HTML）。big=true で2回目以降の「お急ぎの方は」を大きく */
 function caContactHtml(big) {
   var ln = caLineUrl();
   var inner = 'お急ぎの方はお電話（<a href="tel:' + CA_PHONE + '">' + CA_PHONE + '</a>）'
             + (ln ? '・<a href="' + esc(ln) + '" target="_blank" rel="noopener">LINE</a>' : '・LINE') + 'でご連絡ください。';
   return big ? '<div style="margin-top:.5rem;font-size:1.05em;font-weight:700">' + inner + '</div>' : '<div style="margin-top:.3rem">' + inner + '</div>';
 }
-/** 再試行の案内（n=1: 2秒待ち / n=2: 4秒待ち＝電話・LINEを大きく）。出す場所は 送信中表示 → 読み込み中表示 → 上部メッセージ の順 */
 function caCongestNotice(n) {
   var text = '混み合っています。自動でもう一度お試ししています…';
   var html = text + (n >= 2 ? caContactHtml(true) : '');
@@ -1310,7 +1117,6 @@ function caCongestNotice(n) {
     if (el) { el.className = 'msg ok'; el.innerHTML = html; }
   } catch (e) {}
 }
-/** 最終的に駄目だったときの案内（HTML）。retryId のボタンに呼び出し側が「もう一度試す」を付ける */
 function caFailHtml(retryId, extra) {
   return 'ただいま混み合っています。' + (extra || '') + caContactHtml(false)
        + '<div style="margin-top:.6rem"><button type="button" class="btn btn-primary" id="' + retryId + '">もう一度試す</button></div>';
@@ -1319,9 +1125,9 @@ function callAction(action, payload) {
   var body = {};
   for (var k in (payload || {})) body[k] = payload[k];
   body.action = action;
-  var tmo = (action === 'createBookingBatch') ? CA_TIMEOUT_BATCH_MS   // 🗓 1017batch
+  var tmo = (action === 'createBookingBatch') ? CA_TIMEOUT_BATCH_MS
           : CA_WRITE_ACTIONS.test(action) ? CA_TIMEOUT_WRITE_MS : CA_TIMEOUT_READ_MS;
-  var raw = JSON.stringify(body);   // ★再試行は同じ内容（reqId も同じ）
+  var raw = JSON.stringify(body);
   function once() {
     var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
     var timer = setTimeout(function() { try { if (ctrl) ctrl.abort(); } catch (e) {} }, tmo);
@@ -1352,10 +1158,8 @@ function callAction(action, payload) {
   return attempt(0);
 }
 
-var SHOW_DAYS_STEP = 14;   // 一度に描く日数（スマホで重くならないように）
+var SHOW_DAYS_STEP = 14;
 var S = { step: 1, menu: null, datetimeJST: '', days: [], loading: false, showDays: SHOW_DAYS_STEP };
-// 🗓 1017batch: まとめて予約（batch・選んだ日時）と、この画面で予約した日時（booked＝「済」の印）。
-//   🔴 画面の中だけ（localStorage に書かない）。閉じれば消える。
 S.batch = false; S.batchSlots = []; S.booked = [];
 
 function $(id) { return document.getElementById(id); }
@@ -1372,61 +1176,38 @@ function showMsg(text, kind) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ============================================================
-// 🔴 0907line 案A: LINE本人確認（予約パス）
-// ------------------------------------------------------------
-//   ・AUTH.token … サーバ（_llMenuCallback_・id_token検証済み）だけが埋め込む札。
-//     無ければ予約フローに入れず、ゲート（LINEで続ける）を出す。
-//   ・AUTH.user  … 確認表示用の4項目（画面はこれを表示するだけ。送信もこの値は使われず、
-//     サーバは札の中の値だけで予約を作る＝画面で書き換えてもなりすませない）。
-// ============================================================
 var AUTH = {
   token: String(SETUP.bookingAuth || ''),
   user: SETUP.bookingUser || null,
-  needName: !!SETUP.bookingNeedName,   // 🆕 0917new: カルテ未紐づけ＝氏名だけ入力してもらう
-  presetName: String(SETUP.bookingPresetName || ''),   // 🆕 0917name: 前回入力した氏名（あれば確認だけ）
-  // 🆕 0918spd2: LINEから直接戻った直後、本人確認(lineMenuCallback)を裏で走らせている間 true。
-  //   メニューは先に見せ、確定（予約作成）の前に本人確認の完了を必ず待つ（サーバも札必須で担保）。
+  needName: !!SETUP.bookingNeedName,
+  presetName: String(SETUP.bookingPresetName || ''),
   authPending: !!SETUP.authPending,
-  _resumeSubmit: null,        // 確定待ちで止めているとき、完了後に呼ぶ関数
-  confirmed: false            // 「◯◯様でお間違いないですか」に「はい」と答えたか
+  _resumeSubmit: null,
+  confirmed: false
 };
 
-// 🆕 0918spd2: 裏で終わった本人確認の結果を画面に反映する（起動役 build_hp.js が呼ぶ）。
-//   ★サーバは createBooking で予約パス必須＝ここが遅れても二重予約・無認証予約は起きない。
 window.__hpApplyAuth__ = function (rc) {
   try {
     AUTH.authPending = false;
     var note = document.getElementById('authPendingNote');
     if (note) note.classList.add('hidden');
-    // 🆕 0918banner: 本人確認が終わったら「LINEで続けると省けます」の案内は必ず畳む
-    //   （連携済みの人＝もう来ている人に見せない）。
     var _lp = document.getElementById('linePromo'); if (_lp) _lp.classList.add('hidden');
     var resume = AUTH._resumeSubmit; AUTH._resumeSubmit = null;
-    if (typeof aaOnAuth === 'function' && aaOnAuth(rc)) return;   // 🆕 2026-11-08 1108ai: 相談の途中なら結果は相談の画面で受ける（それ以外は今までどおり）
+    if (typeof aaOnAuth === 'function' && aaOnAuth(rc)) return;
     if (rc && rc.success && rc.auth && rc.user && rc.user.name) {
-      // 連携済み（カルテ紐づけ）＝氏名は分かっている。そのまま予約できる。
       AUTH.token = rc.auth; AUTH.user = rc.user; AUTH.needName = false; AUTH.presetName = '';
-      // 🔒 1007rm: この人に許可された限定メニュー（応答にだけ乗る・キャッシュしない）。メニュー画面なら静かに足す
       SETUP.bookingRestricted = (rc.restrictedMenus && rc.restrictedMenus.length) ? rc.restrictedMenus : [];
       try { if (S.step === 1 && typeof renderMenus === 'function') renderMenus(); } catch (eRm) {}
       try { sessionStorage.removeItem('cbfail'); } catch (e) {}
-      if (resume) resume(true);   // 確定待ちなら進める
-      // 🔴 0928ux【2】: 「次へ」を押して裏の確認を待っていた人は、そのまま④確認へ進める
+      if (resume) resume(true);
       if (AUTH._resumeNext) { AUTH._resumeNext = false; showMsg(''); if (S.step === 2 && S.menu && S.datetimeJST) goStep(4); }
     } else if (rc && rc.success && rc.auth && rc.needName) {
-      // カルテ未紐づけ＝氏名の確認/入力が要る。本人確認画面へ（確定はまだ）。
-      // 🔴 0928flow: 「この内容で予約する」を押して待っていた人は、氏名を入れたら自動で送信まで進める
-      //   （今までは氏名の後にメニュー①へ戻され、選んだ内容が消えたように見えた）
       AUTH._afterWhoSubmit = !!resume;
       AUTH.token = rc.auth; AUTH.needName = true; AUTH.presetName = String(rc.preset || '');
-      SETUP.bookingRestricted = [];   // 🔒 1007rm: 紐づけ前の方には限定メニューは出ない
+      SETUP.bookingRestricted = [];
       AUTH.confirmed = false;
       AUTH.user = rc.preset ? { name: rc.preset, kana: '', phone: '', email: '' } : null;
       try { sessionStorage.removeItem('cbfail'); } catch (e) {}
-      // 🔴 0928ux【2】: 選択の途中（メニューを選んだ後）なら割り込まない。「次へ」または送信のときに氏名を聞く。
-      //   ★メニュー一覧を眺めているだけ（未選択）のときは今までどおりすぐ聞く（その方が早い）。
-      //   ★送信を押して待っていた人（resume）は今すぐ聞いて、氏名の後に自動で送信する（今までどおり）。
       if (!resume && S.menu) {
         AUTH.whoPending = true;
         if (AUTH._resumeNext) { AUTH._resumeNext = false; showMsg(''); AUTH.whoPending = false; showWhoScreen(); }
@@ -1434,10 +1215,8 @@ window.__hpApplyAuth__ = function (rc) {
       }
       if (typeof showWhoScreen === 'function') showWhoScreen();
     } else if (rc && rc.success && rc.guest) {
-      // 未連携（通常は起きない）。false運用なら入力で予約できる＝メニュー継続。
       SETUP.lineHint = true;
     } else {
-      // 失敗：2回で電話案内（ループにしない）
       var cbN = 0; try { cbN = parseInt(sessionStorage.getItem('cbfail') || '0', 10) || 0; } catch (e) {}
       cbN += 1; try { sessionStorage.setItem('cbfail', String(cbN)); } catch (e) {}
       var m = document.getElementById('msg');
@@ -1447,28 +1226,25 @@ window.__hpApplyAuth__ = function (rc) {
           ? 'ご本人確認がうまくいきませんでした。お手数ですが、お電話（089-906-8249）でご予約ください。'
           : ('ご本人確認をやり直してください。<a href="' + esc(SETUP.execUrl) + '?from=line">もう一度LINEで続ける</a>');
       }
-      if (resume) resume(false);   // 確定待ちなら失敗を伝えて止める
-      AUTH._resumeNext = false;   // 🔴 0928ux【2】: 「次へ」待ちは解除（次に押すと③ご入力へ進む）
+      if (resume) resume(false);
+      AUTH._resumeNext = false;
     }
   } catch (e) {}
 };
 
-/** 予約フローの画面と段バーを全部畳む（ゲート系の画面を出す前に呼ぶ） */
 function hideBookingFlow() {
   ['screenMenu', 'screenDate', 'screenForm', 'screenConfirm', 'screenDone'].forEach(function(id) {
     $(id).classList.add('hidden');
   });
-  // 🔴 0915nolineA: LINEのおすすめ・ヒントも畳む（ゲート系の画面に重ねない）
   $('linePromo').classList.add('hidden');
   $('lineHint').classList.add('hidden');
   $('stepBar').classList.add('hidden');
-  if ($('stepLabel')) $('stepLabel').classList.add('hidden');   // 🆕 0917auth
+  if ($('stepLabel')) $('stepLabel').classList.add('hidden');
   $('navRow').classList.add('hidden');
 }
-// 🆕 0917auth: 本人確認は「① ご本人確認」＝進捗バーの1番目。バーとラベルを出す。
 function showAuthStep() {
   try {
-    S.step = 0;   // 予約の流れ(1〜)より前＝本人確認
+    S.step = 0;
     $('stepBar').classList.remove('hidden');
     var sl = $('stepLabel');
     if (sl) { sl.classList.remove('hidden'); sl.textContent = '① ご本人確認'; }
@@ -1478,11 +1254,10 @@ function showAuthStep() {
 function showGateScreen(errText) {
   hideBookingFlow();
   ['screenNotice', 'screenWho'].forEach(function(id) { $(id).classList.add('hidden'); });
-  // 🆕 0917auth: LINE必須OFF のときだけ「LINEを使わずに予約する」を出す（今までどおり5項目）
   var nl = $('gateNoLine');
   if (nl) nl.style.display = SETUP.lineRequired ? 'none' : 'block';
   var nln = $('gateNoLineNote');
-  if (nln) nln.style.display = SETUP.lineRequired ? 'none' : 'block';   // 🆕 0917name: 面倒である旨
+  if (nln) nln.style.display = SETUP.lineRequired ? 'none' : 'block';
   $('screenGate').classList.remove('hidden');
   showAuthStep();
   if (errText) showMsg(errText);
@@ -1497,10 +1272,6 @@ function showWhoScreen() {
   hideBookingFlow();
   ['screenGate', 'screenNotice'].forEach(function(id) { $(id).classList.add('hidden'); });
   showAuthStep();
-  // 🆕 0917name: 出し分け
-  //   ・カルテ未紐づけ＋前回の氏名あり(presetName) … 確認「◯◯様?」＋「別の名前にする」
-  //   ・カルテ未紐づけ＋前回なし(1回目) … 氏名入力
-  //   ・カルテ紐づけ済み … 確認（従来・別名は出さない）
   var showInput = AUTH.needName && !AUTH.presetName;
   if (showInput) {
     $('whoConfirmBlock').classList.add('hidden');
@@ -1509,13 +1280,11 @@ function showWhoScreen() {
     $('whoInputBlock').classList.add('hidden');
     $('whoConfirmBlock').classList.remove('hidden');
     if (AUTH.needName && AUTH.presetName) {
-      // 2回目以降（未紐づけ）：覚えている氏名で確認
       if (!AUTH.user) AUTH.user = { name: AUTH.presetName, kana: '', phone: '', email: '' };
       $('whoName').textContent = AUTH.presetName;
       $('whoConfirmLead').textContent = '前回のお名前でご予約を続けます。';
       $('whoChangeName').style.display = 'block';
     } else {
-      // カルテ紐づけ済み：従来の確認
       $('whoName').textContent = (AUTH.user && AUTH.user.name) || '';
       $('whoConfirmLead').textContent = 'LINEのご登録から、お客様の情報をお預かりしています。';
       $('whoChangeName').style.display = 'none';
@@ -1523,43 +1292,30 @@ function showWhoScreen() {
   }
   $('screenWho').classList.remove('hidden');
 }
-/**
- * トークン無しで開いたときの入口を決める。出したら true。
- *   ⚠ ?t=（確認・変更）・?pu=（情報更新）・?intake=（問診票）は今まで通りで、ここは通らない。
- */
 function routeEntry() {
-  if (typeof aaRouteConsult === 'function' && aaRouteConsult()) return true;   // 🆕 2026-11-08 1108ai: 相談の途中なら相談の画面（無ければ何もしない）
-  // 🆕 0918spd2: LINEから直接戻った直後は、本人確認を裏で走らせつつ【先にメニューを見せる】。
-  //   ・氏名の確認/入力（needName）や失敗の案内は __hpApplyAuth__ が後から出す。
-  //   ・確定（予約作成）の直前に必ず本人確認の完了を待つ（下の submitBooking）。
+  if (typeof aaRouteConsult === 'function' && aaRouteConsult()) return true;
   if (AUTH.authPending && !AUTH.token) {
     var apn = $('authPendingNote'); if (apn) apn.classList.remove('hidden');
     $('stepBar').classList.remove('hidden');
-    goStep(1);            // メニューを表示
+    goStep(1);
     return true;
   }
   if (SETUP.lineNoticeGate) { showNoticeScreen(); return true; }
-  // 🆕 0917new: カルテ未紐づけ（needName）＝氏名入力から
   if (AUTH.token && AUTH.needName) {
-    if (AUTH.confirmed) return false;      // 名前入力済みなら予約の流れへ
+    if (AUTH.confirmed) return false;
     showWhoScreen(); return true;
   }
   if (AUTH.token && AUTH.user && AUTH.user.name) {
-    if (AUTH.confirmed) return false;      // 確認済みなら予約の流れへ
+    if (AUTH.confirmed) return false;
     showWhoScreen(); return true;
   }
-  // 🆕 0917auth: パス無し（未連携）は 本人確認(ゲート) を1番目に出す。
-  //   ・必須(true)  … LINEで続ける＋電話（今までどおり）
-  //   ・解除(false) … 「LINEで続ける」＋「LINEを使わずに予約する」（後者で今までの5項目フローへ）
   showGateScreen();
   return true;
 }
 
-// ---- 起動 ----
 function init() {
   try {
     $('clinicName').textContent = SETUP.clinic.name;
-    // 常設の案内（電話・LINE）
     $('helpTel').href = 'tel:' + String(SETUP.clinic.tel).replace(/[^0-9+]/g, '');
     $('helpTelText').textContent = SETUP.clinic.tel;
     $('noMailTel').href = 'tel:' + String(SETUP.clinic.tel).replace(/[^0-9+]/g, '');
@@ -1569,37 +1325,19 @@ function init() {
       $('helpLine').classList.remove('hidden');
       $('doneLineBtn').href = SETUP.clinic.lineUrl;
     } else {
-      // ⚠ LINE公式アカウントのIDが未設定のときはボタンを出さない（リンク切れを見せない）
       $('doneLineWrap').classList.add('hidden');
     }
-    // 🔴 0907line 案A: ゲート・案内・氏名確認の連絡先とリンク
     var telHref = 'tel:' + String(SETUP.clinic.tel).replace(/[^0-9+]/g, '');
     $('gateTel').href = telHref;   $('gateTelText').textContent = SETUP.clinic.tel;
     $('noticeTel').href = telHref; $('noticeTelText').textContent = SETUP.clinic.tel;
     $('whoTel').href = telHref;    $('whoTelText').textContent = SETUP.clinic.tel;
-    // ★「LINEで続ける」は既存の ?from=line（サーバが id_token を検証する入口）へ
     $('gateLineBtn').href = SETUP.execUrl + '?from=line';
-    // 🔴 0915nolineA: 未連携の方へのLINEのおすすめ（★止めない。メニュー画面の上に出すだけ）
-    //   ・本人確認済み（AUTH.token）… 不要
-    //   ・LINE経由の未連携（lineHint）… 既存のヒントが出る（ボタンを押しても戻るだけなので出さない）
     $('linePromoBtn').href = SETUP.execUrl + '?from=line';
-    // 🆕 0918banner: 🔴 連携済み(AUTH.token)・裏で本人確認中(authPending) には出さない。
-    //   ＝すでにLINEから来ている人に「LINEで続けると省けます」を見せない（混乱防止）。
-    //   ★「LINEを使わずに予約する」で進んだ未連携の人にだけ出す（連携すれば楽と伝える）。
     if (!AUTH.token && !AUTH.authPending && !SETUP.lineHint) $('linePromo').classList.remove('hidden');
     if (SETUP.clinic.lineUrl) $('noticeAddFriend').href = SETUP.clinic.lineUrl;
-    else $('noticeAddFriend').classList.add('hidden');   // ID未設定ならリンク切れを見せない
-    // ============================================================
-    // 🔴 0831a: リッチメニュー（?from=line）から来たとき
-    // ------------------------------------------------------------
-    //   ・連携済み  … サーバが本人と確かめたうえで4項目だけ入れてくれている
-    //   ・未連携    … 控えめな案内だけ（★ここから連携はできない）
-    //   ⚠ 判定はサーバが済ませている。画面では出し分けるだけ。
-    //   ⚠ from=line 無しで開いた人は prefill も lineHint も無い＝今まで通り。
-    // ============================================================
+    else $('noticeAddFriend').classList.add('hidden');
     if (SETUP.prefill) {
       var PF = SETUP.prefill;
-      // 🔴 入れるのは予約に必要な4つだけ。★どれも書き換えられる（readonly にしない）
       if (PF.name)  $('fName').value  = PF.name;
       if (PF.kana)  $('fKana').value  = PF.kana;
       if (PF.phone) $('fPhone').value = PF.phone;
@@ -1614,22 +1352,11 @@ function init() {
   }
 }
 
-// ---- ① メニュー ----
 
-/**
- * 🔴 0906a: 患者に見せる時間（治療時間）。
- *   treatmentMinutes はサーバが「treatment_min が空なら duration_min」に倒して埋めた値。
- *   古いキャッシュ等で無い場合に備え、画面でも durationMinutes に倒す。
- *   ⚠ これは【表示専用】。空き枠の取得・予約の作成は durationMinutes（枠）を使い続ける。
- */
 function menuDispMin(m) {
   return Number(m && m.treatmentMinutes) || Number(m && m.durationMinutes) || 0;
 }
 
-// 🔒 1007rm: 画面に出すメニュー ＝ 全員共通の SETUP.menus ＋ この人に許可された限定メニュー（SETUP.bookingRestricted）。
-//   ・限定は【札（本人確認）の応答】にだけ乗る（getBookingAuthUser / lineMenuCallback / GASページの埋め込み）。
-//     全員共通の setup（サーバ10分キャッシュ・端末の土台キャッシュ localStorage）には乗らない＝起動役は SETUP.menus だけを控える。
-//   ・画面では印を付けない（普通のメニューと同じ見た目）。並びは sortOrder。
 function menusForDisplay() {
   var base = SETUP.menus || [];
   var extra = SETUP.bookingRestricted || [];
@@ -1641,7 +1368,7 @@ function menusForDisplay() {
     if (!m || !m.id || seen[m.id]) return;
     seen[m.id] = true;
     var c = {}; for (var k in m) c[k] = m[k];
-    c.restricted = true;   // 先読み（wpPrefetched）を使わない目印（画面には出さない）
+    c.restricted = true;
     out.push(c);
   });
   out.sort(function(a, b) { return (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0); });
@@ -1651,11 +1378,7 @@ function menusForDisplay() {
 function renderMenus() {
   var h = '';
   menusForDisplay().forEach(function(m) {
-    // 🔴 0924sasada: 佐々田先生が未稼働（SETUP.sasadaActive が false）なら佐々田担当メニューは出さない
-    //   （サーバ側 getBookingSetup_ でも除いているが、画面でも念のため守る）
     if (SETUP.sasadaActive === false && m.owner === 'sasada') return;
-    // 0905b: 料金(税込)・説明文を出す。0906a: 時間は【治療時間】・コース特典を追加
-    //   （★枠 durationMinutes は患者に見せない。枠計算は durationMinutes のまま）
     var price = Number(m.price) || 0;
     var priceHtml = price > 0 ? '<span class="menu-price">¥' + Number(price).toLocaleString('ja-JP') + '（税込）</span>' : '';
     var desc = m.description || m.note || '';
@@ -1678,68 +1401,40 @@ function pickMenu(id) {
   menusForDisplay().forEach(function(x) { if (x.id === id) m = x; });
   if (!m) return;
   S.menu = m;
-  // ⚠ メニュー＝所要時間が変わると選べる枠が変わる。前の結果を必ず捨てる。
   S.days = [];
   S.datetimeJST = '';
   S.showDays = SHOW_DAYS_STEP;
-  S.staff = 'any';   // 👤 0923choice: メニューを選び直したら希望担当は「どちらでも」に戻す（既定）
-  S.batchSlots = [];   // 🗓 1017batch: メニュー（所要時間）が変われば選んだ日時も捨てる
+  S.staff = 'any';
+  S.batchSlots = [];
   Array.prototype.forEach.call($('menuList').querySelectorAll('.menu-btn'), function(b) {
     b.classList.toggle('on', b.getAttribute('data-id') === id);
   });
   goStep(2);
 }
 
-// ============================================================
-// 🔴 週表（0830b 第6段階）— 日時選択の部品はこれ1つ
-// ------------------------------------------------------------
-//   新規予約（②日時）と「日時の変更」の両方がここを使う。
-//   ★同じものを2つ作らない。直すときもここ1箇所。
-//
-//   ① 週を選ぶ（◀前週 / 今週 / 翌週▶。新規予約と同じ2ヶ月先まで）
-//   ② その週が表で出る（縦=時間 / 横=月〜日）
-//   ③ ◯を押す → 確認シート（★押した瞬間には実行しない）
-//
-//   🔴 表記は ◯ × の2種類だけ（0830c）。△ は使わない。
-//     ⚠ 定休日か昼休みかを患者に伝える必要はない。取れないのは同じ。
-//   🔴 空き枠の数は出さない（埋まり具合から来院人数が読めてしまうため）。
-//   🔴 ◯× の判定はサーバが返した mark をそのまま使う。画面側で作らない。
-//      ⚠ 画面が◯でも、押した時点で埋まっている可能性がある。
-//        最終判定は必ずサーバー。失敗したら表を取り直す。
-//   ⚠ 1週ぶんを1往復で取る。一度読んだ週はキャッシュして再取得しない。
-//     ⚠ 所要時間（メニュー）が変わると空きも変わるので、キャッシュの鍵に含める。
-// ============================================================
 var WP = {
-  el: null,          // 描画先の要素
-  dur: 0,            // 所要時間（分）
-  // 👥 0921owner 第2段-B-2: 選んでいるメニューのID（あれば）。サーバーに渡すだけで
-  //   見た目・動作は変えない。無ければ渡さない（既存の自己申告フローは今までどおり）。
+  el: null,
+  dur: 0,
   menuId: '',
-  weekStart: '',     // 表示中の週の月曜 'YYYY-MM-DD'
-  minWeek: '',       // これより前には戻れない（今日の週）
-  maxWeek: '',       // これより先には進めない（2ヶ月先の週）
-  // 🔴 キャッシュは【日ごと】に持つ（0830c）。
-  //   ⚠ 週と月で別々のキャッシュにすると、月表示から日を押したときに
-  //     同じ日をもう一度取りに行ってしまう。日で持てば取り直しが起きない。
-  //   鍵は所要時間ごと。メニュー＝所要時間が変わると空きも変わるため。
-  cache: {},         // dur -> { day: {ymd: 日データ}, got: {ymd: true}, starts: ['09:00'…] }
+  weekStart: '',
+  minWeek: '',
+  maxWeek: '',
+  cache: {},
   loading: false,
-  picked: '',        // 'YYYY/MM/DD HH:mm'
-  onPick: null,      // ◯が押されたとき（確認シートを出す）
-  auto: false,       // 空きのある週まで自動で送ってよいか（★最初の表示だけ）
-  hops: 0,           // 自動で送った回数（★通信しすぎないように上限を付ける）
-  // ---- 月表示（0830c）★既定は閉じている ----
+  picked: '',
+  onPick: null,
+  auto: false,
+  hops: 0,
   monthOpen: false,
-  month: '',         // 表示中の月 'YYYY-MM'
-  minMonth: '',      // 今日の月
-  maxMonth: '',      // 2ヶ月先の月
+  month: '',
+  minMonth: '',
+  maxMonth: '',
   monthBusy: false
 };
-var WP_MAX_HOPS = 4;   // 自動で送るのは最大4週まで
+var WP_MAX_HOPS = 4;
 
 var WP_DOW = ['日','月','火','水','木','金','土'];
 
-/** 'YYYY-MM-DD' に日数を足す（★UTCで計算して時差でずらさない） */
 function wpAddDays(ymd, n) {
   var p = String(ymd).split('-');
   var d = new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2])));
@@ -1747,55 +1442,37 @@ function wpAddDays(ymd, n) {
   return d.getUTCFullYear() + '-' + ('0' + (d.getUTCMonth() + 1)).slice(-2)
        + '-' + ('0' + d.getUTCDate()).slice(-2);
 }
-/** その日を含む週の月曜 */
 function wpMonday(ymd) {
   var p = String(ymd).split('-');
-  var dow = new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2]))).getUTCDay(); // 0=日
+  var dow = new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2]))).getUTCDay();
   return wpAddDays(ymd, -(dow === 0 ? 6 : dow - 1));
 }
-/** 'YYYY-MM-DD' の曜日番号（0=日） */
 function wpDow(ymd) {
   var p = String(ymd).split('-');
   return new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2]))).getUTCDay();
 }
-/** 'YYYY-MM-DD' → 'M/D' */
 function wpMD(ymd) {
   var p = String(ymd).split('-');
   return Number(p[1]) + '/' + Number(p[2]);
 }
-/** 'YYYY-MM-DD' + 'HH:mm' → 「10月12日（月）9:00」 */
 function wpLabel(ymd, hm) {
   var p = String(ymd).split('-');
   return Number(p[1]) + '月' + Number(p[2]) + '日（' + WP_DOW[wpDow(ymd)] + '）'
        + String(hm).replace(/^0/, '');
 }
 
-/**
- * 週表を組み立てる。
- * @param {Element}  el        描画先
- * @param {number}   dur       所要時間（分）
- * @param {Function} onPick    ◯が押されたとき onPick(datetimeJST, label)
- * @param {string}   [picked]  すでに選ばれている日時（'YYYY/MM/DD HH:mm'）
- * @param {string}   [menuId]  👥 0921owner: 選んでいるメニューのID（分かれば）。無ければ空のまま。
- * @param {boolean}  [enableWaitlist]  🔴 0921wait: ×の枠からキャンセル待ちに登録できるようにする
- *   （新規予約の日時選択画面だけ true。予約の変更画面(mgPickDays)では今まで通り false のまま）
- */
 function wpStart(el, dur, onPick, picked, menuId, enableWaitlist) {
   WP.el = el;
   WP.dur = dur;
   WP.menuId = menuId || '';
-  // 🆕 2026-11-02 1102chg: 変更画面（startEdit）だけ「変更する本人の予約」を渡す。ほかの呼び出しでは必ず空に戻す
   WP.changeFor = WP.nextChangeFor || null;
   WP.nextChangeFor = null;
-  // 👤 0923choice: 変更画面（startEdit）など他の呼び出し元は希望担当を持たない＝'' に戻す。
-  //   新規予約は mountWeekPickerForNew が wpStart の直前に WP.staff を入れ、ここでは触らない。
   if (!(S.step === 2 && staffChoiceShown())) WP.staff = '';
   WP.onPick = onPick;
   WP.picked = picked || '';
   WP.enableWaitlist = !!enableWaitlist;
   WP.minWeek = wpMonday(SETUP.today);
   WP.maxWeek = wpMonday(horizonDate());
-  // 🔴 月表示は既定で閉じる（今までの見た目を変えない）。範囲は今日〜2ヶ月先。
   WP.monthOpen = false;
   WP.monthBusy = false;
   WP.month = '';
@@ -1805,26 +1482,17 @@ function wpStart(el, dur, onPick, picked, menuId, enableWaitlist) {
   var ws = wpMonday(base);
   if (ws < WP.minWeek) ws = WP.minWeek;
   if (ws > WP.maxWeek) ws = WP.maxWeek;
-  // ⚠ 今日が日曜（定休）だと今週の表が真っ白になる。
-  //   空きが1つも無い週で止まらないよう、最初だけ空きのある週まで自動で送る。
-  //   ★隠していない。◀ でいつでも戻れる。
   WP.auto = !WP.picked;
   WP.hops = 0;
-  // 🆕 0918os: 🔴 まず【表示する週だけ】取って即描く（今までは2ヶ月=60日を1往復で取り、
-  //   シート併読(@164)が加わって重く・弱い回線で落ちて「空き枠が出ない」原因になっていた）。
-  //   ・wpGo(ws) が その週(7日)だけを取得して描画（失敗しても wpFetch が1回やり直す）。
-  //   ・残りは【裏で】少しずつ先読み＝週送りは速いまま・失敗しても表示済みなので壊れない。
-  //   🔴 枠の空きはキャッシュしない（毎回サーバから取得。押したときも再確認する）。
   wpGo(ws);
   wpPrefetchAhead(ws);
 }
 
-/** 🆕 0918os: 表示中の週の先の数週を、裏でこっそり先読みする（週送りを速く保つ・非同期）。 */
 function wpPrefetchAhead(ws) {
   try {
     var ranges = [
-      [wpAddDays(ws, 7),  wpAddDays(ws, 13)],   // 翌週
-      [wpAddDays(ws, 14), wpAddDays(ws, 27)]    // 2〜3週先
+      [wpAddDays(ws, 7),  wpAddDays(ws, 13)],
+      [wpAddDays(ws, 14), wpAddDays(ws, 27)]
     ];
     var i = 0;
     function next() {
@@ -1833,47 +1501,36 @@ function wpPrefetchAhead(ws) {
       var a = (rg[0] > WP.maxWeek) ? null : rg[0];
       if (!a) return;
       var b = (rg[1] > wpAddDays(WP.maxWeek, 6)) ? wpAddDays(WP.maxWeek, 6) : rg[1];
-      // 既に持っていれば飛ばす
       if (wpHave(rg[0], b)) { next(); return; }
       wpFetch(a, b).then(function() {
-        if (!WP.loading && WP.el) wpRender();   // 先読みできたら軽く描き直す（今の週は変えない）
+        if (!WP.loading && WP.el) wpRender();
         next();
-      }).catch(function() { next(); });          // 先読み失敗は無視（オンデマンドで取れる）
+      }).catch(function() { next(); });
     }
-    // 表示が落ち着いてから（初回描画をブロックしない）
     setTimeout(next, 400);
   } catch (e) {}
 }
 
-/** 所要時間ごとの入れ物（無ければ作る）
- *   👤 0923choice: 鍵に メニューID と 希望担当 も入れる。同じ所要時間でも担当者（メニューの owner／選んだ担当）が
- *   違えば ◯× が違うので、取り置きを混ぜない（OFF・固定メニューでは staff は '' ＝今までと同じ鍵の形）。 */
 function wpStore() {
   var k = String(WP.dur) + '|' + (WP.menuId || '') + '|' + (WP.staff || '')
-        + (WP.changeFor ? '|chg:' + WP.changeFor.rid : '');   // 🆕 1102chg: 変更画面の空きは新規予約と混ぜない
+        + (WP.changeFor ? '|chg:' + WP.changeFor.rid : '');
   if (!WP.cache[k]) WP.cache[k] = { day: {}, got: {}, starts: [] };
   return WP.cache[k];
 }
 
-/** その範囲を全部すでに読んでいるか（★読んで「無かった」日も読んだ扱い） */
 function wpHave(from, to) {
   var st = wpStore();
   for (var d = from; d <= to; d = wpAddDays(d, 1)) if (!st.got[d]) return false;
   return true;
 }
 
-/** その日のデータ（範囲外・未取得なら null） */
 function wpDay(ymd) { return wpStore().day[ymd] || null; }
 
-/** その日に○が1つでもあるか */
 function wpDayOpen(ymd) {
   var d = wpDay(ymd);
   return !!(d && (d.slots || []).some(function(s) { return wpMark(s) === 'o'; }));
 }
 
-/** 🔴 記号はサーバの mark をそのまま使う（◯ か × の2種類だけ） */
-/** 🆕 2026-11-02 1102sticky: 表が幅に収まるか見て、日付の行の残し方を切り替える（CSS の .wp-fit / .wp-wide）
- *   ⚠ 失敗しても表はそのまま使える（今までの見た目に戻るだけ） */
 function wpStickyFit_() {
   try {
     var sc = $('wpScroll'); if (!sc) return;
@@ -1891,39 +1548,26 @@ function wpMark(slot) {
   if (!slot) return 'x';
   return (slot.mark === 'o' || (slot.mark === undefined && slot.available)) ? 'o' : 'x';
 }
-/** 🔴 0914p: slot が取れるか（mark='o' なら取れる）。available は冗長なので廃止。 */
 function slotOpen(s) { return s && s.mark === 'o'; }
 
-/**
- * 範囲ぶんを取ってくる（★1往復。すでに読んでいれば通信しない）
- *   🔴 空き枠の計算は作らない。既存の getOpenSlots を範囲指定で呼ぶだけ。
- *   ⚠ サーバは今日より前・2ヶ月より先を切り落とす。返ってこなかった日は
- *     「読んだが枠が無い」＝ × として扱う（got には立てる）。
- */
-/** 🔴 1002speed【🅕】: 起動役がページを開いた瞬間に先読みした空き枠（60分・今週＋来週）が使えるか
- *   ・同じ所要時間・希望担当なし・佐々田担当メニューでない・範囲内・取得から90秒以内 のときだけ
- *   ・古い空きを見せない守り: 90秒を過ぎたものは使わず取り直す。確定時はサーバが必ず再確認（_bkSlotCheck_）*/
 function wpPrefetched(dur, from, to) {
   try {
     var pre = window.__HP_SLOTS_PRE__;
     if (!pre || !pre.p) return null;
-    if (WP.changeFor) return null;   // 🆕 1102chg: 変更画面は先読み（本人の予約を数えた空き）を使わない
+    if (WP.changeFor) return null;
     if (WP.staff) return null;
     if (from < pre.from || to > pre.to) return null;
     if (Date.now() - pre.at > 90000) return null;
     var mm = menusForDisplay().filter(function(m) { return m.id === WP.menuId; })[0];
     if (mm && mm.owner === 'sasada') return null;
-    if (mm && mm.restricted) return null;   // 🔒 1007rm: 限定メニューは先読みを使わない（札つきで取り直す）
-    // 🔴 1002r2【🅑】: 先読みの所要時間は「札あり→再診・札なし→初診」をメニュー設定から引く（起動役）。
-    //   手元の土台キャッシュが無い初めての方は、サーバ（menuRole）が決めて応答に durationMinutes が入る＝応答を待って照合。
+    if (mm && mm.restricted) return null;
     if (pre.dur != null && pre.dur !== '') return (String(pre.dur) === String(dur)) ? pre.p : null;
     return pre.p.then(function(r) {
       if (r && r.success && String(r.durationMinutes) === String(dur)) return r;
-      throw new Error('prefetch-mismatch');   // 合わなければ wpFetch が今までどおり取りに行く
+      throw new Error('prefetch-mismatch');
     });
   } catch (e) { return null; }
 }
-/** 🔴 1002speed【🅐】: 起動役が裏で取り直した土台（メニュー等）が違っていたら静かに差し替える */
 window.__hpApplySetupRefresh__ = function(s) {
   try {
     if (!s || !s.menus || !s.menus.length || typeof SETUP === 'undefined') return;
@@ -1939,21 +1583,15 @@ window.__hpApplySetupRefresh__ = function(s) {
 };
 function wpFetch(from, to) {
   var st = wpStore(), dur = WP.dur;
-  // 🆕 0918os: 通信が落ちても「空き枠が出ない」を起こさない＝自動で1回やり直す。
-  //   （GAS往復は数秒あり、弱い回線で最初の1回が落ちやすいため）
   function once() {
     var payload = {
       durationMinutes: dur,
       startDate: (from < SETUP.today) ? SETUP.today : from,
       endDate:   to
     };
-    // 👥 0921owner 第2段-B-2: メニューIDが分かっていれば添える（無ければ送らない＝今までどおり）
     if (WP.menuId) payload.menuId = WP.menuId;
-    // 👤 0923choice: 希望担当（スイッチ ON・共通メニューのときだけ WP.staff が入る。'' なら送らない）
     if (WP.staff) payload.staff = WP.staff;
-    // 🔒 1007rm: 札があれば添える（限定メニューの空き枠はサーバが札＋許可を確かめてからしか返さない）
     if (AUTH.token) payload.auth = AUTH.token;
-    // 🆕 2026-11-02 1102chg: 変更画面は「変更する本人の予約」を除いた空きをもらう（サーバがトークンと本人の予約を確かめる）
     if (WP.changeFor) {
       return callAction('getMyChangeSlots', { token: WP.changeFor.token, reservationId: WP.changeFor.rid,
                                               startDate: payload.startDate, endDate: payload.endDate }).then(function(r) {
@@ -1967,13 +1605,11 @@ function wpFetch(from, to) {
     });
   }
   function apply(r) {
-    if (String(dur) !== String(WP.dur)) return;      // 途中でメニューが変わった
+    if (String(dur) !== String(WP.dur)) return;
     (r.days || []).forEach(function(d) { st.day[d.date] = d; });
     for (var d2 = from; d2 <= to; d2 = wpAddDays(d2, 1)) st.got[d2] = true;
     if (r.slotStarts && r.slotStarts.length) st.starts = r.slotStarts;
   }
-  // 🔴 1002speed【🅕】: 先読み済みなら通信しない（失敗していれば今までどおり取りに行く）
-  //   1002r2【🅓】: 再試行（時間切れ→2秒→4秒）は callAction の中で行う＝ここでの重ね掛けはやめた
   var pre = wpPrefetched(dur, from, to);
   if (pre) {
     return pre.then(function(r) { if (!r || r.success === false || !r.days) throw new Error('prefetch'); return r; })
@@ -1983,7 +1619,6 @@ function wpFetch(from, to) {
   return once().then(apply);
 }
 
-/** その週を表示する（★読んでいれば通信しない） */
 function wpGo(ws) {
   if (ws < WP.minWeek) ws = WP.minWeek;
   if (ws > WP.maxWeek) ws = WP.maxWeek;
@@ -1994,7 +1629,6 @@ function wpGo(ws) {
 
   WP.loading = true;
   wpRender();
-  // 🔴 1週ぶんを1往復。枠ごとには通信しない。
   wpFetch(ws, we)
     .then(function() {
       WP.loading = false;
@@ -2002,10 +1636,8 @@ function wpGo(ws) {
     })
     .catch(function(eW) {
       WP.loading = false;
-      reportClientError('空き枠（週表）の読み込みで通信失敗: ' + ((eW && eW.message) ? eW.message : ''), ws + (S.menu ? ' / ' + S.menu.name : ''));   // 📝 0927fail【B】
-      // ⚠ 無言で固まらせない。読めなかったことを必ず出す
+      reportClientError('空き枠（週表）の読み込みで通信失敗: ' + ((eW && eW.message) ? eW.message : ''), ws + (S.menu ? ' / ' + S.menu.name : ''));
       if (WP.el) {
-        // 1002r2【🅓】: 混雑の案内＋[もう一度試す]（同じ週を取り直す）
         WP.el.innerHTML = '<div class="loading">' + caFailHtml('wpRetryBtn', '空き状況を読み込めませんでした。') + '</div>';
         var rb = $('wpRetryBtn'); if (rb) rb.addEventListener('click', function() { wpGo(ws); });
       }
@@ -2013,25 +1645,22 @@ function wpGo(ws) {
     });
 }
 
-/** その週に○が1つでもあるか */
 function wpWeekOpen(ws) {
   for (var i = 0; i < 7; i++) if (wpDayOpen(wpAddDays(ws, i))) return true;
   return false;
 }
 
-/** 週を読み終えたとき。空きが無ければ最初だけ次の週へ送る。 */
 function wpAfterLoad(ws) {
   if (WP.auto && !wpWeekOpen(ws) && ws < WP.maxWeek && WP.hops < WP_MAX_HOPS) {
     WP.hops++;
     wpGo(wpAddDays(ws, 7));
     return;
   }
-  WP.auto = false;   // ★以降はユーザーの操作にまかせる
+  WP.auto = false;
   wpRender();
-  if (WP.avPending) avAfterWeek();   // 🆕 2026-11-02 1102rm【A】: 空き状況で選んだ日時があれば確かめる（無ければ何もしない）
+  if (WP.avPending) avAfterWeek();
 }
 
-/** 通信で「埋まっていた」と分かったときに使う。表を取り直す。 */
 function wpInvalidate() {
   WP.cache = {};
   if (WP.el && WP.weekStart) wpGo(WP.weekStart);
@@ -2043,7 +1672,6 @@ function wpRender() {
   var st = wpStore();
   var ready = wpHave(ws, we);
 
-  // 🔴 月表示への入口（0830c）★既定は閉じている＝今までの見た目を変えない
   var h = '<button type="button" class="wp-mtoggle" id="wpMToggle" aria-expanded="'
         + (WP.monthOpen ? 'true' : 'false') + '">📅 先の日付から選ぶ '
         + (WP.monthOpen ? '▲' : '▼') + '</button>'
@@ -2070,10 +1698,8 @@ function wpRender() {
     return;
   }
 
-  // 縦軸（★サーバが返した枠の開始時刻をそのまま使う）
   var starts = st.starts.slice();
   if (!starts.length) {
-    // ⚠ 万一 slotStarts が無い応答でも表が消えないように、その週の実データから作る
     var seen = {};
     for (var si = 0; si < 7; si++) {
       var dd = wpDay(wpAddDays(ws, si));
@@ -2085,7 +1711,6 @@ function wpRender() {
   var dates = [];
   for (var i = 0; i < 7; i++) dates.push(wpAddDays(ws, i));
 
-  // ⚠ 横スクロールの案内は【本当にはみ出しているときだけ】出す（描いた後に判定する）
   h += '<p class="wp-scrollhint hidden" id="wpScrollHint">→ 表を横にスクロールできます</p>';
   h += '<div class="wp-scroll" id="wpScroll"><table class="wp-tbl"><thead><tr><th class="wp-th-time"></th>';
   dates.forEach(function(ymd) {
@@ -2107,11 +1732,8 @@ function wpRender() {
       if (d) {
         (d.slots || []).forEach(function(s) { if (s.start === hm) slot = s; });
       }
-      // 🔴 記号は ◯ × の2種類だけ。サーバの mark をそのまま使う。
-      //   枠そのものが無い（過去・3時間以内で間引かれた・範囲外）ときも × にする。
-      //   ⚠ 定休日か昼休みかは患者に伝えない。取れないことが分かればよい。
       var dt = ymd.replace(/-/g, '/') + ' ' + hm;
-      var bx = wpCellExtra(dt);   // 🗓 1017batch: 'booked'（この画面で予約済み）／'sel'（まとめて予約で選択中）／''
+      var bx = wpCellExtra(dt);
       if (bx === 'booked') {
         h += '<td><span class="wpc bk" aria-label="' + esc(wpLabel(ymd, hm)) + ' ご予約済み">済</span></td>';
       } else if (slot && wpMark(slot) === 'o') {
@@ -2120,7 +1742,6 @@ function wpRender() {
         h += '<td><button type="button" class="wpc o' + on + sel + '" data-dt="' + esc(dt) + '"'
            + ' aria-label="' + esc(wpLabel(ymd, hm)) + (sel ? ' 選択中（押すと外れます）">✓' : ' 空きあり">○') + '</button></td>';
       } else if (WP.enableWaitlist) {
-        // 🔴 0921wait: ×でもタップできる（キャンセル待ちに登録）。過去かどうか等はサーバが判定する。
         h += '<td><button type="button" class="wpc x wait" data-dt="' + esc(dt) + '"'
            + ' aria-label="' + esc(wpLabel(ymd, hm)) + ' 満席・タップでキャンセル待ち">×</button></td>';
       } else {
@@ -2135,16 +1756,12 @@ function wpRender() {
   h += '<div class="wp-legend">'
      + '<span><b>○</b> 空きあり</span>'
      + '<span><b style="color:#b9c2bb">×</b> 空きなし</span>'
-     + (btActive() ? '<span><b>✓</b> 選んだ日時</span>' : '')   // 🗓 1017batch
+     + (btActive() ? '<span><b>✓</b> 選んだ日時</span>' : '')
      + ((WP.enableWaitlist && S.booked.length) ? '<span><b style="color:var(--green)">済</b> ご予約済み</span>' : '')
      + '</div>';
-  // 🔴 0922wlnotify【A】: ×からキャンセル待ちに登録できることの常時表示の説明
-  //   （折りたたみ・ポップアップにしない＝先生の指示）。enableWaitlistの画面だけに出す
-  //   （予約の変更画面(mgPickDays)は×をタップしても登録できないので、ここでは出さない）。
   if (WP.enableWaitlist) {
     h += '<p class="wp-wait-note">💡 ×の枠をタップすると「キャンセル待ち」に登録できます（LINE連携が必要です）</p>';
   }
-  // ⚠ 表が真っ白なまま黙らせない。次にどうすればよいかを必ず出す。
   if (!wpWeekOpen(ws)) {
     h += '<p class="wp-hint">この週に空いているお時間はありません。'
        + (ws < WP.maxWeek ? '「▶」で翌週をご覧ください。' : 'お電話・LINEでご相談ください。') + '</p>';
@@ -2155,19 +1772,16 @@ function wpRender() {
   wpBindNav();
   mpRender();
 
-  // 横スクロールが要るときだけ案内を出す
   var sc = $('wpScroll'), hint = $('wpScrollHint');
   if (sc && hint && sc.scrollWidth > sc.clientWidth + 1) hint.classList.remove('hidden');
-  wpStickyFit_();   // 🆕 2026-11-02 1102sticky: 日付の行を画面の上に残す
+  wpStickyFit_();
 
   Array.prototype.forEach.call(WP.el.querySelectorAll('.wpc.o'), function(b) {
     b.addEventListener('click', function() {
       var dt = b.getAttribute('data-dt');
-      // 🔴 ここでは実行しない。確認シートを出すだけ。
       if (WP.onPick) WP.onPick(dt, fmtJP(dt));
     });
   });
-  // 🔴 0921wait: ×（満席）をタップ → キャンセル待ちに登録できる（enableWaitlist=trueのときだけ）
   Array.prototype.forEach.call(WP.el.querySelectorAll('.wpc.x.wait'), function(b) {
     b.addEventListener('click', function() {
       var dt = b.getAttribute('data-dt');
@@ -2177,16 +1791,8 @@ function wpRender() {
   updateNav();
 }
 
-// ============================================================
-// 🔴 0921wait: キャンセル待ち（×の枠から登録）
-// ------------------------------------------------------------
-//   ・本人特定はAUTH.token（LINE連携済み・id_token検証済み）だけ。未連携は登録させない。
-//   ・断る条件（1枠1人・1人3件まで・過去日時等）はすべてサーバ側 joinWaitlist_ が判定する。
-//     ここでは案内と確認ダイアログだけ（サーバの判定を先取りして複雑にしない）。
-// ============================================================
 function wpJoinWaitlist(dt, label) {
   if (!AUTH.token) {
-    // 🔴 LINE連携が無ければ登録できない（先生の決定）。連携の入口へ案内するだけ。
     if (window.confirm(label + ' は満席です。\n'
         + 'キャンセルが出たらLINEでお知らせできますが、LINE連携が必要です。\n'
         + '今すぐLINEで連携しますか？')) {
@@ -2200,7 +1806,6 @@ function wpJoinWaitlist(dt, label) {
   callAction('joinWaitlist', { reqId: mgReqId(), auth: AUTH.token, menuId: WP.menuId, date: ymd, time: hm })
     .then(function(r) {
       if (r && r.success) {
-        // 🔴 0922wlnotify【B】: showMsgのトーストではなく、閉じるまで消えないモーダルで知らせる
         wlShowDoneModal(label, S.menu ? (S.menu.name + '（' + menuDispMin(S.menu) + '分）') : '');
       } else {
         showMsg((r && r.error) || 'キャンセル待ちに登録できませんでした');
@@ -2211,7 +1816,6 @@ function wpJoinWaitlist(dt, label) {
     });
 }
 
-/** 🔴 0922wlnotify【B】: キャンセル待ち登録完了モーダルを開く */
 function wlShowDoneModal(dtLabel, menuLabel) {
   var m = $('wlDoneModal');
   if (!m) return;
@@ -2234,7 +1838,6 @@ function wlCloseDoneModal() {
   });
 })();
 
-/** 🔴 0921wait: 自分が待っているキャンセル待ちを表示し、取り消せるようにする（最低限の導線） */
 function wlRefreshMine() {
   var box = $('wlMineBox');
   if (!box || !AUTH.token) return;
@@ -2254,7 +1857,7 @@ function wlRefreshMine() {
           .then(function() { wlRefreshMine(); });
       });
     });
-  }).catch(function() { /* ⚠ 表示だけの補助機能。失敗しても日時選択は止めない */ });
+  }).catch(function() {   });
 }
 
 function wpBindNav() {
@@ -2265,23 +1868,11 @@ function wpBindNav() {
   if (m) m.addEventListener('click', mpToggle);
 }
 
-// ============================================================
-// 🔴 月表示（0830c）— 「先の日付から選ぶ」
-// ------------------------------------------------------------
-//   週送りを何回も押さずに、先の日付へ一気に飛べるようにする。
-//   🔴 既定は閉じている（今までの見た目を変えない）。
-//   🔴 出すのは日ごとの ◯ × だけ。空き枠の数は出さない
-//      （★先生用の月カレンダーは数字と濃淡を出すが、患者用は出さない）。
-//   🔴 範囲は 今日〜2ヶ月先（新規予約・変更の上限と同じ）。
-//   ⚠ データは週表と【同じ日ごとのキャッシュ】を使う。
-//     月を1往復で読めば、その中の週は通信ゼロで出せる。
-// ============================================================
 
-/** 'YYYY-MM' の1日 / 末日 */
 function mpFirst(mo) { return mo + '-01'; }
 function mpLast(mo) {
   var p = mo.split('-');
-  var d = new Date(Date.UTC(Number(p[0]), Number(p[1]), 0));   // 翌月0日＝末日
+  var d = new Date(Date.UTC(Number(p[0]), Number(p[1]), 0));
   return mo + '-' + ('0' + d.getUTCDate()).slice(-2);
 }
 function mpAddMonth(mo, n) {
@@ -2299,14 +1890,10 @@ function mpToggle() {
     b.setAttribute('aria-expanded', WP.monthOpen ? 'true' : 'false');
     b.textContent = '📅 先の日付から選ぶ ' + (WP.monthOpen ? '▲' : '▼');
   }
-  // ⚠ 開く月は「いま出している週が主にどの月か」で決める。
-  //   週の真ん中（木曜）の月を使う。月末をまたぐ週で、残り2日しかない月を
-  //   開いてしまう（＝ほとんど × に見える）のを避けるため。
   if (WP.monthOpen) WP.month = mpOf(wpAddDays(WP.weekStart || SETUP.today, 3));
   mpGo(WP.month);
 }
 
-/** その月を表示する（★読んでいれば通信しない） */
 function mpGo(mo) {
   if (!mo) return;
   if (mo < WP.minMonth) mo = WP.minMonth;
@@ -2319,7 +1906,6 @@ function mpGo(mo) {
 
   WP.monthBusy = true;
   mpRender();
-  // 🔴 月ぶんを1往復。日ごとには通信しない。空き枠の計算は既存の getOpenSlots のまま。
   wpFetch(from, to)
     .then(function() {
       WP.monthBusy = false;
@@ -2327,7 +1913,6 @@ function mpGo(mo) {
     })
     .catch(function() {
       WP.monthBusy = false;
-      // ⚠ 無言で固まらせない
       var el = $('wpMonth');
       if (el) {
         el.innerHTML = '<div class="loading">' + caFailHtml('mpRetryBtn', '空き状況を読み込めませんでした。') + '</div>';
@@ -2336,7 +1921,6 @@ function mpGo(mo) {
     });
 }
 
-/** 月表示を描く（★週表は描き直さない＝スクロール位置を飛ばさない） */
 function mpRender() {
   var el = $('wpMonth');
   if (!el) return;
@@ -2360,10 +1944,9 @@ function mpRender() {
     return;
   }
 
-  // 月曜はじまりの升目
   var first = mpFirst(mo), last = mpLast(mo);
-  var lead = (wpDow(first) + 6) % 7;                 // 月=0 … 日=6
-  var ws = WP.weekStart, we = wpAddDays(ws, 6);      // いま週表に出ている7日
+  var lead = (wpDow(first) + 6) % 7;
+  var ws = WP.weekStart, we = wpAddDays(ws, 6);
 
   h += '<table class="mp-tbl"><thead><tr>';
   ['月','火','水','木','金','土','日'].forEach(function(d, i) {
@@ -2407,7 +1990,6 @@ function mpBind() {
   if (n) n.addEventListener('click', function() { mpGo(mpAddMonth(WP.month,  1)); });
   Array.prototype.forEach.call(document.querySelectorAll('#wpMonth .mpc.o'), function(b) {
     b.addEventListener('click', function() {
-      // 🔴 押した日を含む週を週表に出す（月表示は閉じる）
       WP.monthOpen = false;
       WP.auto = false;
       wpGo(wpMonday(b.getAttribute('data-d')));
@@ -2416,17 +1998,13 @@ function mpBind() {
   });
 }
 
-/** 月を読み込んだ結果、いま出している週の中身が埋まったなら描き直す */
 function wpRefreshWeekBody() {
   if (!WP.el) return;
   if (!wpHave(WP.weekStart, wpAddDays(WP.weekStart, 6))) return;
-  if (WP.el.querySelector('.wp-tbl')) return;   // すでに表が出ている
+  if (WP.el.querySelector('.wp-tbl')) return;
   wpRender();
 }
 
-// ============================================================
-// 🔴 確認シート（★押した瞬間に実行しない）— 新規予約と変更で共用
-// ============================================================
 var CF = { onOk: null, busy: false };
 
 function cfOpen(opts) {
@@ -2442,11 +2020,10 @@ function cfOpen(opts) {
   ok.focus();
 }
 function cfClose() {
-  if (CF.busy) return;          // 送信中は閉じさせない
+  if (CF.busy) return;
   $('cfSheet').classList.add('hidden');
   CF.onOk = null;
 }
-/** 送信中はボタンを無効にして戻さない（★二重送信の防止） */
 function cfBusy(on, text) {
   CF.busy = on;
   var ok = $('cfOk');
@@ -2455,27 +2032,23 @@ function cfBusy(on, text) {
   $('cfCancel').disabled = on;
 }
 
-/** 新規予約：◯を押したとき */
 function cfOpenNew(dt, label) {
-  S.reqId = ''; S._retriedReq = '';   // 1001deadend: 日時を選び直したら新しいキー
+  S.reqId = ''; S._retriedReq = '';
   cfOpen({
     title: 'この日時でよろしいですか？',
     lead:  'まだご予約は確定していません。',
     okText: 'この時間にする',
     bodyHtml: '<div class="cf-dt">' + esc(label) + '</div>'
-            // 🔴 0906a: 患者に見せるのは治療時間（枠 durationMinutes は見せない）
             + '<div class="cf-menu">' + esc(S.menu.name) + '（施術 約' + esc(menuDispMin(S.menu)) + '分）</div>',
     onOk: function() {
       S.datetimeJST = dt;
       WP.picked = dt;
       cfClose();
-      // 🔴 0907line 案A: LINE本人確認済みなら「お客様の情報」は飛ばして確認へ（0928ux: 裏の確認中は少し待つ）
       proceedAfterDate();
     }
   });
 }
 
-/** 日時の変更：◯を押したとき（★変更前 → 変更後 を並べて見せる） */
 function cfOpenEdit(b, dt, label) {
   cfOpen({
     title: 'この日時に変更しますか？',
@@ -2496,10 +2069,7 @@ function cfOpenEdit(b, dt, label) {
   });
 }
 
-// 👤 0923choice: 担当者の選択を出すか（★サーバのスイッチ SETUP.staffChoice が true かつ 共通メニューのときだけ）
-//   メニューの owner が harunori / sasada のときは出さない（メニューの担当者に固定＝今までどおり）。
 function staffChoiceShown() {
-  // 🔴 0924sasada: 佐々田先生が未稼働（SETUP.sasadaActive が false）なら出さない（サーバも staffChoice を false にするが念のため）
   if (SETUP.sasadaActive === false) return false;
   return !!(SETUP.staffChoice && S.menu && !(S.menu.owner === 'harunori' || S.menu.owner === 'sasada'));
 }
@@ -2521,45 +2091,35 @@ function paintStaffChoice() {
     b.setAttribute('aria-checked', on ? 'true' : 'false');
   });
 }
-/** 担当者を選び直す → 空き枠を取り直す（表示だけ変わる。選んだ日時は捨てる） */
 function setStaffChoice(v) {
   v = (v === 'harunori' || v === 'sasada') ? v : 'any';
   if (S.staff === v) return;
   S.staff = v;
   S.datetimeJST = '';
   WP.picked = '';
-  WP.cache = {};        // 🔴 担当者が変わると◯×が変わるので、取り置きは捨てる
+  WP.cache = {};
   paintStaffChoice();
   mountWeekPickerForNew();
   updateNav();
 }
 
-/** ②日時：新規予約の週表を出す（★変更画面と同じ部品を使う） */
 function mountWeekPickerForNew() {
   if (!S.menu) return;
-  // 🔴 0906a: 見出しは治療時間。★週表の空き枠計算(wpStart)は今まで通り【枠 durationMinutes】
   $('dateLead').textContent =
     S.menu.name + '（施術 約' + menuDispMin(S.menu) + '分）で空いているお時間です。○を押してください。';
-  // 👤 0923choice: 選択を出す場面だけ希望担当を週表に渡す（OFF・固定メニューでは '' ＝今までどおり送らない）
   paintStaffChoice();
   WP.staff = staffChoiceShown() ? (S.staff || 'any') : '';
-  paintBatchToggle();   // 🗓 1017batch
-  var avDt = (!S.batch && !S.datetimeJST) ? avTakePreset() : '';   // 🆕 2026-11-02 1102rm【A】: 空き状況で選んだ日時（無ければ ''）
+  paintBatchToggle();
+  var avDt = (!S.batch && !S.datetimeJST) ? avTakePreset() : '';
   WP.avPending = avDt;
   wpStart($('dayList'), S.menu.durationMinutes, function(dt, label) {
-    if (btActive()) { btToggleSlot(dt); return; }   // 🗓 1017batch: まとめて予約では ○ が「選ぶ／外す」
+    if (btActive()) { btToggleSlot(dt); return; }
     cfOpenNew(dt, label);
   }, (S.batch ? (S.batchSlots[0] || '') : (S.datetimeJST || avDt)), S.menu.id, true);
-  btRenderBar();   // 🔴 0921wait: 新規予約の日時選択だけ ×からキャンセル待ちに登録できる
+  btRenderBar();
   try { wlRefreshMine(); } catch (e) {}
 }
 
-// ============================================================
-// 🗂 0830b より前の「2ヶ月ぶんを縦に並べる」日時選択（★無効。呼び出し元は無い）
-// ------------------------------------------------------------
-//   ⚠ コードは1行も消していない。週表(wpStart)に置き換えただけ。
-//     先生の指摘「2ヶ月先まで並んでいて選びにくい」への対応。
-// ============================================================
 function loadSlots() {
   if (!S.menu) return;
   S.loading = true;
@@ -2569,15 +2129,14 @@ function loadSlots() {
 
   callAction('getOpenSlots', {
       durationMinutes: S.menu.durationMinutes,
-      startDate: SETUP.today,      // ★指定しないと当日1日分しか返らない
-      endDate:   horizonDate(),    // ★2ヶ月先まで
-      menuId:    S.menu.id,        // 👥 0921owner 第2段-B-2
-      auth:      AUTH.token || undefined   // 🔒 1007rm: 限定メニューの空き枠は札＋許可が要る（無ければ送らない）
+      startDate: SETUP.today,
+      endDate:   horizonDate(),
+      menuId:    S.menu.id,
+      auth:      AUTH.token || undefined
     })
     .then(function(r) {
       S.loading = false;
       if (!r || r.success === false) {
-        // ⚠ 無言で失敗しない
         $('dayList').innerHTML = '';
         showMsg('空き状況を読み込めませんでした。' + ((r && r.error) ? '（' + r.error + '）' : '')
               + ' お手数ですがお電話でご連絡ください。');
@@ -2593,12 +2152,11 @@ function loadSlots() {
       $('dayList').innerHTML = '<div class="loading">' + caFailHtml('dlRetryBtn', '空き状況を読み込めませんでした。') + '</div>';
       var rb = $('dlRetryBtn'); if (rb) rb.addEventListener('click', loadSlots);
       showMsg('');
-      reportClientError('空き枠の読み込みで通信失敗: ' + ((e && e.message) ? e.message : ''), S.menu ? S.menu.name : '');   // 📝 0927fail【B】
+      reportClientError('空き枠の読み込みで通信失敗: ' + ((e && e.message) ? e.message : ''), S.menu ? S.menu.name : '');
       updateNav();
     });
 }
 
-/** 今日から2ヶ月先の日付（'yyyy-MM-dd'）。サーバ側でも同じ範囲に丸められる。 */
 function horizonDate() {
   var p = SETUP.today.split('-');
   var d = new Date(Number(p[0]), Number(p[1]) - 1 + 2, Number(p[2]));
@@ -2624,7 +2182,6 @@ function renderDays() {
                       : (anyOpen ? '' : '<span class="day-note">空きなし</span>'))
        +   '</div>';
 
-    // 定休日は「×」を21個並べても意味が無いので一言で示す（患者には理由を見せない方針のまま）
     if (!d.isBusinessDay) {
       h += '<div class="closed">定休日</div>';
     } else if (!d.slots.length) {
@@ -2641,8 +2198,6 @@ function renderDays() {
       h += '</div>';
     }
 
-    // 🔴 本日の行に添える一言
-    //    ⚠「システム上3時間以内は入れられません」とは書かない。受付方法が違うだけ、と伝える。
     if (isToday) {
       h += '<div class="today-note">※ 本日のご予約はお電話・LINEで承ります</div>';
     }
@@ -2668,29 +2223,17 @@ function renderDays() {
   });
 }
 
-// ============================================================
-// 🗓 1017batch: まとめて予約（4件まで）・続けて予約
-// ------------------------------------------------------------
-//   ・初期は「1件だけ」＝今までどおり。切り替えたときだけ ○ が「選ぶ／外す」になる。
-//   ・選んだ日時・お名前・お電話は画面の中だけ（localStorage に書かない）。閉じれば消える。
-//   ・空き・二重予約・重なりの最終判定はサーバが1件ずつ行う（createBookingBatch）。
-//     ここは「選び間違いを防ぐ案内」だけ（5件目・同じ日に重なる時間は選ばせない）。
-// ============================================================
 var BT_MAX = 4;
-/** はじめての方（初診）のメニューか（サーバの _itIsInitialMenu_ と同じ見分け方）。初診はまとめて予約を出さない */
 function btIsInitialMenu(m) {
   return !!m && (m.isInitial === true || String(m.id) === 'first' || /はじめて|初診|初回/.test(String(m.name || '')));
 }
 function btAllowed() { return !!S.menu && !btIsInitialMenu(S.menu); }
-/** ②日時の画面で、まとめて予約を選んでいる最中か */
 function btActive() {
   return !!S.batch && btAllowed() && S.step === 2 && $('screenManage').classList.contains('hidden');
 }
-/** 確認・送信で「まとめて」を使うか（選んだ日時があるとき） */
 function btOn() { return !!S.batch && btAllowed() && S.batchSlots.length > 0; }
-/** 週表の1マスの印（新規予約の週表だけ）: 'booked'＝この画面で予約済み ／ 'sel'＝選択中 ／ '' */
 function wpCellExtra(dt) {
-  if (!WP.enableWaitlist) return '';   // 予約の変更画面（mgPickDays）には出さない
+  if (!WP.enableWaitlist) return '';
   if (S.booked.indexOf(dt) >= 0) return 'booked';
   if (btActive() && S.batchSlots.indexOf(dt) >= 0) return 'sel';
   return '';
@@ -2723,7 +2266,6 @@ function setBatchMode(on) {
   updateNav();
 }
 function btMin(dt) { var m = /\s(\d{2}):(\d{2})$/.exec(String(dt)); return m ? Number(m[1]) * 60 + Number(m[2]) : -1; }
-/** 同じ日に時間が重なる選択済みの日時（端が接するだけは重ならない）。無ければ '' */
 function btOverlapWith(dt) {
   var dur = Number(S.menu && S.menu.durationMinutes) || 60, day = String(dt).slice(0, 10), s = btMin(dt);
   return S.batchSlots.filter(function(x) {
@@ -2746,8 +2288,8 @@ function btToggleSlot(dt) {
     S.batchSlots.sort();
   }
   showMsg('');
-  S.reqId = ''; S._retriedReq = '';           // 選び直したら新しい冪等キー
-  S.datetimeJST = S.batchSlots[0] || '';      // 「次へ」・戻り先の判定は今までの S.datetimeJST を使う
+  S.reqId = ''; S._retriedReq = '';
+  S.datetimeJST = S.batchSlots[0] || '';
   wpRender();
   btRenderBar();
   updateNav();
@@ -2775,14 +2317,12 @@ function btRenderBar() {
 function btMarkBooked(dts) {
   (dts || []).forEach(function(dt) { if (dt && S.booked.indexOf(dt) < 0) S.booked.push(dt); });
 }
-/** 完了画面の「続けて別の日も予約する」／「メニューを変えて予約する」
- *   お名前・お電話（入力欄・LINEの本人情報）はそのまま。日時と選んだ枠だけ空にする。 */
 function btContinue(changeMenu) {
   S.datetimeJST = ''; WP.picked = '';
   S.batchSlots = [];
   S.reqId = ''; S._retriedReq = '';
   S.confirmSasada = false;
-  WP.cache = {};   // 🔴 取ったばかりの枠を反映するため、空き枠は取り直す（キャッシュしない）
+  WP.cache = {};
   $('doneBatchList').classList.add('hidden');
   if (changeMenu) {
     S.menu = null; S.batch = false;
@@ -2793,14 +2333,12 @@ function btContinue(changeMenu) {
   }
 }
 
-// ---- ③ 入力 ----
 function readForm() {
   return {
     name:  $('fName').value.trim(),
     kana:  $('fKana').value.trim(),
     phone: $('fPhone').value.trim(),
     email: $('fEmail').value.trim(),
-    // 🔴 0915nolineA: 未連携の方の予約をカルテと照合するための住所（カルテには書かない）
     address: $('fAddress').value.trim()
   };
 }
@@ -2817,19 +2355,14 @@ function validateForm() {
   return '';
 }
 
-// ---- ④ 確認 ----
 function renderConfirm() {
-  // 🔴 0907line 案A: LINE本人確認済みなら、サーバが渡したご登録の情報を表示する
-  //   （★表示だけ。予約に使う値はサーバが札から取るので、画面で書き換えてもなりすませない）
   var au = !!(AUTH.token && AUTH.user);
   var f = au ? AUTH.user : readForm();
   var rows = [
-    // 🗓 1017batch: まとめて予約は全件の日時を1件1行で並べる（1件だけのときは今までどおり）
     btOn() ? ['日時（' + S.batchSlots.length + '件）', S.batchSlots.map(fmtJP).join('\n')]
            : ['日時', fmtJP(S.datetimeJST)],
-    ['メニュー', S.menu.name + '（施術 約' + menuDispMin(S.menu) + '分）'],   // 🔴 0906a: 枠は見せない
+    ['メニュー', S.menu.name + '（施術 約' + menuDispMin(S.menu) + '分）'],
   ];
-  // 👤 0923choice: 選択を出しているときだけ、希望の担当者を確認に載せる（OFF では行ごと出ない）
   if (staffChoiceShown()) rows.push(['ご希望の担当', staffChoiceLabel(S.staff || 'any')]);
   rows = rows.concat([
     ['お名前', f.name],
@@ -2837,7 +2370,6 @@ function renderConfirm() {
     ['電話番号', au ? (f.phone || '（ご登録なし）') : f.phone],
     ['メール', au ? (f.email || '（LINEでお知らせします）') : f.email]
   ]);
-  // 🔴 0915nolineA: 住所は未連携で入力したときだけ出す（連携済みは入力しない＝カルテが正）
   if (!au) rows.push(['ご住所', f.address]);
   $('confirmBox').innerHTML = rows.map(function(r) {
     return '<div class="crow"><div class="ckey">' + esc(r[0]) + '</div>'
@@ -2858,8 +2390,6 @@ function fmtJP(dt) {
   return Number(m[1]) + '年' + Number(m[2]) + '月' + Number(m[3]) + '日（' + dows[d.getDay()] + '）' + m[4];
 }
 
-// 🔴 0928ux【1】: 送信中の進捗表示（実測 7〜10 秒）。10 秒を超えたら文言を進め、止まったように見せない。
-//   ★秒数は実測に合わせる（嘘を書かない）。装飾は小さな回転だけ。
 var SEND_STATUS_T = null;
 function sendStatusShow() {
   var box = $('sendStatus'), tx = $('sendStatusText');
@@ -2879,55 +2409,41 @@ function sendStatusHide() {
   if (SEND_STATUS_T) { clearTimeout(SEND_STATUS_T.a); clearTimeout(SEND_STATUS_T.b); SEND_STATUS_T = null; }
 }
 
-// ---- 送信 ----
 function submitBooking() {
-  // 🆕 0918spd2: 本人確認がまだ裏で走っているなら、ここで【必ず待つ】（予約は確認完了後だけ）。
-  //   ・完了(成功)したら自動で予約に進む。失敗したら案内が出て止まる（__hpApplyAuth__）。
-  //   🔴 サーバも createBooking で予約パス必須＝万一この待ちを抜けても無認証予約はできない。
   if (AUTH.authPending && !AUTH.token) {
     showMsg('ご本人を確認しています。少しお待ちください…', 'ok');
     var nb = $('btnNext'); if (nb) { nb.disabled = true; nb.textContent = '確認しています…'; }
     AUTH._resumeSubmit = function (ok) {
       if (nb) { nb.disabled = false; nb.textContent = 'この内容で予約する'; }
       if (ok) { showMsg(''); submitBooking(); }
-      // ok===false のときは __hpApplyAuth__ が既に案内を出している（ここでは何もしない）
     };
     return;
   }
-  // 🔴 0928ux【2】: 本人確認は終わったが氏名の確認がまだ（割り込みを後回しにした）→ ここで聞き、氏名の後に自動で送信
   if (AUTH.whoPending) {
     AUTH.whoPending = false;
     AUTH._afterWhoSubmit = true;
     showWhoScreen();
     return;
   }
-  // 🗓 1017batch: まとめて予約は別の送り方（1回の送信で N 件・サーバが1件ずつ同じ判定）
   if (btOn()) { submitBatch(); return; }
-  // 🔴 0928ux【1】: 二重送信の防止（押し直し・ダブルタップ）。送信中は何もしない
   if (S.sending) return;
   S.sending = true;
-  // 🔴 0907line 案A: 本人情報はサーバが札（auth）から取る。画面の値は表示・問診の下書きにだけ使う
   var f = (AUTH.token && AUTH.user) ? AUTH.user : readForm();
   var btn = $('btnNext');
   btn.disabled = true;
   btn.textContent = '送信中…';
-  var bb = $('btnBack'); if (bb) bb.disabled = true;   // 戻るも押せない（送信中に画面を動かさない）
+  var bb = $('btnBack'); if (bb) bb.disabled = true;
   sendStatusShow();
   showMsg('');
 
-  // 🔴 1001deadend【D-3】: 送信ごとの冪等キー（同じ確認内容なら同じ reqId＝送り直しても二重にならない）
   if (!S.reqId) S.reqId = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   callAction('createBooking', {
       reqId: S.reqId,
       menuId: S.menu.id, datetimeJST: S.datetimeJST,
       auth: AUTH.token,
-      // 🔴 0915nolineA: 未連携（auth無し）はこの入力値で予約が作られる。
-      //   auth があるときは今まで通りサーバがパスの値だけを使う（この4つ＋住所は無視される）
       name: f.name, kana: f.kana, phone: f.phone, email: f.email,
       address: f.address || '',
-      // 🔴 0923dup Step2: 「別の者が担当」の確認に「はい」と答えた後だけ true（既定は付けない）
       confirmSasada: !!S.confirmSasada,
-      // 👤 0923choice: 希望担当（スイッチ ON・共通メニューのときだけ送る。OFF では送らない＝今までどおり）
       staff: staffChoiceShown() ? (S.staff || 'any') : undefined
     })
     .then(function(r) {
@@ -2935,63 +2451,45 @@ function submitBooking() {
       btn.textContent = 'この内容で予約する';
       sendStatusHide();
       if (!r || !r.success) {
-        // 🔴 0907line: 予約パスが無い/切れた → ゲートに戻して LINE で開き直してもらう
         if (r && r.needLine) {
           AUTH.token = ''; AUTH.user = null; AUTH.confirmed = false;
-          SETUP.bookingRestricted = [];   // 🔒 1007rm: 札が切れたら限定メニューも畳む（選択中なら外す）
+          SETUP.bookingRestricted = [];
           if (S.menu && S.menu.restricted) { S.menu = null; S.datetimeJST = ''; }
           showGateScreen(r.error || '');
           return;
         }
-        // 🔴 0923dup Step2: 「この時間は、別の者が担当いたします。よろしいでしょうか？」
-        //   サーバが聞き返してきたときだけ確認シートを出す。「はい」で confirmSasada:true を付けて送り直す。
-        //   「別の時間を選ぶ」で日時の選び直し（②）へ戻す。★黙って振り替えない。
         if (r && r.needsConfirm && r.ownerFallback) {
           showConfirmOwnerFallback(r);
           return;
         }
-        // ⚠ 無言で失敗しない。理由を必ず出す
-        // 🔴 画面が○でも、押した時点で埋まっていることがある。
-        //   その場合は日時の選び直しに戻し、表を取り直す。
         var why = (r && r.error) ? r.error
                 : 'ご予約を確定できませんでした。お手数ですがお電話でご連絡ください。';
         S.datetimeJST = '';
         WP.picked = '';
         WP.cache = {};
-        goStep(2);                 // ★goStep が showMsg('') するので、出すのはこの後
+        goStep(2);
         showMsg(why);
         return;
       }
-      S.reqId = '';   // 1001deadend: 成立したら次の予約は新しいキー
-      btMarkBooked([r.datetimeJST || S.datetimeJST]);   // 🗓 1017batch: 続けて予約で「済」と分かるように
+      S.reqId = '';
+      btMarkBooked([r.datetimeJST || S.datetimeJST]);
       $('doneBatchList').classList.add('hidden');
       $('doneDt').textContent   = r.datetimeLabel || fmtJP(r.datetimeJST);
-      // 🔴 0906a: 完了画面も治療時間（サーバ応答の r.durationMinutes は枠なので使わない。
-      //   この画面に来るとき S.menu は必ず選択済み）
       $('doneMenu').textContent = r.menuName + '（施術 約'
         + (S.menu ? menuDispMin(S.menu) : r.durationMinutes) + '分）'
-        // 👤 0923choice: 担当者名（サーバのスイッチ ON のときだけ r.staffLabel が入る。'' なら今までどおり）
         + (r.staffLabel ? '　担当: ' + r.staffLabel : '');
-      // 🔴 メールの失敗を無言にしない（0907line: LINEで届いた場合は文言を合わせる）
       $('doneMail').textContent = r.mailSent
         ? (String(r.notifyVia || '').indexOf('line') === 0
             ? '確認のお知らせをLINEにお送りしました。'
             : '確認のメールをお送りしました。')
         : ('⚠ ' + (r.mailError || '確認メールをお送りできませんでした') + '（ご予約は承っています）');
-      // 🔴 0830g: LINE連携の入口（★URLはサーバが組み立てたものをそのまま使う。
-      //   画面でトークンを組み立てない。空で返ってきたら＝紐づけ済み or LINE未設定 → 出さない）
       showDoneLineLink(r.lineStartUrl);
-      // 🔴 0903a 第7段階-1: 初診メニューならこのまま問診票へ（予約は成立済み）。
-      //   ⚠ トークンが無ければ（初診以外・発行失敗）今まで通り完了画面。
       if (r.intakeToken) {
         iqOpen(r.intakeToken, { prefill: { name: f.name, kana: f.kana, phone: f.phone, email: f.email,
                                            address: f.address || '' },
-                                // 🎀 0919beauty: メニュー名に「美容鍼」を含めば美容鍼専用の問診
                                 beauty: /美容鍼/.test(String(r.menuName || '')),
-                                // 🆕 0921carry: 前回の問診票から共通項目を引き継ぐ（無ければ found:false）
                                 carryover: r.intakeCarryover });
       } else if (r.revisitToken) {
-        // 🔴 0906k 第7段階-4: 再診メニュー → 経過・新しい症状の事前入力（任意）
         rvOpen(r.revisitToken);
       } else {
         goStep(5);
@@ -2999,9 +2497,6 @@ function submitBooking() {
     })
     .catch(function(e) {
       var em = (e && e.message) ? e.message : '';
-      // 🔴 1001deadend【D-2/D-5】→ 1002r2【🅓】: 応答が読めない/時間切れのときは callAction が【同じ reqId】で
-      //   自動で2回送り直している（2秒・4秒）。サーバは reqId で冪等＝1回目が成立していれば同じ「完了」が返る（二重にならない）。
-      //   それでも駄目なら「混み合っています」＋電話・LINE＋[もう一度試す]（同じ reqId のまま＝押し直しても二重にならない）
       btn.disabled = false;
       btn.textContent = 'もう一度試す';
       sendStatusHide();
@@ -3011,16 +2506,11 @@ function submitBooking() {
         'ご予約が完了している場合があります。「もう一度試す」を押しても、同じ内容が二重に登録されることはありません。');
       var rb = $('sbRetryBtn'); if (rb) rb.addEventListener('click', function() { showMsg(''); submitBooking(); });
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      // 📝 0927fail【B】: 予約の送信で通信が失敗＝いちばん知りたい失敗。届く範囲で記録する
       reportClientError('予約の送信で通信失敗: ' + em,
                         (S.datetimeJST || '') + (S.menu ? ' / ' + S.menu.name : ''));
     });
 }
 
-// ---- 🗓 1017batch: まとめて予約の送信 ----
-//   ・1回の送信で選んだ日時を全部送る。サーバは1件ずつ 1件予約と同じ判定（空き・二重予約・ロック）を通し、
-//     取れた分だけ確定して結果の一覧を返す。通知はサーバが最後に1通だけ送る。
-//   ・冪等キー（reqId）は選んだ内容ごとに1つ。送り直しても二重にならない（1件ずつのキーもサーバが作る）。
 function submitBatch() {
   if (S.sending) return;
   S.sending = true;
@@ -3031,7 +2521,6 @@ function submitBatch() {
   var bb = $('btnBack'); if (bb) bb.disabled = true;
   var n = S.batchSlots.length;
   sendStatusShow();
-  // まとめて予約は件数ぶん時間がかかる（実測の目安: 1件 7〜10 秒）。文言を件数に合わせる
   if (SEND_STATUS_T) { clearTimeout(SEND_STATUS_T.a); clearTimeout(SEND_STATUS_T.b); }
   var tx = $('sendStatusText');
   if (tx) tx.innerHTML = n + '件のご予約を登録しています<br>' + (n * 10) + '秒ほどお待ちください';
@@ -3107,25 +2596,15 @@ function submitBatch() {
 }
 
 
-// ============================================================
-// 🔴 予約の確認・変更（0830a 第5段階）
-// ------------------------------------------------------------
-//   ★メールアドレスを入れただけでは絶対に入れない。
-//     そのメールに届いたリンクを押すこと自体が本人確認。
-//   ★サーバに投げるのは requestBookingLink / getMyBookings /
-//     updateMyBooking / cancelMyBooking の4つだけ。
-//     患者を検索するアクションは【存在しない】。
-//   ⚠ 「システム上できません」とは書かない。必ず別の連絡手段を案内する。
-// ============================================================
 
 var MG = {
-  token: '',        // メールのリンクから来たときのトークン
-  action: '',       // 🔴 0830e: 'edit' / 'cancel'（予約完了メールのどちらのリンクか）
-  single: false,    // 🔴 0830e: その予約1件だけのリンクで来たか
+  token: '',
+  action: '',
+  single: false,
   bookings: [],
   menus: [],
-  editing: null,    // 変更中の予約
-  days: [],         // 変更先の空き枠
+  editing: null,
+  days: [],
   pickedJST: '',
   busy: false
 };
@@ -3137,12 +2616,9 @@ function mgShow(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/** 予約の確認・変更モードに入る（★予約の流れとは別画面にする） */
 function openManage() {
   ['screenMenu', 'screenDate', 'screenForm', 'screenConfirm', 'screenDone',
    'screenIntake', 'screenIntakeDone',
-   // 🔴 0907line 案A: ゲート系の画面も畳む（確認・変更は LINE 無しで今まで通り使える）
-   // 🔴 0915nolineA: LINEのおすすめ・ヒントも畳む
    'screenGate', 'screenNotice', 'screenWho', 'linePromo', 'lineHint'].forEach(function(id) {
     $(id).classList.add('hidden');
   });
@@ -3152,16 +2628,13 @@ function openManage() {
   showMsg('');
 }
 
-/** 予約の流れに戻る */
 function closeManage() {
   $('screenManage').classList.add('hidden');
-  // 🔴 0907line 案A: LINE本人確認がまだなら、予約の流れではなく入口（ゲート/案内）に戻す
   if (routeEntry()) return;
   $('stepBar').classList.remove('hidden');
   goStep(1);
 }
 
-// ---- ① メールアドレスを入れてリンクを送ってもらう ----
 function sendLink() {
   if (MG.busy) return;
   var email = $('mgEmail').value.trim();
@@ -3178,7 +2651,6 @@ function sendLink() {
       MG.busy = false;
       btn.disabled = false;
       btn.textContent = 'リンクを送る';
-      // 🔴 実在しても実在しなくても同じ応答。画面も分けない
       $('mgSentMsg').textContent = (res && res.message) ? res.message : '';
       mgShow('mgSent');
     })
@@ -3186,12 +2658,10 @@ function sendLink() {
       MG.busy = false;
       btn.disabled = false;
       btn.textContent = 'リンクを送る';
-      // ⚠ 無言で失敗しない
       showMsg('ただいま送信できませんでした。お手数ですがお電話ください。');
     });
 }
 
-// ---- ② リンクから来たとき：自分の予約を見る ----
 function loadMyBookings() {
   mgShow('mgList');
   $('mgListBody').innerHTML = '<div class="loading">ご予約を読み込んでいます…</div>';
@@ -3199,7 +2669,6 @@ function loadMyBookings() {
   callAction('getMyBookings', { token: MG.token })
     .then(function(res) {
       if (!res || !res.success) {
-        // 🔴 失効・不正はすべて同じ扱い。「そんな予約はありません」とは言わない
         $('mgListBody').innerHTML = '';
         $('mgExpired').classList.remove('hidden');
         $('mgExpiredMsg').textContent = (res && res.error) ? res.error : '';
@@ -3209,16 +2678,12 @@ function loadMyBookings() {
       MG.menus    = res.menus || [];
       MG.single   = !!res.single;
       renderMyBookings();
-      // 🔴 0830f: LINEの案内（★予約の表示より後。ここが失敗しても上は出ている）
       renderLine(res.line);
-      // 🔴 0830e: 予約完了メールの【変更する】【キャンセルする】から来たときは、
-      //   そのままその画面へ進める（★1件だけのリンクのときに限る）。
-      //   ⚠ どちらの画面でも「実行する前に必ず確認」を挟む形は変えていない。
       if (MG.single && MG.bookings.length === 1) {
         if (MG.action === 'edit')   { startEdit(MG.bookings[0]); }
         if (MG.action === 'cancel') { askCancel(MG.bookings[0]); }
       }
-      MG.action = '';   // ★1回だけ効かせる（戻ったときに再発火させない）
+      MG.action = '';
     })
     .catch(function() {
       $('mgListBody').innerHTML =
@@ -3254,12 +2719,6 @@ function renderMyBookings() {
   });
 }
 
-/**
- * 予約完了画面に【LINEで通知を受け取る】を出す（0830g）
- *   🔴 URL はサーバ（_notify_ → _psBookingLinks_）が作ったものだけを使う。
- *     ★画面でトークンを組み立てない（組み立てを散らすと必ず食い違う）。
- *   ⚠ 空文字＝「すでに紐づけ済み」または「LINEの設定が無い」→ 何も出さない。
- */
 function showDoneLineLink(url) {
   var box = $('doneLineLink'), btn = $('doneLineStart');
   if (!box || !btn) return;
@@ -3268,9 +2727,6 @@ function showDoneLineLink(url) {
   box.classList.remove('hidden');
 }
 
-// ---- ②-b LINEで通知を受け取る（0830f 第6段階-1）----
-//   🔴 URLはサーバが組み立てたものをそのまま使う（画面で手書きしない）。
-//   ⚠ 押すと doGet の ?line=start へ進む。患者用アクションは1つも増えていない。
 function renderLine(line) {
   var box = $('mgLine');
   if (!line || !line.available || !line.startUrl) { box.classList.add('hidden'); return; }
@@ -3278,15 +2734,11 @@ function renderLine(line) {
 
   var btn = $('mgLineBtn'), off = $('mgLineOff');
   if (line.linked && line.needFriend) {
-    // 🔴 連携はできたが、当院の公式アカウントと「友だち」でないと LINE は届かない。
-    //   ⚠ 友だち追加は LINE 側の操作なので、こちらからは代わりにできない。
-    //     ★この間もお知らせはメールで届くので、予約そのものは何も困らない。
     $('mgLineState').textContent = 'あと1歩：LINEの友だち追加をお願いします';
     $('mgLineSub').textContent =
       'LINEの連携はできました。お知らせをLINEでお届けするには、'
       + '当院の公式アカウントを「友だち追加」してください。'
       + '（追加されるまではメールでお送りします）';
-    // ⚠ 公式アカウントのURLが設定されていない場合はボタンを出さない（行き先が無いため）
     btn.classList.toggle('hidden', !line.addFriendUrl);
     if (line.addFriendUrl) {
       btn.href = line.addFriendUrl;
@@ -3318,7 +2770,6 @@ function renderLine(line) {
   }
 }
 
-/** LINE連携から戻ってきたときの一言（★サーバが決めた結果だけを出す） */
 function showLineNotice(code) {
   if (!code) return;
   var el = $('mgLineMsg');
@@ -3342,26 +2793,18 @@ function showLineNotice(code) {
   el.classList.remove('hidden');
 }
 
-// ---- ③ 日時を変更する ----
 function startEdit(b) {
   MG.editing = b;
   MG.pickedJST = '';
   mgShow('mgPick');
   $('mgPickLead').textContent =
     b.datetimeLabel + ' のご予約を、空いているお時間へ変更いたします。○を押してください。';
-  // 🔴 新規予約とまったく同じ週表を使う（部品は1つ）。
-  //   ★空き枠は既存の getOpenSlots をそのまま使う（新しい計算は作らない）。
-  //   🆕 2026-11-02 1102chg: ただし変更する本人の予約は数えない（getMyChangeSlots。19:00 の予約を 18:30 へ動かせるように）
   WP.nextChangeFor = { token: MG.token, rid: b.reservationId };
   wpStart($('mgPickDays'), b.durationMinutes || 60, function(dt, label) {
-    cfOpenEdit(b, dt, label);   // 🔴 押した瞬間には変更しない。確認シートを挟む。
+    cfOpenEdit(b, dt, label);
   }, '');
 }
 
-// ============================================================
-// 🗂 0830b より前の「空いている枠を縦に並べる」変更画面（★無効。呼び出し元は無い）
-//   ⚠ コードは1行も消していない。週表(wpStart)に置き換えただけ。
-// ============================================================
 function renderPickDays() {
   if (!MG.days.length) {
     $('mgPickDays').innerHTML =
@@ -3373,7 +2816,6 @@ function renderPickDays() {
   MG.days.forEach(function(d) {
     var open = (d.slots || []).filter(slotOpen);
     if (!open.length) return;
-    // 🔴 0914p: datetimeJST は冗長なので廃止。d.date + s.start から組み立てる。
     var dateSlash = d.date.replace(/-/g, '/');
     h += '<div class="mg-day"><div class="mg-day-h">' + esc(fmtDayLabel(d)) + '</div><div class="mg-slots">';
     open.forEach(function(s) {
@@ -3395,19 +2837,11 @@ function renderPickDays() {
   });
 }
 
-/** 'YYYY-MM-DD' + 曜日 → 「9月3日（木）」 */
 function fmtDayLabel(d) {
   var p = String(d.date).split('-');
   return Number(p[1]) + '月' + Number(p[2]) + '日（' + (d.dayOfWeek || '') + '）';
 }
 
-/**
- * 日時を変更する。
- *   ⚠ 押した直後にボタンを無効化し、完了/失敗が確定するまで戻さない（二重送信の防止）。
- *   🔴 最終判定はサーバー。画面の○を信用しない。
- *     失敗したら「埋まりました」と出して表を取り直す。
- * @param {Element} [btn] 押されたボタン（確認シートのボタン。省略時は旧・決定ボタン）
- */
 function saveEdit(btn) {
   if (MG.busy || !MG.editing || !MG.pickedJST) return;
   btn = btn || $('mgSave');
@@ -3420,14 +2854,12 @@ function saveEdit(btn) {
       reqId: mgReqId(),
       reservationId: MG.editing.reservationId,
       datetimeJST: MG.pickedJST
-      // ★メニューは変えない（同じメニューのまま日時だけ移す）
     })
     .then(function(res) {
       MG.busy = false;
       cfBusy(false, '変更する');
       btn.disabled = false;
       if (!res || !res.success) {
-        // 🔴 画面が○でも、押した時点で埋まっていることがある。表を取り直す。
         cfClose();
         showMsg((res && res.error) ? res.error
               : 'ただいま変更できませんでした。お手数ですがお電話ください。');
@@ -3447,13 +2879,6 @@ function saveEdit(btn) {
     });
 }
 
-// ---- ④ キャンセルする ----
-/**
- * キャンセルの確認（🔴 押した瞬間には実行しない）
- *   ⚠ 0830e で window.confirm をやめ、日時選択と同じ確認シートに寄せた。
- *     ★GAS は画面を iframe で描くため、ブラウザの confirm が出ない環境がありうる。
- *       確認シートは本番で動作を確認済みなので、そちらに揃える。
- */
 function askCancel(b) {
   if (MG.busy) return;
   showMsg('');
@@ -3468,7 +2893,6 @@ function askCancel(b) {
   });
 }
 
-/** 実際にキャンセルを送る（★確認シートの「キャンセルする」から呼ばれる） */
 function doCancel(b, btn) {
   if (MG.busy) return;
   MG.busy = true;
@@ -3509,31 +2933,25 @@ function mgDone(title, dt, menu) {
   mgShow('mgDone');
 }
 
-/** 二重送信よけの合言葉（サーバが同じものは1回しか処理しない） */
 function mgReqId() {
   return String(Date.now()) + '-' + Math.random().toString(36).slice(2, 10);
 }
 
-// ---- 画面遷移 ----
 function goStep(n) {
   S.step = n;
   showMsg('');
   ['screenMenu','screenDate','screenForm','screenConfirm','screenDone'].forEach(function(id, i) {
     $(id).classList.toggle('hidden', (i + 1) !== n);
   });
-  // 0903a: 問診票の画面は予約の流れの外にある。流れに戻るときは必ず畳む
   $('screenIntake').classList.add('hidden');
   $('screenIntakeDone').classList.add('hidden');
-  // 🔴 0907line 案A: ゲート系の画面も畳む（予約の流れに入る＝本人確認は済んでいる）
   $('screenGate').classList.add('hidden');
   $('screenNotice').classList.add('hidden');
   $('screenWho').classList.add('hidden');
-  // 🆕 0917auth: 進捗バーは ①ご本人確認 ②メニュー ③日時 ④ご確認。
-  //   本人確認(st1)はここに来た時点で済んでいる＝常に点灯。以降は段階に応じて点灯。
   $('st1').classList.add('on');
-  $('st2').classList.toggle('on', n >= 1);   // メニュー
-  $('st3').classList.toggle('on', n >= 2);   // 日時（未連携の5項目入力もこの段）
-  $('st4').classList.toggle('on', n >= 4);   // ご確認
+  $('st2').classList.toggle('on', n >= 1);
+  $('st3').classList.toggle('on', n >= 2);
+  $('st4').classList.toggle('on', n >= 4);
   var _sl = $('stepLabel');
   if (_sl) {
     var _lab = (n === 1) ? '② メニュー'
@@ -3544,16 +2962,12 @@ function goStep(n) {
     else _sl.classList.add('hidden');
   }
   $('helpBox').classList.toggle('hidden', n === 5);
-  // 🔴 0831a: 未連携の案内はメニュー画面だけ（★予約の途中で邪魔をしない）
   if (SETUP.lineHint) $('lineHint').classList.toggle('hidden', n !== 1);
-  // 🔴 0915nolineA / 🆕 0918banner: LINEのおすすめはメニュー画面だけ。
-  //   🔴 連携済み(AUTH.token)・裏で本人確認中(authPending) には出さない（else で必ず畳む）。
   if (!AUTH.token && !AUTH.authPending && !SETUP.lineHint) {
     $('linePromo').classList.toggle('hidden', n !== 1);
   } else {
     $('linePromo').classList.add('hidden');
   }
-  // 🔴 0830b: ②日時は週表（部品は1つ。変更画面と同じもの）
   if (n === 2) mountWeekPickerForNew();
   if (n === 4) renderConfirm();
   updateNav();
@@ -3562,20 +2976,14 @@ function goStep(n) {
 
 function updateNav() {
   var row = $('navRow'), back = $('btnBack'), next = $('btnNext');
-  // 🔴 「予約の確認・変更」の画面を開いている間は、予約の流れの操作行を出さない。
-  //   ⚠ 週表は両方の画面で使うので、変更画面から updateNav が呼ばれることがある。
   if (!$('screenManage').classList.contains('hidden')) { row.classList.add('hidden'); return; }
-  // 0903a: 問診票を開いている間も出さない（ページ送りは問診票の中のボタンで行う）
   if (!$('screenIntake').classList.contains('hidden')) { row.classList.add('hidden'); return; }
   if (S.step === 1 || S.step === 5) { row.classList.add('hidden'); return; }
   row.classList.remove('hidden');
   back.textContent = '戻る';
   if (S.step === 2) {
-    // 🔴 0830b: 日時は週表の○を押して確認シートで決める。
-    //   ここは「選んだあとに進み直す」ための控え。選ぶ前は押せない。
     next.textContent = '次へ';
     next.disabled = !S.datetimeJST || WP.loading;
-    // 🗓 1017batch: まとめて予約は選んだ件数を出す（1件も無ければ押せない）
     if (btActive()) {
       next.textContent = '次へ（' + S.batchSlots.length + '件）';
       next.disabled = !S.batchSlots.length || WP.loading;
@@ -3589,19 +2997,6 @@ function updateNav() {
   }
 }
 
-// 🔴 0907line 案A: 「はい、予約にすすむ」（氏名確認 → 予約の流れへ）
-// 🔴 0928flow: 本人確認の画面（裏の LINE 確認が終わったときに割り込みで出る）を閉じた後は、
-//   患者さんが【居た場所】へ戻す。メニュー・日時を選んでいたのに①メニュー一覧へ戻されて
-//   「選んだ内容が消えた」ように見える段差の修正。★選んだ内容（S.menu / S.datetimeJST）はもともと消していない。
-//   ・日時まで選んでいた … ④確認へ（送信ボタンを押して待っていた人はそのまま送信）
-//   ・メニューだけ選んでいた … ③日時へ（週表はキャッシュから再描画）
-//   ・何も選んでいない … ②メニューへ（今までどおり）
-// 🔴 0928ux【2】: 日時を決めた後の進み先（③日時の「次へ」と、日時確認シートの「はい」の両方から呼ぶ）。
-//   ・裏の LINE 本人確認がまだ → ③ご入力（5項目）を出さずに「確認しています」で少しだけ待つ。
-//     終わり次第 __hpApplyAuth__ が自動で進める（連携済み→④確認／新規→氏名の画面→④確認）。
-//     ★万一 20 秒たっても終わらないときは今までどおり③ご入力へ進める（止まったままにしない）。
-//   ・本人確認は終わっているが氏名の確認を後回しにしていた（whoPending）→ ここで氏名を聞く。
-//     氏名の後は returnAfterWho が ④確認へ戻す（@200 の「元いた画面に戻る」をそのまま使う）。
 var PROCEED_WAIT_T = null;
 function proceedAfterDate() {
   if (AUTH.authPending && !AUTH.token) {
@@ -3637,8 +3032,6 @@ $('whoOk').addEventListener('click', function() {
   returnAfterWho();
 });
 
-// 🆕 0917auth: 「LINEを使わずに予約する」（LINE必須OFF のときだけ表示）
-//   → 今までどおり メニュー→日時→5項目 の流れへ（AUTH.token 無しなので screenForm を通る）
 if ($('gateNoLine')) {
   $('gateNoLine').addEventListener('click', function() {
     $('screenGate').classList.add('hidden');
@@ -3647,18 +3040,13 @@ if ($('gateNoLine')) {
   });
 }
 
-// 🆕 0917new: 「この名前で予約にすすむ」（カルテ未紐づけ＝氏名だけ入力 → 予約の流れへ）
-//   ★入力した氏名は送信時に auth と一緒に送る。サーバは needName の札のときだけ
-//     この氏名を採用する（patient_id は空のまま＝他人のカルテには触れない）。
 $('whoNameOk').addEventListener('click', function() {
   var nm = $('whoNameInput').value.trim();
   if (!nm) { showMsg('お名前を入力してください'); return; }
   if (nm.length > 60) { showMsg('お名前が長すぎます'); return; }
   AUTH.user = { name: nm, kana: '', phone: '', email: '' };
   AUTH.confirmed = true;
-  AUTH.presetName = nm;   // この画面ではもう聞かない
-  // 🆕 0917name: 次回から聞かないよう、入力した氏名をサーバ(line_links)に覚えてもらう。
-  //   ★失敗しても予約は進める（行き止まりにしない）。1回だけ自動で再試行。
+  AUTH.presetName = nm;
   if (AUTH.token) {
     try {
       callAction('rememberBookingName', { auth: AUTH.token, name: nm })
@@ -3669,13 +3057,12 @@ $('whoNameOk').addEventListener('click', function() {
         .catch(function () {});
     } catch (e) {}
   }
-  returnAfterWho();   // 🔴 0928flow: 居た場所へ戻す（①固定をやめた）
+  returnAfterWho();
 });
 
-// 🆕 0917name: 「別の名前にする」（覚えている氏名と違う人が使うとき）→ 入力画面に切り替え
 if ($('whoChangeName')) {
   $('whoChangeName').addEventListener('click', function() {
-    AUTH.presetName = '';        // 入力しなおす
+    AUTH.presetName = '';
     AUTH.user = null;
     $('whoConfirmBlock').classList.add('hidden');
     $('whoInputBlock').classList.remove('hidden');
@@ -3683,7 +3070,6 @@ if ($('whoChangeName')) {
   });
 }
 
-// ---- 予約の確認・変更（★関数を作ったらボタンも作る）----
 $('btnManage').addEventListener('click', function() { openManage(); mgShow('mgAsk'); });
 $('mgSend').addEventListener('click', sendLink);
 $('mgEmail').addEventListener('keydown', function(e) { if (e.key === 'Enter') sendLink(); });
@@ -3698,10 +3084,6 @@ $('mgRetry').addEventListener('click', function() {
 $('mgSave').addEventListener('click', function() { saveEdit($('mgSave')); });
 $('mgPickBack').addEventListener('click', function() { mgShow('mgList'); });
 
-// 🔴 0923dup Step2: 「この時間は、別の者が担当いたします。よろしいでしょうか？」の確認シート
-//   ★既存の確認シート（cfOpen）に乗せる。新しい部品は作らない。
-//   「はい、お願いします」→ confirmSasada:true を付けて同じ内容を送り直す
-//   「別の時間を選ぶ」→ 日時の選び直し（②）へ戻す
 function showConfirmOwnerFallback(r) {
   var cancelBtn = $('cfCancel');
   var origCancel = cancelBtn.textContent;
@@ -3730,26 +3112,23 @@ function showConfirmOwnerFallback(r) {
     onOk: function() {
       restore();
       cfClose();
-      S.confirmSasada = true;   // ★この1回の送信にだけ付く（送信後に必ず戻す）
+      S.confirmSasada = true;
       submitBooking();
       S.confirmSasada = false;
     }
   });
 }
 
-// 🗓 1017batch: 「1件だけ予約／まとめて予約」の切り替えと、完了画面の「続けて予約」
 Array.prototype.forEach.call(document.querySelectorAll('#batchToggle .bt-btn'), function(b) {
   b.addEventListener('click', function() { setBatchMode(b.getAttribute('data-batch') === '1'); });
 });
 $('btnContinue').addEventListener('click', function() { btContinue(false); });
 $('btnChangeMenu').addEventListener('click', function() { btContinue(true); });
 
-// 👤 0923choice: 担当者の選択ボタン（出ているときだけ押せる。OFF では箱ごと hidden）
 Array.prototype.forEach.call(document.querySelectorAll('#staffChoiceBox .sc-btn'), function(b) {
   b.addEventListener('click', function() { setStaffChoice(b.getAttribute('data-staff')); });
 });
 
-// ---- 確認シート（0830b）★閉じるボタン＋ESC＋背景クリックで閉じられる ----
 $('cfOk').addEventListener('click', function() { if (CF.onOk) CF.onOk(); });
 $('cfCancel').addEventListener('click', cfClose);
 $('cfSheet').addEventListener('click', function(e) { if (e.target === $('cfSheet')) cfClose(); });
@@ -3758,7 +3137,6 @@ document.addEventListener('keydown', function(e) {
 });
 
 $('btnBack').addEventListener('click', function() {
-  // 🔴 0907line 案A: 情報入力を飛ばしている間は ④確認 → ②日時 へ戻る
   if (S.step === 4 && AUTH.token) { goStep(2); return; }
   if (S.step > 1) goStep(S.step - 1);
 });
@@ -3775,21 +3153,12 @@ $('btnNext').addEventListener('click', function() {
   if (S.step === 4) { submitBooking(); }
 });
 
-// ============================================================
-// 🔴 0903a 第7段階-1: 初診の問診票
-// ------------------------------------------------------------
-//   ここから validateQPage6 の終わりまでと qNext/qBack は、旧 booking.html
-//   1973〜3446行・3579〜3680行の【逐語コピー】（項目・分岐・文言を変えないため）。
-//   変えた場所は Page7（日時選択とLINE連携を出さない）と送信（fetch→doPost）だけで、
-//   それらは下の「stage7-1」印のブロックにまとめてある。
-// ============================================================
 
 var QUEST_STORAGE_KEY = 'rishin_questionnaire_draft';
 
 var Q_PAGE_TITLES = [
   '', 'A. 基本情報', 'B. 主なお悩み選択', 'C. 症状別の詳細質問',
   'D. 症状全体の共通質問', 'E. 全身症状チェック', 'F. 女性専用フォーム', 'G. 最終共通項目',
-  // 🎀 0919beauty: 美容鍼専用ページ(page 8)。鍼灸の1〜7は不変。
   'B. 美容鍼の問診'
 ];
 
@@ -3825,9 +3194,6 @@ var SYMPTOM_CATEGORIES = [
   }
 ];
 
-// ============================================================
-// Phase 3: 症状別詳細質問定義
-// ============================================================
 var SYMPTOM_QUESTIONS = {
   shoulder_neck: {
     title: 'C-1. 肩首のこり・痛み',
@@ -4047,7 +3413,6 @@ var SYMPTOM_QUESTIONS = {
   }
 };
 
-// C-8 婦人科症状（構造が複雑なため専用オブジェクトで管理）
 var GYNECO_TYPE_MAP = {
   '月経痛・生理痛':                           'menstrual_pain',
   'PMS（生理前のイライラ・不調）':             'pms',
@@ -4164,7 +3529,7 @@ var GYNECO_TYPE_QUESTIONS = {
 
 var qPage             = 1;
 var qFormData         = {};
-var selectedComplaints = [];  // [{ key, label }, ...]
+var selectedComplaints = [];
 
 function saveDraft(data) {
   try {
@@ -4186,7 +3551,6 @@ function clearDraft() {
   try { localStorage.removeItem(QUEST_STORAGE_KEY); } catch(e) {}
 }
 
-// ---- 年代自動計算 ----
 function calcAgeGroup(bd) {
   if (!bd) return '';
   var p = bd.split('-');
@@ -4210,7 +3574,6 @@ function renderQProgressBar(page) {
   var isMale = qFormData.gender === '男性';
   var total, effectivePage;
   if (IQ.beauty) {
-    // 🎀 0919beauty: 美容鍼は 3ページ（1=基本 / 8=美容鍼 / 7=最終）
     total = 3;
     effectivePage = (page === 1) ? 1 : (page === 8 ? 2 : 3);
   } else {
@@ -4240,7 +3603,7 @@ function renderQPage(page) {
   if (page === 5) { renderQPage5(); return; }
   if (page === 6) { renderQPage6(); return; }
   if (page === 7) { renderQPage7(); return; }
-  if (page === 8) { renderQPage8(); return; }   // 🎀 0919beauty: 美容鍼専用
+  if (page === 8) { renderQPage8(); return; }
   renderQPageStub(page);
 }
 
@@ -4367,9 +3730,6 @@ function updateAgeGroupDisplay() {
   disp.textContent = ag ? '年代：' + ag : '';
 }
 
-// ============================================================
-// Page 2: B. 主なお悩み選択
-// ============================================================
 function renderQPage2() {
   var count = selectedComplaints.length;
   var html = renderQProgressBar(2) +
@@ -4449,13 +3809,9 @@ function removeComplaint(idx) {
   renderQPage2();
 }
 
-// ============================================================
-// Page 3: C. 症状別の詳細質問
-// ============================================================
 function renderQPage3() {
   var sd = qFormData.symptom_details || {};
 
-  // C-9「その他」のテキストをPhase 2から引き継ぐ
   if (!sd.other && qFormData.other_symptom_text) {
     sd.other = { symptom_text: qFormData.other_symptom_text };
   }
@@ -4576,7 +3932,6 @@ function renderCheckboxGroup3(name, options, checkedVals, exclusiveVals) {
   return html + '</div>';
 }
 
-// ---- C-8 婦人科症状 ----
 function renderGynecoSection(savedData) {
   var types = Array.isArray(savedData.types) ? savedData.types : [];
   var commonData = savedData.common || {};
@@ -4584,7 +3939,6 @@ function renderGynecoSection(savedData) {
   var html = '<div class="q-symptom-section" data-symptom="gyneco">' +
     '<div class="q-symptom-title">C-8. 婦人科症状</div>';
 
-  // C-8-0: タイプ選択（F連動フィルタリング）
   var _menstrualStatus = qFormData.female_form ? qFormData.female_form.menstrual_status : '';
   var _typeLabels = Object.keys(GYNECO_TYPE_MAP);
   if (_menstrualStatus === '完全に閉経している') {
@@ -4601,7 +3955,6 @@ function renderGynecoSection(savedData) {
   });
   html += '</div></div>';
 
-  // C-8-1: 共通質問（タイプ選択後に表示）
   html += '<div id="gyneco_common_section" style="' + (types.length > 0 ? '' : 'display:none;') + '">' +
     '<div class="q-type-sub-title">▍共通の質問</div>';
   GYNECO_COMMON_QUESTIONS.forEach(function(q) {
@@ -4609,7 +3962,6 @@ function renderGynecoSection(savedData) {
   });
   html += '</div>';
 
-  // C-8-2: タイプ別追加質問
   Object.keys(GYNECO_TYPE_QUESTIONS).forEach(function(typeKey) {
     var tq = GYNECO_TYPE_QUESTIONS[typeKey];
     var typeLabel = '';
@@ -4645,14 +3997,12 @@ function updateGynecoSections() {
   checkConditionals();
 }
 
-// ---- 排他制御 ----
 function handleExclusiveCtrl(cb) {
   var name = cb.name;
   var isExcl = cb.getAttribute('data-exclusive') === 'true';
   var allCbs = document.querySelectorAll('input[name="' + name + '"]');
 
   if (isExcl && cb.checked) {
-    // 排他選択肢ON → 他を全てOFF・無効化
     allCbs.forEach(function(other) {
       if (other !== cb) {
         other.checked = false;
@@ -4661,7 +4011,6 @@ function handleExclusiveCtrl(cb) {
       }
     });
   } else {
-    // 現在の状態を再評価
     var anyExclChecked = false;
     var anyNonExclChecked = false;
     allCbs.forEach(function(other) {
@@ -4677,7 +4026,6 @@ function handleExclusiveCtrl(cb) {
         }
       });
     } else if (anyNonExclChecked) {
-      // 通常選択肢ON → 排他選択肢を無効化
       allCbs.forEach(function(other) {
         if (other.getAttribute('data-exclusive') === 'true') {
           other.disabled = true;
@@ -4688,7 +4036,6 @@ function handleExclusiveCtrl(cb) {
         }
       });
     } else {
-      // 何も選択なし → 全て有効化
       allCbs.forEach(function(other) {
         other.disabled = false;
         if (other.parentElement) other.parentElement.style.opacity = '';
@@ -4698,7 +4045,6 @@ function handleExclusiveCtrl(cb) {
   checkConditionals();
 }
 
-// ---- 条件分岐チェック ----
 function checkConditionals() {
   document.querySelectorAll('.q-cond-block').forEach(function(block) {
     var condOn = block.getAttribute('data-cond-on');
@@ -4710,7 +4056,6 @@ function checkConditionals() {
     document.querySelectorAll('input[name="' + condOn + '"]:checked').forEach(function(el) {
       currentVals.push(el.value);
     });
-    // ラジオも考慮（checkboxで取れなかった場合）
     if (currentVals.length === 0) {
       var radio = document.querySelector('input[name="' + condOn + '"]:checked');
       if (radio) currentVals.push(radio.value);
@@ -4718,17 +4063,14 @@ function checkConditionals() {
 
     var show = false;
     if (condMode === 'not') {
-      // condValsにない値が1つでも選ばれていれば表示
       show = currentVals.some(function(v) { return condVals.indexOf(v) === -1; });
     } else if (condMode === 'values') {
-      // condValsのうち1つでも選ばれていれば表示
       show = condVals.some(function(v) { return currentVals.indexOf(v) !== -1; });
     }
     block.style.display = show ? '' : 'none';
   });
 }
 
-// ---- ページ3初期化（保存済みデータの排他・条件を反映） ----
 function initPage3() {
   var groups = {};
   document.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
@@ -4762,7 +4104,6 @@ function initPage3() {
   checkConditionals();
 }
 
-// ---- ページ3 データ収集 ----
 function collectQPage3Data() {
   var details = {};
   selectedComplaints.forEach(function(c) {
@@ -4817,7 +4158,6 @@ function collectGynecoData() {
   return data;
 }
 
-// ---- ページ3 バリデーション ----
 function validateQPage3() {
   var errs = [];
   selectedComplaints.forEach(function(c) {
@@ -4835,7 +4175,6 @@ function validateSympData(prefix, questions, sectionLabel) {
   var errs = [];
   questions.forEach(function(q) {
     if (!q.required) return;
-    // 条件付きブロックが非表示なら検証スキップ
     if (q.conditional) {
       var blockId = 'qcond_' + (prefix + q.id).replace(/[^a-zA-Z0-9]/g, '_');
       var blockEl = document.getElementById(blockId);
@@ -4892,9 +4231,6 @@ function validateGynecoData(sectionLabel) {
   return errs;
 }
 
-// ============================================================
-// Phase 4: D・E データ定義
-// ============================================================
 var BODY_CHECK_CATEGORIES = [
   { key: 'head', label: '👁️ 頭・目・耳・鼻・喉',
     items: ['頭が痛い','めまいがする','目が疲れる・かすむ','目がかゆい','光がまぶしい','涙がでる',
@@ -4920,9 +4256,6 @@ var BODY_CHECK_CATEGORIES = [
     items: ['雨の日に身体が重くなる','冷え性がある','疲れやすい（朝方）','疲れやすい（夕方）','疲れやすい（一日中）'] }
 ];
 
-// ============================================================
-// Page 4: D. 症状全体の共通質問
-// ============================================================
 function renderQPage4() {
   var d = qFormData.common_symptom || {};
   var hasImpact = d.life_impact && d.life_impact !== '影響なし';
@@ -5023,9 +4356,6 @@ function validateQPage4() {
   return errs;
 }
 
-// ============================================================
-// Page 5: E. 全身症状チェック
-// ============================================================
 function renderQPage5() {
   var saved = qFormData.body_check || {};
 
@@ -5081,9 +4411,6 @@ function collectQPage5Data() {
   qFormData.body_check = data;
 }
 
-// ============================================================
-// Page 6: F. 女性専用フォーム
-// ============================================================
 function renderQPage6() {
   var f = qFormData.female_form || {};
   var status = f.menstrual_status || '';
@@ -5094,7 +4421,6 @@ function renderQPage6() {
     '<div class="q-header"><h2>F. 女性専用フォーム</h2>' +
     '<p>女性・その他の方のみへの質問です。生理の状況についてお聞きします。</p></div>';
 
-  // F-0
   var statusOpts = ['定期的にある','不規則にある','薬の影響・妊娠中・授乳中の為ない','半年以上きていない','完全に閉経している'];
   html += '<div class="q-card"><label>現在の生理の状況を教えてください<span class="req">*</span></label>';
   statusOpts.forEach(function(opt) {
@@ -5103,7 +4429,6 @@ function renderQPage6() {
   });
   html += '</div>';
 
-  // F-A: 生理がある人ルート（定期的・不規則・半年以上）
   html += '<div id="f_route_a"' + (isA ? '' : ' style="display:none;"') + '>';
   html += '<div class="q-symptom-title">F-A. 生理の詳細</div>';
   html += '<div class="q-card"><label>平均周期<span class="req">*</span></label>' +
@@ -5122,9 +4447,8 @@ function renderQPage6() {
       f.irregular_bleeding) + '</div>';
   html += '<div class="q-card"><label>その他、伝えたいこと<span class="q-optional">（任意）</span></label>' +
     '<textarea id="f_note" rows="2" placeholder="例：生理前のむくみがひどい など">' + esc(f.note||'') + '</textarea></div>';
-  html += '</div>'; // end f_route_a
+  html += '</div>';
 
-  // F-B: 閉経ルート
   html += '<div id="f_route_b"' + (isB ? '' : ' style="display:none;"') + '>';
   html += '<div class="q-symptom-title">F-B. 閉経後の詳細</div>';
   html += '<div class="q-card"><label>何歳で閉経しましたか？<span class="req">*</span></label>' +
@@ -5140,7 +4464,7 @@ function renderQPage6() {
       f.period_pain) + '</div>';
   html += '<div class="q-card"><label>その他、伝えたいこと<span class="q-optional">（任意）</span></label>' +
     '<textarea id="f_note_b" rows="2" placeholder="例：当時の様子など">' + esc(f.note_b||'') + '</textarea></div>';
-  html += '</div>'; // end f_route_b
+  html += '</div>';
 
   html += '<div id="q-page-err"></div>' +
     '<div style="display:flex;gap:0.8rem;margin-top:1.5rem;">' +
@@ -5255,7 +4579,7 @@ function collectQPageData(page) {
   } else if (page === 7) {
     collectQPage7Data();
   } else if (page === 8) {
-    collectQPage8Data();   // 🎀 0919beauty
+    collectQPage8Data();
   }
 }
 
@@ -5290,9 +4614,8 @@ function validateQPage(page) {
   } else if (page === 7) {
     return validateQPage7();
   } else if (page === 8) {
-    return validateQPage8();   // 🎀 0919beauty
+    return validateQPage8();
   }
-  // Page 5 (E) has no required fields
   return errs;
 }
 
@@ -5307,7 +4630,6 @@ function qNext() {
     }
     return;
   }
-  // 🎀 0919beauty: 美容鍼は 1 → 8(美容鍼専用) → 7(最終) の3ページ。鍼灸は従来どおり。
   var nextPage;
   if (IQ.beauty) {
     nextPage = (qPage === 1) ? 8 : (qPage === 8 ? 7 : qPage + 1);
@@ -5322,7 +4644,6 @@ function qNext() {
 function qBack() {
   if (qPage <= 1) return;
   collectQPageData(qPage);
-  // 🎀 0919beauty: 美容鍼は 7 → 8 → 1 で戻る。
   var prevPage;
   if (IQ.beauty) {
     prevPage = (qPage === 7) ? 8 : (qPage === 8 ? 1 : qPage - 1);
@@ -5334,42 +4655,27 @@ function qBack() {
   renderQPage(prevPage);
 }
 
-// ------------------------------------------------------------
-// 🔴 stage7-1 シム: 旧コードが期待する道具（★中身だけこの画面に向ける）
-// ------------------------------------------------------------
-function setContent(html) {              // 旧booking.htmlでは画面全体・ここでは問診枠の中だけ
+function setContent(html) {
   $('qContent').innerHTML = html;
 }
-function val(id) {                       // 旧booking.htmlと同じ実装
+function val(id) {
   var el = document.getElementById(id);
   return el ? el.value.trim() : '';
 }
 
-// ------------------------------------------------------------
-// 🔴 stage7-1: 問診票の状態と開閉
-// ------------------------------------------------------------
 var IQ = {
-  token: '',          // 問診トークン（createBooking の応答 or ?intake= から）
+  token: '',
   active: false,
-  standalone: false,  // メールのリンク（?intake=）から開いたか
-  beauty: false       // 🎀 0919beauty: 美容鍼の初診か（メニュー名に「美容鍼」を含む）
+  standalone: false,
+  beauty: false
 };
 
-/**
- * 問診票を開く。
- * @param {string} token
- * @param {Object} [opts] { prefill:{name,kana,phone,email,address}, standalone:boolean,
- *   submittedBefore:boolean, beauty:boolean,
- *   carryover:{found:boolean, fields?:Object, beauty?:Object|null} }  🆕 0921carry
- */
 function iqOpen(token, opts) {
   opts = opts || {};
   IQ.token = String(token || '');
   IQ.active = true;
   IQ.standalone = !!opts.standalone;
-  IQ.beauty = !!opts.beauty;   // 🎀 0919beauty: メニュー名に「美容鍼」を含む初診か
-  // 🆕 1004intake: 予約に紐づかない問診票（先生が「問診票だけ」を送った場合）。
-  //   ★完了画面で「予約が取れた」と誤解されない文言に切り替えるために持つ。
+  IQ.beauty = !!opts.beauty;
   IQ.noBooking = !!opts.noBooking;
   IQ.presetName = String(opts.presetName || '');
 
@@ -5377,9 +4683,6 @@ function iqOpen(token, opts) {
     .forEach(function(id) { $(id).classList.add('hidden'); });
   $('navRow').classList.add('hidden');
   $('stepBar').classList.add('hidden');
-  // 🔴 1004-401: 「問診票だけ」のリンクでは、予約の流れの飾りを出さない。
-  //   ★「① ご本人確認」は予約の段階表示なので、予約が無いのに出ると迷わせる。
-  //   ★予約に紐づく従来の問診票では【今までどおり】出す（挙動を変えない）。
   if (IQ.noBooking) {
     try { var _sl2 = $('stepLabel'); if (_sl2) _sl2.classList.add('hidden'); } catch (e1) {}
     try { var _lp2 = $('linePromo'); if (_lp2) _lp2.classList.add('hidden'); } catch (e2) {}
@@ -5388,7 +4691,6 @@ function iqOpen(token, opts) {
   $('screenIntake').classList.remove('hidden');
   showMsg('');
 
-  // 途中保存（旧booking.htmlと同じ localStorage 下書き・文言もそのまま）
   var draft = loadDraft();
   if (draft) {
     if (confirm('前回の入力データが見つかりました。続きから入力しますか？\n（キャンセル：最初から入力）')) {
@@ -5406,23 +4708,17 @@ function iqOpen(token, opts) {
     selectedComplaints = [];
     qPage              = 1;
   }
-  // 🆕 1004intake: 先生が発行時に入れた氏名の下書き（★空欄のときだけ）。
-  //   紐づけ済みの患者さんは、下の carryover で ふりがな等も入る。
   if (!qFormData.name && IQ.presetName) qFormData.name = IQ.presetName;
 
-  // 予約フォームで入力済みの4項目を引き継ぐ（★空欄のときだけ。二度打たせない）
   var pf = opts.prefill || null;
   if (pf) {
     if (!qFormData.name     && pf.name)  qFormData.name     = pf.name;
     if (!qFormData.furigana && pf.kana)  qFormData.furigana = pf.kana;
     if (!qFormData.phone    && pf.phone) qFormData.phone    = pf.phone;
     if (!qFormData.email    && pf.email) qFormData.email    = pf.email;
-    // 🔴 0915nolineA: 未連携の予約フォームで住所も入力済み → 問診票にも引き継ぐ
     if (!qFormData.address  && pf.address) qFormData.address = pf.address;
   }
 
-  // 🆕 0921carry: 前回（別の予約）の問診票から、共通項目だけを空欄のときだけ引き継ぐ
-  //   （同意・その回だけの項目は含めない＝サーバ側 _itCarryoverForPatient_ で既に除かれている）。
   IQ.carriedOver = false;
   var co = opts.carryover;
   if (co && co.found) {
@@ -5456,7 +4752,6 @@ function iqOpen(token, opts) {
         IQ.carriedOver = true;
       }
     }
-    // 🎀 美容鍼の問診を開くときだけ、前回の美容鍼データ（服薬・アレルギー・生活習慣のみ）を引き継ぐ
     if (IQ.beauty && co.beauty) {
       if (!qFormData.beauty_form) qFormData.beauty_form = {};
       var bfDst = qFormData.beauty_form, bfSrc = co.beauty;
@@ -5467,9 +4762,6 @@ function iqOpen(token, opts) {
     }
   }
 
-  // 案内文（★予約が成立していることを必ず伝える＝途中でやめても不安にさせない）
-  //   🔴 1004-401: ただし「問診票だけ」のリンク（予約に紐づかない＝IQ.noBooking）では
-  //     予約は1件も無い。ここで「ご予約は確定しています」と出すと嘘になるので必ず分ける。
   $('iqBanner').innerHTML = (opts.submittedBefore
     ? '✅ この問診票はご提出済みです。<br>内容を修正して再送信すると、新しい内容が院に届きます。'
     : (IQ.noBooking
@@ -5482,7 +4774,6 @@ function iqOpen(token, opts) {
           + '変更があれば書き換えてください。</div>'
         : '');
 
-  // 🔴 1004-401: 「あとで入力する」の添え書きも、予約が無いときは「確定」と言わない
   try {
     var _sk = document.getElementById('iqSkipBtn');
     if (_sk) _sk.textContent = IQ.noBooking
@@ -5490,27 +4781,22 @@ function iqOpen(token, opts) {
       : 'あとで入力する（ご予約はこのまま確定しています）';
   } catch (eSk) {}
 
-  // 🎀 0919beauty: フォーム種別が違う下書き（鍼灸↔美容鍼）はページだけ1に戻す（違うページを出さない）。
   if (draft && (!!draft.beauty !== IQ.beauty)) qPage = 1;
   renderQPage(qPage);
 }
 
-/** 「あとで入力する」（🔴 予約はもう成立している。下書きは消さない＝メールのリンクで続きから書ける） */
 function iqSkip() {
   iqFinish(false);
 }
 
-/** 問診票を閉じる。submitted=true なら送信完了の表示にする */
 function iqFinish(submitted) {
   IQ.active = false;
   $('screenIntake').classList.add('hidden');
   if (IQ.standalone) {
-    // メールのリンクから来た人 → 完了/案内の画面だけ見せる（予約完了画面の情報は無い）
     $('iqDoneTitle').textContent = submitted ? '問診票を送信しました' : '問診票はあとでご記入いただけます';
     var _tel2 = '';
     try { _tel2 = (SETUP.clinic && SETUP.clinic.tel) ? String(SETUP.clinic.tel) : ''; } catch (eT2) {}
     if (IQ.noBooking) {
-      // 🆕 1004intake: 予約に紐づかない問診票。🔴「予約が取れた」と誤解されない文言にする。
       $('iqDoneMsg').innerHTML = submitted
         ? 'ご記入ありがとうございました。<br>内容をお預かりしました。<br><br>'
           + '<b>※ これはご予約ではありません。</b><br>'
@@ -5526,7 +4812,6 @@ function iqFinish(submitted) {
     $('screenIntakeDone').classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } else {
-    // 予約の流れの中 → いつもの予約完了画面へ（問診の結果を一言添える）
     $('doneIntakeNote').textContent = submitted
       ? '📋 問診票を受け付けました。ご記入ありがとうございました。'
       : '📋 問診票は、確認メールに記載のリンクからいつでもご記入いただけます。';
@@ -5535,12 +4820,6 @@ function iqFinish(submitted) {
   }
 }
 
-// ============================================================
-// 🔴 0906k 第7段階-4: 再診の事前入力（経過・新しい症状）
-//   ・予約成立後・再診メニューのみ。全項目 任意・飛ばせる。
-//   ・B主訴の部位別は 初診問診の SYMPTOM_CATEGORIES を使い回す（新しく作らない）。
-//   ・🔴 送信は submitRevisit（token はトークン由来の rid だけを信じる）。
-// ============================================================
 var RV = { token: '', complaints: [] };
 var RV_POST_CHANGE = ['直後から楽になった', '翌日から楽になった', '数日もった', 'すぐ戻った', 'だるさが出た'];
 var RV_DAILY_LIFE  = ['支障なし', '少し支障', 'かなり支障'];
@@ -5552,8 +4831,6 @@ function rvOpen(token) {
     .forEach(function(id) { if ($(id)) $(id).classList.add('hidden'); });
   if ($('navRow')) $('navRow').classList.add('hidden');
   if ($('stepBar')) $('stepBar').classList.add('hidden');
-  // 🔴 0907rv3: 簡素化（自由記入＋新しい症状だけ・30秒〜1分で終わる量）
-  //   痛みの程度・施術後の変化・日常生活は画面から廃止（サーバ・列は互換のため据え置き）
   $('rvBanner').innerHTML = '✅ ご予約は確定しています。<br>よろしければ、前回からのご様子をお聞かせください（任意・30秒ほど）。';
   $('rvFreeText').value = '';
   $('rvErr').style.display = 'none';
@@ -5562,7 +4839,6 @@ function rvOpen(token) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/** 部位別の症状ピッカー（初診問診の SYMPTOM_CATEGORIES を使い回す・最大3） */
 function rvRenderSymptoms() {
   var count = RV.complaints.length;
   var html = '';
@@ -5601,8 +4877,6 @@ function rvToggleComplaint(key, label) {
 function rvRemoveComplaint(idx) { RV.complaints.splice(idx, 1); rvRenderSymptoms(); }
 
 function rvCollect() {
-  // 🔴 0907rv3: 廃止した3項目（痛み・施術後の変化・日常生活）は空で送る。
-  //   サーバ（Revisit.js）と列はそのまま＝既存の保存行・先生の閲覧画面と互換。
   return {
     new_complaints: RV.complaints.slice(),
     pain_before: '',
@@ -5644,13 +4918,6 @@ function rvFinish(submitted) {
   goStep(5);
 }
 
-// ------------------------------------------------------------
-// Page 7: G. 最終共通項目（★stage7-1 改）
-//   🔴 旧Gページからの変更は2点だけ:
-//     ① 「ご希望の日時」を出さない（予約は成立済み。旧Gの日時選択は使わない＝先生の決定）
-//     ② LINE連携の案内・hidden入力を出さない（?lineId= 方式は持ち込まない）
-//   他の項目・選択肢・文言は旧booking.htmlのまま。
-// ------------------------------------------------------------
 function renderQPage7() {
   var g = qFormData.final_items || {};
   var checkedPurpose = Array.isArray(g.visit_purpose) ? g.visit_purpose : [];
@@ -5659,13 +4926,11 @@ function renderQPage7() {
     '<div class="q-header"><h2>G. 最終共通項目</h2>' +
     '<p>最後の質問です。あともう少しです！</p></div>';
 
-  // Q1: 過去の病気・ケガ（任意）
   html += '<div class="q-card"><label>過去にかかった病気・ケガ<span class="q-optional">（任意）</span></label>' +
     '<textarea id="g_past_illness" rows="3"' +
     ' placeholder="例：令和3年頃 胃潰瘍 治療中 / 10年前 交通事故 背骨圧迫骨折 完治">' +
     esc(g.past_illness||'') + '</textarea></div>';
 
-  // Q2: 通院目的（複数可）
   var purposeOpts = ['今ある痛みや症状を取りたい','症状が改善後も再発しないようにしたい',
     'ケガ・病気になりにくい体をつくりたい','すぐ疲れる体質を改善したい',
     'とにかく健康でいたい','自律神経を調節したい'];
@@ -5677,13 +4942,11 @@ function renderQPage7() {
   });
   html += '</div></div>';
 
-  // Q3: 通院ペースの希望
   html += '<div class="q-card"><label>通院ペースの希望<span class="req">*</span></label>' +
     renderRadioGroup3('g_visit_pace',
       ['施術してから決めたい','週2回','週1回','2〜3週間に1回','月1回','2〜3ヶ月に1回'],
       g.visit_pace) + '</div>';
 
-  // Q4: SNS掲載同意（案内文付き）
   html += '<div class="q-card">' +
     '<div class="f-info-box">' +
     '<h3>📷 施術中の撮影について</h3>' +
@@ -5698,7 +4961,6 @@ function renderQPage7() {
     renderRadioGroup3('g_sns_consent', ['同意する','使用前に都度確認してほしい','同意しない'], g.sns_consent) +
     '</div>';
 
-  // Q5: 美容鍼希望（🎀 0919beauty: 美容鍼の問診では出さない＝選んで来ているため。鍼灸は従来どおり）
   if (!IQ.beauty) {
     html += '<div class="q-card"><label>美容鍼希望<span class="req">*</span></label>' +
       renderRadioGroup3('g_beauty_acu', ['はい','いいえ'], g.beauty_acu) + '</div>';
@@ -5726,30 +4988,21 @@ function collectQPage7Data() {
   var beautyEl = document.querySelector('input[name="g_beauty_acu"]:checked');
   g.beauty_acu  = beautyEl ? beautyEl.value : '';
   qFormData.final_items = g;
-  // 🔴 stage7-1: 旧実装がここで拾っていた line_linked / line_user_id は【存在しない】（持ち込まない）
 }
 
 function validateQPage7() {
   var errs = [];
-  // 🔴 stage7-1: 旧実装の「ご希望の日時」チェックは無い（予約は成立済み）
   if (document.querySelectorAll('input[name="g_visit_purpose"]:checked').length === 0)
     errs.push('通院目的を1つ以上選択してください');
   if (!document.querySelector('input[name="g_visit_pace"]:checked'))
     errs.push('通院ペースの希望を選択してください');
   if (!document.querySelector('input[name="g_sns_consent"]:checked'))
     errs.push('SNS・ブログ掲載同意を選択してください');
-  // 🎀 0919beauty: 美容鍼の問診では「美容鍼希望」を出していないので必須にしない。
   if (!IQ.beauty && !document.querySelector('input[name="g_beauty_acu"]:checked'))
     errs.push('美容鍼希望を選択してください');
   return errs;
 }
 
-// ------------------------------------------------------------
-// 🎀 0919beauty: Page 8 = 美容鍼専用の問診（鍼灸の主訴・症状詳細・共通症状・身体チェックは出さない）
-//   ・回答は qFormData.beauty_form に入れる → questionnaire_raw(JSON)に保存（列は増やさない）。
-//   ・必須: 美容医療の経験 / 皮膚疾患 / 抗凝固薬 / 内出血同意 / 肌の悩み / 気になる部位。
-//   ・入力欄は16px・タップ44px以上（スマホ配慮）。
-// ------------------------------------------------------------
 function renderQPage8() {
   var bf = qFormData.beauty_form || {};
   var INP = 'width:100%;box-sizing:border-box;font-size:16px;padding:11px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit';
@@ -5763,7 +5016,6 @@ function renderQPage8() {
     '<div class="q-header"><h2>B. 美容鍼の問診</h2><p>お肌の状態と、安全に施術するための確認です。</p></div>';
 
   html += '<div style="font-weight:700;color:var(--accent);margin:0.4rem 0 0.6rem">安全のための確認</div>';
-  // 美容医療の経験（必須・複数）＋ なし以外なら時期・部位
   html += '<div class="q-card"><label>美容医療の経験<span class="req">*</span><span class="q-optional">（複数選択可・無ければ「なし」）</span></label>' +
     cbGrid('b_cosmetic_history', ['ヒアルロン酸', 'ボトックス', '糸リフト', 'レーザー', 'その他', 'なし']) + '</div>';
   html += '<div class="q-card q-cond-block" data-cond-on="b_cosmetic_history" data-cond-mode="not" data-cond-vals="なし">' +
@@ -5772,23 +5024,19 @@ function renderQPage8() {
   html += '<div class="q-card q-cond-block" data-cond-on="b_cosmetic_history" data-cond-mode="not" data-cond-vals="なし">' +
     '<label>受けた部位<span class="q-optional">（任意）</span></label>' +
     '<input type="text" id="b_cosmetic_area" value="' + esc(bf.cosmetic_area || '') + '" placeholder="例：ほうれい線・目元" style="' + INP + '"></div>';
-  // 皮膚疾患・アレルギー（必須）→ ある→内容
   html += '<div class="q-card"><label>皮膚疾患・アトピー・金属アレルギー<span class="req">*</span></label>' +
     renderRadioGroup3('b_skin_disease', ['ある', 'ない'], bf.skin_disease) + '</div>';
   html += '<div class="q-card q-cond-block" data-cond-on="b_skin_disease" data-cond-mode="values" data-cond-vals="ある">' +
     '<label>内容<span class="q-optional">（任意）</span></label>' +
     '<textarea id="b_skin_disease_detail" rows="2" placeholder="例：金属アレルギー（ピアスでかぶれる）" style="' + INP + '">' + esc(bf.skin_disease_detail || '') + '</textarea></div>';
-  // 抗凝固薬（必須）→ あり→薬名
   html += '<div class="q-card"><label>血をサラサラにする薬（抗凝固薬）の服用<span class="req">*</span></label>' +
     renderRadioGroup3('b_anticoagulant', ['あり', 'なし', 'わからない'], bf.anticoagulant) + '</div>';
   html += '<div class="q-card q-cond-block" data-cond-on="b_anticoagulant" data-cond-mode="values" data-cond-vals="あり">' +
     '<label>お薬の名前<span class="q-optional">（任意）</span></label>' +
     '<input type="text" id="b_anticoagulant_name" value="' + esc(bf.anticoagulant_name || '') + '" placeholder="例：ワーファリン" style="' + INP + '"></div>';
-  // 内出血の同意（必須チェック）
   html += '<div class="q-card" style="background:#fdf6ec"><label class="q-check-label" style="font-weight:600;align-items:flex-start">' +
     '<input type="checkbox" id="b_bruise_consent"' + (bf.bruise_consent ? ' checked' : '') + ' style="margin-top:3px">' +
     '<span>美容鍼では まれに内出血が出ることがあります（数日〜2週間ほどで自然に消えます）。理解しました<span class="req">*</span></span></label></div>';
-  // 直近の大事な予定（任意）→ ある→日付
   html += '<div class="q-card"><label>直近の大事な予定（結婚式・撮影・行事など）<span class="q-optional">（任意）</span></label>' +
     renderRadioGroup3('b_upcoming_event', ['ある', 'ない'], bf.upcoming_event) + '</div>';
   html += '<div class="q-card q-cond-block" data-cond-on="b_upcoming_event" data-cond-mode="values" data-cond-vals="ある">' +
@@ -5866,9 +5114,6 @@ function validateQPage8() {
   return errs;
 }
 
-// ------------------------------------------------------------
-// 送信（★fetch → doPost。google.script.run は使わない）
-// ------------------------------------------------------------
 function iqSubmit() {
   collectQPageData(qPage);
   var errs = validateQPage(qPage);
@@ -5881,9 +5126,6 @@ function iqSubmit() {
     return;
   }
 
-  // 旧 submitQuestionnaireNew と同じ組み立て。
-  //   🔴 送らないもの: selected_dt（日時は予約で確定済み）/ line_user_id（?lineId=禁止）/
-  //     reservation_menu・reservation_duration（メニューはサーバが予約行から採る）
   var payload = {};
   for (var k in qFormData) { if (qFormData.hasOwnProperty(k)) payload[k] = qFormData[k]; }
   payload.main_complaint_1    = selectedComplaints[0] ? selectedComplaints[0].label : '';
@@ -5898,8 +5140,6 @@ function iqSubmit() {
   var errEl2 = document.getElementById('q-page-err');
   if (errEl2) errEl2.innerHTML = '';
 
-  // 🆕 1004intake: 送信ごとの冪等キー（通信が再試行されても問診票の行が二重にならない）。
-  //   ★同じ送信のあいだは同じ値を使い回す（押し直しでは作り直さない）。
   if (!IQ.reqId) IQ.reqId = 'iq' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   callAction('submitIntake', { token: IQ.token, answers: payload, reqId: IQ.reqId })
     .then(function(res) {
@@ -5926,23 +5166,11 @@ function iqSubmit() {
     });
 }
 
-// ★「関数を作ったらボタンも作る」
 $('iqSkipBtn').addEventListener('click', iqSkip);
-// 🔴 0906k 第7段階-4: 再診の事前入力
 $('rvSubmitBtn').addEventListener('click', rvSubmit);
 $('rvSkipBtn').addEventListener('click', rvSkip);
 
 
-// ============================================================
-// 🔴 0904a 第7段階-3: 患者情報の更新
-//   ・SETUP.updateToken があるとき更新画面を出す（?pu=<token>）
-//   ・住所/電話/生年月日/メールは初期表示しない（空欄で入力）
-//   ・空欄の項目はサーバ側で上書きされない
-// ============================================================
-// 🔴 0905d: 情報更新は【LINE先行】。開いたとき、連携状況で出す画面を分ける。
-//   ・未連携            → 「LINEで続ける」画面（screenPULine）
-//   ・連携済み/連携直後   → 入力画面（screenPU）＋「◯◯様として登録済み」
-//   ・中止/失敗して戻った → 「LINEで続ける」画面（やり直し導線・行き止まりにしない）
 function puHideOthers_(){
   ['screenMenu','screenDate','screenForm','screenConfirm','screenDone','screenManage','screenIntake','screenIntakeDone',
    'screenPU','screenPULine','screenPUDone']
@@ -5954,7 +5182,6 @@ function puHideOthers_(){
 
 function puOpen(){
   var notice = SETUP.lineNotice || '';
-  // 「連携済み」＝サーバ判定(patient_id基準) or 連携直後に戻ってきた合図
   var justLinked = (notice==='linked' || notice==='already' || notice==='friend');
   var linked = !!SETUP.updateLineLinked || justLinked;
 
@@ -5963,7 +5190,6 @@ function puOpen(){
   puShowLine_('');
 }
 
-// 「LINEで続ける」画面
 function puShowLine_(notice){
   puHideOthers_();
   $('screenPULine').classList.remove('hidden');
@@ -5981,7 +5207,6 @@ function puShowLine_(notice){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// 入力画面（連携済み）
 function puShowInput_(notice){
   puHideOthers_();
   $('screenPU').classList.remove('hidden');
@@ -6017,7 +5242,6 @@ function puSubmit(){
     email:   $('puEmail').value,
     address: $('puAddress').value
   };
-  // 全部空なら送らない（サーバは受けても0件だが、無駄打ちを避ける）
   var anyInput = Object.keys(fields).some(function(k){ return String(fields[k]||'').replace(/[\s　]/g,'')!==''; });
   if(!anyInput){ puShowMsg('変更したい項目を1つ以上ご入力ください。'); return; }
   var btn=$('puSubmit'); btn.disabled=true; btn.textContent='送信中…'; puShowMsg('');
@@ -6032,7 +5256,6 @@ function puSubmit(){
       $('puDoneMsg').innerHTML = (r.changed_count>0)
         ? ('ご登録情報を更新しました。<br>ご協力ありがとうございました。')
         : ('入力いただいた内容は今の登録と同じでした。<br>そのままで問題ございません。');
-      // 🔴 0905d: LINE連携は【入力の前】に済ませているので、完了画面のLINEボタンは出さない。
       $('screenPUDone').classList.remove('hidden');
       window.scrollTo({top:0,behavior:'smooth'});
     })
@@ -6045,20 +5268,14 @@ function puSubmit(){
 
 init();
 
-// 🔴 0830a: メールのリンクから来たか（?t=<トークン>）
-//   ⚠ トークンの正しさはサーバが判定する。画面では中身を一切見ない。
 if (SETUP.manageToken) {
   MG.token  = SETUP.manageToken;
-  // 🔴 0830e: 予約完了メールの【変更する】【キャンセルする】どちらから来たか。
-  //   ⚠ これは導線の目印だけ。何ができるかはサーバのトークン検証が決める。
   MG.action = SETUP.manageAction || '';
   openManage();
-  // 🔴 0830f: LINE連携から戻ってきたときの一言（★サーバが値を絞ってから渡している）
   showLineNotice(SETUP.lineNotice || '');
   loadMyBookings();
 }
 
-// 🔴 0904a 第7段階-3: 情報更新リンク（?pu=<更新トークン>）から来たか
 if (SETUP.updateToken && !SETUP.manageToken) {
   $('puSubmit').addEventListener('click', puSubmit);
   puOpen();
@@ -6066,24 +5283,16 @@ if (SETUP.updateToken && !SETUP.manageToken) {
   showMsg('この更新リンクの有効期限が切れています。お手数ですが院にお問い合わせください。');
 }
 
-// 🔴 0903a 第7段階-1: 確認メールの問診票リンクから来たか（?intake=<問診トークン>）
-//   ⚠ トークンの正しさはサーバが判定する。まず有効かだけ確かめてから開く
-//     （7ページ書かせた後に「期限切れ」と言わないため）。
-//   ⚠ ?t=（予約の確認・変更）と同時に来ることは無い想定。来たら ?t= を優先。
 if (SETUP.intakeToken && !SETUP.manageToken) {
   callAction('checkIntakeToken', { token: SETUP.intakeToken })
     .then(function(r) {
       if (r && r.success && r.valid) {
-        // 🎀 0919beauty: サーバが返す menuName に「美容鍼」を含めば美容鍼専用の問診
         iqOpen(SETUP.intakeToken, { standalone: true, submittedBefore: !!r.submitted,
                                     beauty: /美容鍼/.test(String((r && r.menuName) || '')),
-                                    // 🆕 1004intake: 予約に紐づかない問診票か・氏名の下書き
                                     noBooking: !!(r && r.standalone),
                                     presetName: (r && r.presetName) || '',
-                                    // 🆕 0921carry: 前回の問診票から共通項目を引き継ぐ（無ければ found:false）
                                     carryover: r.carryover });
       } else {
-        // 🆕 1004intake: 行き止まりにしない（@208 の掟）。必ず連絡先を添える。
         var _tel = '';
         try { _tel = (SETUP.clinic && SETUP.clinic.tel) ? String(SETUP.clinic.tel) : ''; } catch (eT) {}
         showMsg('このリンクは有効期限が切れています。お手数ですが院にご連絡ください。'
@@ -6091,32 +5300,18 @@ if (SETUP.intakeToken && !SETUP.manageToken) {
       }
     })
     .catch(function() {
-      // 確認できなくても入力は試せる（送信時にもう一度サーバが検証する）
       iqOpen(SETUP.intakeToken, { standalone: true });
     });
 }
 
-// ============================================================
-// 🆕 2026-11-02 1102rm【A】空き状況（今日から7日分）… 接頭辞 av
-// ------------------------------------------------------------
-//   ・入口は ?view=slots（LINE のリッチメニュー「空き状況」）。それ以外では一切動かない。
-//   ・🔴 空きの判定は今の getOpenSlots をそのまま使う（画面で作らない・端末にしまわない）。
-//     長さは AV_DUR 分（再診と同じ1時間）。メニューを選んだ後、その長さで入らなければ知らせる。
-//   ・時刻を押す → 日時を端末に30分だけ覚える（localStorage）→ LINE の本人確認（?from=line）
-//     → メニューを選ぶ → 週表がその週で開き、まだ○ならそのまま「この日時でよろしいですか？」。
-//     ×なら「先に埋まってしまいました」と出して、ほかの○から選んでもらう。
-//   ・確定はいつもの submitBooking（サーバの二重予約の守り _bkSlotCheck_ はそのまま）。
-// ============================================================
 var AV_DUR = 60;
 var AV_DAYS = 7;
 var AV_KEY = 'rishin_av_preset';
 var AV_MAX_AGE_MS = 30 * 60 * 1000;
 
-/** HPページの起動役が URL から受けた印（SETUP.view）。GAS のページでは入らない＝出さない */
 function avWanted() {
   try { return SETUP.view === 'slots'; } catch (e) { return false; }
 }
-/** ?view=slots で、まだ本人確認の途中でない時だけ空き状況を出す（出したら true） */
 function avMaybeShow() {
   try {
     if (!avWanted()) return false;
@@ -6130,7 +5325,7 @@ function avMaybeShow() {
     $('avBookBtn').addEventListener('click', function(ev) { ev.preventDefault(); avClearPreset(); avGoBook(); });
     avLoad();
     return true;
-  } catch (e) { return false; }   // 何かあれば今までの入口へ
+  } catch (e) { return false; }
 }
 function avLoad() {
   var from = SETUP.today, to = wpAddDays(SETUP.today, AV_DAYS - 1);
@@ -6173,9 +5368,8 @@ function avRender(days, from) {
 }
 function avPick(dt) {
   try { localStorage.setItem(AV_KEY, JSON.stringify({ dt: dt, at: Date.now() })); } catch (e) {}
-  aaAfterPick();   // 🆕 2026-11-08 1108ai【A-4】: 前は avGoBook()。連携済みの端末はそのまま LINE へ・初めての端末は案内を1枚（aaAfterPick → avGoBook）
+  aaAfterPick();
 }
-/** 予約へ進む（HPページは LINE の本人確認へ。GAS のページではいつもの入口） */
 function avGoBook() {
   if (typeof window.__HP_SETUP__ !== 'undefined') {
     location.replace(location.pathname + '?from=line');
@@ -6185,7 +5379,6 @@ function avGoBook() {
   routeEntry();
 }
 function avClearPreset() { try { localStorage.removeItem(AV_KEY); } catch (e) {} }
-/** 覚えている日時を1回だけ取り出す（30分より古い・今日より前は捨てる） */
 function avTakePreset() {
   var v = null;
   try { v = JSON.parse(localStorage.getItem(AV_KEY) || 'null'); } catch (e) { v = null; }
@@ -6196,7 +5389,6 @@ function avTakePreset() {
   if (dt.slice(0, 10).replace(/\//g, '-') < SETUP.today) return '';
   return dt;
 }
-/** 週表を読み終えた時：覚えていた日時がこのメニューで○なら確認を出す・×なら知らせる */
 function avAfterWeek() {
   var dt = WP.avPending;
   WP.avPending = '';
@@ -6211,16 +5403,6 @@ function avAfterWeek() {
         + 'ほかの○のお時間からお選びください。');
 }
 
-// ============================================================
-// 🆕 2026-11-08 1108ai「AIに聞いて予約」… 接頭辞 aa
-// ------------------------------------------------------------
-//   ・ご希望の文をサーバ（aiAsk）に送る → サーバが条件に直し、今の getOpenSlots の空きだけを返す（画面で空きを作らない）。
-//   ・○のボタン → 今の空き状況と同じ流れ（avPick：日時を覚える → 本人確認 → メニュー → 確定）。🔴 AI は予約を作らない。
-//   ・［この時間で相談する］→ 内容を端末に30分だけ覚える → LINE の本人確認 → 送信（aiConsultSubmit）。
-//   ・【A-4】この端末で LINE の本人確認が済んだことがある（rishin_line_ok）→ そのまま LINE へ（案内を出さない）。
-//     無い（初めて・別の端末・連携をやめた）→「LINE と連携すると、次からすぐご予約できます」の案内 → LINE へ。
-//     🔴 端末に残すのは「済んだことがある」の印だけ（名前・LINE の ID などは残さない）。判定のために新しく何も聞かない。
-// ============================================================
 var AA_CONSULT_KEY = 'rishin_aa_consult';
 var AA_LINKED_KEY = 'rishin_line_ok';
 var AA_DEV_KEY = 'rishin_aa_dev';
@@ -6241,7 +5423,6 @@ function aaLinkedDevice() { try { return localStorage.getItem(AA_LINKED_KEY) ===
 function aaSetLinked(on) { try { if (on) localStorage.setItem(AA_LINKED_KEY, '1'); else localStorage.removeItem(AA_LINKED_KEY); } catch (e) {} }
 function aaSaveConsult(c) { try { c.at = Date.now(); localStorage.setItem(AA_CONSULT_KEY, JSON.stringify(c)); } catch (e) {} AA.consult = c; }
 function aaClearConsult() { try { localStorage.removeItem(AA_CONSULT_KEY); } catch (e) {} AA.consult = null; }
-/** 覚えている相談（30分より古いもの・今日より前の日時は捨てる） */
 function aaPeekConsult() {
   if (AA.consult) return AA.consult;
   var v = null;
@@ -6252,14 +5433,12 @@ function aaPeekConsult() {
   return v;
 }
 
-// 🆕 2026-11-08 1108aioff: 「AIに聞く」欄とトップの入口は外した（LINE のトークで作り直すため）。aaAsk/aaRender/aaOpenConsultForm/aaOpenFromTop も一緒に外した。相談の画面・連携の案内は残す
 function aaStartConsult(c) {
   aaSaveConsult(c);
-  avClearPreset();   // 予約の日時（空き状況のボタン）と取り違えない
+  avClearPreset();
   if (AUTH.token && !AUTH.authPending) { aaShowConsultScreen(c); return; }
   aaNeedLine('ご相談の内容：' + c.label + '。');
 }
-/** 時刻のボタンの後（avPick から）。この画面で本人確認が済んでいれば、そのままメニューへ */
 function aaAfterPick() {
   aaClearConsult();
   if (AUTH.token && !AUTH.authPending) {
@@ -6274,7 +5453,6 @@ function aaAfterPick() {
   try { dt = (JSON.parse(localStorage.getItem(AV_KEY) || 'null') || {}).dt || ''; } catch (e) { dt = ''; }
   aaNeedLine(dt ? ('選んだ日時：' + fmtJP(dt) + '。') : '');
 }
-/** 【A-4】LINE へ（この端末で済んだことがあれば案内なし・無ければ案内を1枚） */
 function aaNeedLine(what) {
   if (aaLinkedDevice()) { avGoBook(); return; }
   $('aaIntroWhat').textContent = what ? what + ' ' : '';
@@ -6283,7 +5461,6 @@ function aaNeedLine(what) {
 }
 function aaHideIntro() { $('aaIntro').classList.add('hidden'); aaClearConsult(); avClearPreset(); }
 
-/** 相談の画面（本人確認の後） */
 function aaShowConsultScreen(c) {
   hideBookingFlow();
   ['screenGate', 'screenNotice', 'screenWho', 'screenAvail'].forEach(function(id) { $(id).classList.add('hidden'); });
@@ -6303,7 +5480,7 @@ function aaConsultReady() {
     $('aaCsSend').classList.remove('hidden');
     return;
   }
-  aaSendConsult();   // 【A-4】LINE で本人と分かっている方は、そのまま送る
+  aaSendConsult();
 }
 function aaSendConsult() {
   var c = aaPeekConsult();
@@ -6351,8 +5528,6 @@ function aaGoHome() {
   routeEntry();
 }
 
-/** routeEntry の最初に呼ぶ：本人確認の後で相談の内容を覚えていれば、相談の画面を出す（出したら true）。
- *  【A-4】空き状況で日時を選んでから来た LINE 連携済みの方は、氏名の確認画面を出さない（そのままメニューへ） */
 function aaRouteConsult() {
   try {
     if (!AUTH.token && !AUTH.authPending) return false;
@@ -6366,7 +5541,6 @@ function aaRouteConsult() {
   } catch (e) {}
   return false;
 }
-/** __hpApplyAuth__ の最初に呼ぶ：端末の印を更新し、相談の途中なら結果をここで受ける（受けたら true） */
 function aaOnAuth(rc) {
   try {
     if (rc && rc.success && rc.auth) aaSetLinked(!!((rc.user && rc.user.name) || rc.preset));
@@ -6391,38 +5565,14 @@ function aaOnAuth(rc) {
     $('aaIntroBack').addEventListener('click', aaHideIntro);
     $('aaCsSend').addEventListener('click', aaSendConsult);
     $('aaCsHome').addEventListener('click', aaGoHome);
-    // GAS のページで本人確認済み（埋め込み）なら、この端末の印を付ける
     if (SETUP.bookingAuth && SETUP.bookingUser && SETUP.bookingUser.name) aaSetLinked(true);
   } catch (e) {}
 })();
 
-// ============================================================
-// 🔴 0915nolineA: トークン無しの通常入口（LINE必須化はやめた）
-// ------------------------------------------------------------
-//   ・?t=（確認・変更）・?pu=（情報更新）・?intake=（問診票）で来た人は今まで通り上で処理済み。
-//   ・それ以外（予約したい人）は routeEntry() が
-//     氏名確認（連携済み） ／ 下見の案内（?preview=notice） だけを出し、
-//     未連携はそのままメニューへ（★LINEのおすすめ linePromo は出すが止めない）。
-// ============================================================
 if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.intakeToken) {
-  if (!avMaybeShow()) routeEntry();   // 🆕 2026-11-02 1102rm【A】: ?view=slots の時だけ空き状況（それ以外は今までどおり）
+  if (!avMaybeShow()) routeEntry();
 }
 
-// ============================================================
-// 🚀 0917spd: トップレベル（＝HP設置ページ・サンドボックス外）では、
-//   「LINEで続ける」を押したら中継画面（LINEで確認しています）を通らず LINE へ跳ぶ。
-//   ・GASの画面（iframeの中）は従来どおりリンク遷移（sandbox の制約で
-//     fetch 後の自動遷移がユーザー操作扱いにならず止められるため）。
-// 🔴 0917spd2（iOS実機で中継画面が出た件の対策）:
-//   認可URLは【ページ読み込み時に事前取得】しておき、クリック時は
-//   通信を待たずその場で location.replace する（クリック後の通信は
-//   失敗・遅延すると従来の中継ページに倒れてしまうため＝実測で再現済み）。
-//   ・state はサーバ発行のまま（従来も中継ページ表示時に発行していたので
-//     露出時間は同じ。期限10分・1回きり・検証は既存の1箇所もの）。
-//   ・8分より古くなったら取り直す／LINEから戻ってきた直後も取り直す。
-//   ・事前取得が無いときだけクリック時取得（1回だけ自動で取り直し）、
-//     それでもだめなら最後の手段として従来の中継ページへ。
-// ============================================================
 (function () {
   var isTop = false;
   try { isTop = (window.self === window.top); } catch (eT) { isTop = false; }
@@ -6430,7 +5580,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   var lineBtns = ['gateLineBtn', 'linePromoBtn'].map(function (id) { return $(id); })
     .filter(function (el) { return !!el; });
   if (!lineBtns.length) return;
-  var PRE_FRESH_MS = 8 * 60 * 1000;   // サーバ側の期限(10分)より短く
+  var PRE_FRESH_MS = 8 * 60 * 1000;
   var pre = { url: '', at: 0, busy: false };
   function prefetchLineUrl() {
     if (pre.busy) return;
@@ -6444,7 +5594,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   }
   prefetchLineUrl();
   window.addEventListener('pageshow', function (e) {
-    if (e && e.persisted) { pre.url = ''; prefetchLineUrl(); }   // LINEから「戻る」で復帰
+    if (e && e.persisted) { pre.url = ''; prefetchLineUrl(); }
   });
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && !pre.busy
@@ -6455,11 +5605,11 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       try {
         if (pre.url && Date.now() - pre.at < PRE_FRESH_MS) {
           ev.preventDefault();
-          location.replace(pre.url);   // 通信ゼロ＝ユーザー操作の文脈のまま即遷移
+          location.replace(pre.url);
           return;
         }
         ev.preventDefault();
-        if (el.getAttribute('data-busy')) return;   // 連打で二重に取りに行かない
+        if (el.getAttribute('data-busy')) return;
         el.setAttribute('data-busy', '1');
         var prev = el.textContent;
         el.textContent = 'LINEへ進んでいます…';
@@ -6470,23 +5620,17 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
           })
           .then(function (r) {
             if (r && r.success && r.url) { location.replace(r.url); return; }
-            location.href = el.getAttribute('href');   // 最後の手段: 従来の中継ページ経由
+            location.href = el.getAttribute('href');
           })
           .catch(function () { location.href = el.getAttribute('href'); });
-        // 遷移しなかった場合に備えてボタンを戻す（通常は遷移して見えない）
         setTimeout(function () { el.removeAttribute('data-busy'); el.textContent = prev; }, 15000);
-      } catch (eC) { /* 何かあれば既定のリンク遷移に任せる */ }
+      } catch (eC) {   }
     });
   });
 })();
 </script>
 <script>
-// ============================================================
-// 起動役（0916hp 案B・build_hp.js が自動生成・版 2026-11-08c）
-//   GASのテンプレート埋め込みの代わりに、初期値を fetch してから本体を起動する。
-// ============================================================
 (function () {
-  // 0917dbg: 版番号を右下に常時表示（先生が「新しいページか」を1目で判別するため）
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
@@ -6497,11 +5641,9 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   var GAS = "https://script.google.com/macros/s/AKfycbzw8nXO5DRxMAMSHmyDmJNnjVITAuRZEzQnTbNFgLWfkD5Ar34C4bH1HT0udyTRcntLfQ/exec";
   var q;
   try { q = new URLSearchParams(location.search); } catch (e) { q = { get: function () { return ''; } }; }
-  // リッチメニュー互換: このページに ?from=line で来たら GAS の LINE 入口へ（ret=hp で戻ってくる）
   if (q.get('from') === 'line' && !q.get('auth')) { location.replace(GAS + '?from=line&ret=hp'); return; }
   var ml = document.getElementById('menuList');
   if (ml) ml.innerHTML = '<div class="loading">読み込んでいます…</div>';
-  // 🔴 1002speed【🅖】: 土台が届くまでの間も「動いている」ことを見せる（本体が起動したら消す）
   var boot = null;
   try {
     boot = document.createElement('div');
@@ -6512,7 +5654,6 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     document.head.appendChild(bst); document.body.appendChild(boot);
   } catch (eB) {}
   function hideBoot() { try { if (boot && boot.parentNode) boot.parentNode.removeChild(boot); } catch (e) {} }
-  // 🔴 1002r2【🅓】: 12秒で時間切れ（@209 実測: 通常 2〜4秒・最大 5.4秒 → 正常時は再試行しない）
   var POST_TIMEOUT_MS = 12000;
   function post(body) {
     var ctrl = (typeof AbortController === 'function') ? new AbortController() : null;
@@ -6523,8 +5664,6 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       .then(function (t) { clearTimeout(timer); return JSON.parse(t); },
             function (e) { clearTimeout(timer); throw (e && e.name === 'AbortError') ? new Error('応答に時間がかかっています') : e; });
   }
-  // 0917err→1002r2【🅓】: 読み込み失敗・時間切れは自動でやり直す（2秒・4秒の間隔＝計3回）。
-  //   画面には「混み合っています。自動でもう一度お試ししています…」、2回目は電話・LINEも添える
   var RETRY_WAITS = [2000, 4000];
   function bootText(html) { try { var b = document.getElementById('hpBoot'); if (!b) return; var n = b.childNodes[b.childNodes.length - 1]; if (n && n.nodeType === 3) b.removeChild(n); var old = b.querySelector('.hpBootMsg'); if (old) b.removeChild(old); var d = document.createElement('div'); d.className = 'hpBootMsg'; d.innerHTML = html; b.appendChild(d); } catch (e) {} }
   var CONGEST_TEXT = '混み合っています。自動でもう一度お試ししています…';
@@ -6541,19 +5680,11 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     return attempt(0);
   }
   var auth = /^[0-9a-f]{64}$/.test(String(q.get('auth') || '')) ? q.get('auth') : '';
-  // 🚀 0917spd: LINEからの直接コールバック（LINE_DIRECT_CALLBACK が有効なときだけ届く）
   var cbCode  = String(q.get('code') || '');
   var cbState = /^[0-9a-f]{64}$/.test(String(q.get('state') || '')) ? q.get('state') : '';
   var hasCb = !!(cbCode && cbState);
-  // 0917err: 失敗時の「もう一度読み込む」用（?auth= を保ったまま）。href に埋めるので記号は消毒
   var origUrl = location.href.replace(/"/g, '%22').replace(/</g, '%3C').replace(/>/g, '%3E').replace(/\x27/g, '%27');
-  // 🆕 0918spd: setup の「土台」(menus/clinic/today など)を sessionStorage に先読みしておく。
-  //   ・LINEへ行く前の初回取得を保存し、戻ってきた時は【待たずに】メニューを出せる。
-  //   🔴 枠の空き(◯×)は setup に含まれない＝キャッシュ対象外（毎回サーバから取る）。
-  //   ・5分TTL・?pu=（情報更新リンク）のときは使わない・裏で必ず取り直して更新（すぐ反映）。
   var SETUP_CACHE_KEY = 'hpSetupBase_v2';
-  // 🔴 1002speed【🅐】: 土台（メニュー・院情報）は24時間 localStorage に控え、2回目以降は【待たずに】メニューを出す。
-  //   裏で必ず取り直し、違っていれば本体（__hpApplySetupRefresh__）が静かに差し替える。空き枠は含まない。
   var SETUP_CACHE_TTL = 24 * 60 * 60 * 1000;
   var hasPu = !!String(q.get('pu') || '').trim();
   function readSetupCache() {
@@ -6572,7 +5703,6 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   function writeSetupCache(setup) {
     try {
       if (!setup || !setup.menus) return;
-      // 🔴 保存するのは変わりにくい土台だけ（枠の空きは元々 setup に無い）
       var slim = { menus: setup.menus, clinic: setup.clinic, today: setup.today,
         build: setup.build, lineRequired: setup.lineRequired, execUrl: setup.execUrl };
       var packed = JSON.stringify({ at: Date.now(), setup: slim });
@@ -6581,11 +5711,6 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     } catch (e) {}
   }
   var cachedSetup = readSetupCache();
-  // 🔴 1002speed【🅕】→ 1002r2【🅑】: 空き枠の今週＋来週を、ページを開いた瞬間に裏で取り始める（先読みは1回のまま）。
-  //   ・札（?auth= / LINE直帰）がある＝再診の方 → 「再診」メニューの所要時間（メニュー設定から。従来の60分と同じ）
-  //   ・札がない＝初めての方 → 「初診」メニューの所要時間（美容鍼初診は見送り。90分の決め打ちはしない）
-  //   ・手元に土台キャッシュがあればそこからメニューを選ぶ。無ければサーバ（menuRole）が同じ規則で選び、応答に所要時間が入る
-  //   ・鮮度の守り（90秒・希望担当なし・佐々田メニューでない）は本体 wpPrefetched のまま
   try {
     var preRole = (auth || hasCb) ? 'repeat' : 'initial';
     var preMenu = null;
@@ -6599,7 +5724,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       }
     } catch (ePm) {}
     var jst = new Date(Date.now() + 9 * 3600 * 1000);
-    var dow = (jst.getUTCDay() + 6) % 7;   // 月=0
+    var dow = (jst.getUTCDay() + 6) % 7;
     var mon = new Date(jst.getTime() - dow * 86400000);
     var ymd = function (d, sep) { return d.getUTCFullYear() + sep + String(d.getUTCMonth() + 1).padStart(2, "0") + sep + String(d.getUTCDate()).padStart(2, "0"); };
     var toD = new Date(mon.getTime() + 13 * 86400000);
@@ -6616,78 +5741,61 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     return postRetry({ action: 'getPatientSetup', pu: String(q.get('pu') || '').trim() })
       .then(function (r) { if (r && r.success && r.setup) writeSetupCache(r.setup); return r; });
   }
-  // 先読みが手元にあれば【待たずに】使い、裏で取り直してキャッシュを更新（次回に効く）
   var setupJob;
   if (cachedSetup) {
     setupJob = Promise.resolve({ success: true, setup: cachedSetup, _cached: true });
-    // 裏で取り直し、違っていれば本体に差し替えてもらう（1002speed）
     try { fetchSetup().then(function (r) { try { if (r && r.success && r.setup && typeof window.__hpApplySetupRefresh__ === "function") window.__hpApplySetupRefresh__(r.setup); } catch (eR) {} }).catch(function () {}); } catch (eBg) {}
   } else {
     setupJob = fetchSetup();
   }
   var jobs = [setupJob];
-  // 🔴 0917err: 本人確認の照会だけが通信で落ちても、ページ全体を道連れにしない
-  //   （リトライ付き・最後まで失敗したら netFail の目印で降参し、画面は起動させる）
   jobs.push(auth ? postRetry({ action: 'getBookingAuthUser', auth: auth }).catch(function () { return { netFail: true }; }) : Promise.resolve(null));
-  // 🆕 0918spd2: LINE直帰の本人確認(lineMenuCallback)は【描画を待たせない】＝裏で走らせる。
-  //   メニューを先に見せ、結果は __hpApplyAuth__ が後から反映（確定の前に必ず待つ）。
   var cbPromise = hasCb ? postRetry({ action: 'lineMenuCallback', code: cbCode, state: cbState }).catch(function () { return null; }) : null;
   Promise.all(jobs).then(function (rs) {
     var r0 = rs[0];
     if (!r0 || !r0.success || !r0.setup) throw new Error((r0 && r0.error) || '読み込みに失敗しました');
     var setup = r0.setup;
-    // ---- URLのしるし（GASの doGet と同じ受け方。知らない値は捨てる）----
     setup.manageToken = String(q.get('t') || '').trim();
     setup.intakeToken = String(q.get('intake') || '').trim();
     var a = String(q.get('a') || '').trim();
     setup.manageAction = (a === 'edit' || a === 'cancel') ? a : '';
     var ln = String(q.get('line') || '').trim();
     setup.lineNotice = ['linked','already','friend','conflict','error','unlinked','cancelled'].indexOf(ln) >= 0 ? ln : '';
-    setup.lineHint = (ln === 'guest');   // LINE経由で未連携だった人への控えめなヒント
-    setup.view = (String(q.get('view') || '') === 'slots') ? 'slots' : '';   // 2026-11-02 1102rm: 空き状況（リッチメニュー）。知らない値は捨てる
+    setup.lineHint = (ln === 'guest');
+    setup.view = (String(q.get('view') || '') === 'slots') ? 'slots' : '';
     setup.prefill = null;
     setup.lineNoticeGate = false;
     setup.bookingAuth = ''; setup.bookingUser = null; setup.bookingNeedName = false; setup.bookingPresetName = '';
-    // 🔒 1007rm: 許可された限定メニューは【札の応答（getBookingAuthUser）にだけ】乗る。土台キャッシュには保存しない（writeSetupCache は menus 等だけ）
     setup.bookingRestricted = [];
-    var authNetFail = false;   // 0917err: 本人確認の照会が通信で落ちた（札が無効だったのとは別）
+    var authNetFail = false;
     if (auth && rs[1] && rs[1].success && rs[1].user && rs[1].user.name) {
       setup.bookingAuth = auth; setup.bookingUser = rs[1].user;
-      setup.bookingRestricted = (rs[1].restrictedMenus && rs[1].restrictedMenus.length) ? rs[1].restrictedMenus : [];   // 🔒 1007rm
+      setup.bookingRestricted = (rs[1].restrictedMenus && rs[1].restrictedMenus.length) ? rs[1].restrictedMenus : [];
     } else if (auth && rs[1] && rs[1].success && rs[1].needName) {
-      setup.bookingAuth = auth; setup.bookingNeedName = true;   // 🆕 0917new: 氏名だけ入力してもらう
-      setup.bookingPresetName = String(rs[1].preset || '');   // 🆕 0917name: 前回の氏名（確認に出す）
+      setup.bookingAuth = auth; setup.bookingNeedName = true;
+      setup.bookingPresetName = String(rs[1].preset || '');
     } else if (auth && rs[1] && rs[1].netFail) {
       authNetFail = true;
     }
-    // 🆕 0918spd2: LINE直帰は 本人確認(lineMenuCallback)を裏で走らせる＝メニューを先に見せる。
     setup.authPending = !!cbPromise;
-    // ---- 予約パス等をURLから消す（履歴・ブックマークに残さない）----
-    try { history.replaceState(null, '', location.pathname + (setup.view === 'slots' ? '?view=slots' : '')); } catch (e) {}   // 2026-11-02 1102av: 空き状況は開き直しても空き状況のまま（それ以外は今までどおり全部消す）
+    try { history.replaceState(null, '', location.pathname + (setup.view === 'slots' ? '?view=slots' : '')); } catch (e) {}
     window.__HP_SETUP__ = setup;
-    hideBoot();   // 1002speed
-    // ---- 本体を起動（GASでサーバが埋め込んで動かすのと同じ順序になる）----
+    hideBoot();
     var main = document.getElementById('hpMain');
     var s = document.createElement('script');
     s.textContent = main.textContent;
     document.body.appendChild(s);
-    // ---- LINEの入口に ret=hp を付ける（LINEの後、このページへ戻すため）----
     ['gateLineBtn', 'linePromoBtn'].forEach(function (id) {
       var e = document.getElementById(id);
       if (e && String(e.getAttribute('href') || '').indexOf('from=line') >= 0) {
         e.setAttribute('href', e.getAttribute('href') + '&ret=hp');
       }
     });
-    // 🆕 0918spd2: 本人確認(lineMenuCallback)を裏で完了させ、結果は画面(__hpApplyAuth__)に反映する。
-    //   ・成功/氏名入力/失敗の出し分け・失敗2回で電話案内 は __hpApplyAuth__ 側で行う。
-    //   ・確定（予約作成）の前に本人確認の完了を必ず待つ（patient.html submitBooking）。
     if (cbPromise) {
       cbPromise.then(function (rc) {
         try { if (typeof window.__hpApplyAuth__ === "function") window.__hpApplyAuth__(rc); } catch (eApply) {}
       });
     }
-    // 🔴 0917err: 本人確認の照会だけが失敗したとき。ページは動かしたまま、
-    //   ?auth= を保った元のURLで「もう一度読み込む」を案内する（情報を捨てない）
     if (authNetFail) {
       var ma = document.getElementById('msg');
       if (ma) {
@@ -6697,13 +5805,10 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       }
     }
   }).catch(function (e) {
-    hideBoot();   // 1002speed
-    // ⚠ 行き止まりにしない: まず再読み込み（?auth= を保ったまま）を案内し、
-    //   従来の予約ページ と 電話 も必ず添える
+    hideBoot();
     var m = document.getElementById('msg');
     if (m) {
       m.className = 'msg err';
-      // 1002r2【🅓】: 3回とも駄目＝「ただいま混み合っています」＋電話・LINE＋[もう一度試す]（?auth= を保った元のURLで読み直す）
       m.innerHTML = ((e && e.congested) ? 'ただいま混み合っています。しばらくしてからもう一度お試しください。' : '予約ページを読み込めませんでした。') +
         CONTACT_HTML +
         '<div style="margin-top:.6rem"><a class="btn btn-primary" href="' + origUrl + '">もう一度試す</a></div>' +
