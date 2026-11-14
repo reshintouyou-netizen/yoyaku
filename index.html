@@ -854,6 +854,20 @@
     </div>
   </section>
 
+  <section class="sec hidden" id="screenIoGate">
+    <h2>問診票のご記入</h2>
+    <p style="font-size:15px;line-height:1.8;margin:8px 0 14px">ご来院前に、問診票のご記入をお願いいたします（5〜10分ほど）。</p>
+    <div id="ioGateMsg" class="hidden" style="background:#fdf1f1;border:1px solid var(--red);color:var(--red);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.7;margin:0 0 12px"></div>
+    <a class="gate-line-btn" id="ioLineBtn" href="#" target="_top" rel="noopener">LINEで本人確認して進む</a>
+    <p style="font-size:12px;color:var(--gray);margin:4px 0 0;line-height:1.7">
+      LINEの画面が開きます。「許可する」を押すと、問診票に進みます。<br>ご予約のお知らせを LINE でお受け取りいただけるようになります。</p>
+    <button type="button" id="ioNoLineBtn" class="btn btn-ghost" style="width:100%;margin-top:14px;min-height:48px">LINEを使わずに入力する</button>
+    <div class="gate-tel-box">
+      ご不明な点はお電話ください。<br>
+      <a class="tel-big" id="ioTel" href="tel:">📞 <span id="ioTelText"></span></a>
+    </div>
+  </section>
+
   <section class="sec hidden" id="screenRevisit">
     <div class="rv-banner" id="rvBanner"></div>
     <div style="text-align:right;margin:-2px 0 10px">
@@ -5283,7 +5297,7 @@ if (SETUP.updateToken && !SETUP.manageToken) {
   showMsg('この更新リンクの有効期限が切れています。お手数ですが院にお問い合わせください。');
 }
 
-if (SETUP.intakeToken && !SETUP.manageToken) {
+if (SETUP.intakeToken && !SETUP.manageToken && SETUP.intakeToken !== 'open') {
   callAction('checkIntakeToken', { token: SETUP.intakeToken })
     .then(function(r) {
       if (r && r.success && r.valid) {
@@ -5632,13 +5646,162 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
     });
   });
 })();
+
+(function () {
+  var gate = document.getElementById('screenIoGate');
+  if (!gate) return;
+  var IO_FLAG = 'ioPendingAt', IO_FLAG_MS = 15 * 60 * 1000;
+  var IO = { active: false, mode: '' };
+  var isTop = false;
+  try { isTop = (window.self === window.top); } catch (eT) { isTop = false; }
+  function flagFresh() {
+    try { var t = parseInt(localStorage.getItem(IO_FLAG) || '0', 10) || 0; return !!t && (Date.now() - t) < IO_FLAG_MS; }
+    catch (e) { return false; }
+  }
+  function flagSet() { try { localStorage.setItem(IO_FLAG, String(Date.now())); } catch (e) {} }
+  function flagClear() { try { localStorage.removeItem(IO_FLAG); } catch (e) {} }
+  function hideAll() {
+    try {
+      var secs = document.querySelectorAll('section.sec');
+      for (var i = 0; i < secs.length; i++) secs[i].classList.add('hidden');
+      ['navRow', 'stepBar', 'stepLabel', 'linePromo', 'authPendingNote', 'lineHint', 'helpBox'].forEach(function (id) {
+        var e = document.getElementById(id); if (e) e.classList.add('hidden');
+      });
+    } catch (e) {}
+  }
+  var waitEl = null;
+  function showWait() {
+    try {
+      if (waitEl) return;
+      waitEl = document.createElement('div');
+      waitEl.id = 'ioWait';
+      waitEl.style.cssText = 'position:fixed;left:0;right:0;top:0;bottom:0;background:#fff;z-index:9000;display:flex;align-items:center;justify-content:center;text-align:center;font-size:15px;color:#1a3d2e;line-height:1.8;padding:24px';
+      waitEl.textContent = 'LINE を確認しています…';
+      document.body.appendChild(waitEl);
+    } catch (e) {}
+  }
+  function hideWait() { try { if (waitEl && waitEl.parentNode) waitEl.parentNode.removeChild(waitEl); } catch (e) {} waitEl = null; }
+  function gateMsg(text) {
+    var m = document.getElementById('ioGateMsg'); if (!m) return;
+    if (text) { m.textContent = text; m.classList.remove('hidden'); } else { m.textContent = ''; m.classList.add('hidden'); }
+  }
+  function keepUrl() {
+    try { if (isTop && /^https?:$/.test(location.protocol)) history.replaceState(null, '', location.pathname + '?intake=open'); } catch (e) {}
+  }
+  function showGate(text) {
+    keepUrl();
+    hideWait(); hideAll(); showMsg('');
+    try {
+      var tel = (SETUP.clinic && SETUP.clinic.tel) ? String(SETUP.clinic.tel) : '';
+      var a = document.getElementById('ioTel'), t = document.getElementById('ioTelText');
+      if (a && tel) a.href = 'tel:' + tel.replace(/[^0-9+]/g, '');
+      if (t) t.textContent = tel;
+    } catch (e) {}
+    gateMsg(text || '');
+    gate.classList.remove('hidden');
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  function openForm(token, mode) {
+    IO.active = true; IO.mode = mode;
+    keepUrl();
+    flagClear(); hideWait(); hideAll();
+    iqOpen(token, { standalone: true, noBooking: true });
+    try {
+      $('iqBanner').innerHTML = '📋 ご来院前に、問診票のご記入をお願いいたします（5〜10分ほど）。'
+        + (mode === 'line' ? '<br>✅ LINE の確認ができました。' : '');
+      var sk = document.getElementById('iqSkipBtn');
+      if (sk) sk.textContent = 'あとで入力する（同じページからいつでも書けます）';
+    } catch (e) {}
+  }
+
+  var _ioOrigFinish = iqFinish;
+  iqFinish = function (submitted) {
+    _ioOrigFinish(submitted);
+    if (!IO.active) return;
+    try {
+      var tel = (SETUP.clinic && SETUP.clinic.tel) ? String(SETUP.clinic.tel) : '';
+      $('iqDoneMsg').innerHTML = submitted
+        ? 'ご記入ありがとうございました。<br>内容をお預かりしました。<br><br>ご来院をお待ちしております。'
+          + (tel ? ('<br>ご不明な点は 📞 ' + esc(tel) + ' までお電話ください。') : '')
+        : '同じページをもう一度開くと、続きからご記入いただけます。'
+          + (tel ? ('<br>ご不明な点は 📞 ' + esc(tel) + ' までお問い合わせください。') : '');
+    } catch (e) {}
+  };
+
+  var _ioOrigApply = window.__hpApplyAuth__;
+  window.__hpApplyAuth__ = function (rc) {
+    var waiting = !!waitEl;
+    if (rc && rc.success && rc.intakeOpen) {
+      try { AUTH.authPending = false; } catch (e) {}
+      if (rc.intakeToken) openForm(rc.intakeToken, 'line');
+      else showGate(rc.error || 'LINE の確認ができませんでした。もう一度お試しください。');
+      return;
+    }
+    if (waiting) {
+      flagClear(); hideWait();
+      if (!rc || !rc.success) {
+        try { AUTH.authPending = false; } catch (e) {}
+        showGate('LINE の確認ができませんでした。もう一度お試しください。');
+        return;
+      }
+    }
+    if (typeof _ioOrigApply === 'function') return _ioOrigApply(rc);
+  };
+
+  var lineBtn = document.getElementById('ioLineBtn');
+  var noBtn = document.getElementById('ioNoLineBtn');
+  if (lineBtn) {
+    if (!isTop) {
+      lineBtn.setAttribute('href', SETUP.intakeOpenUrl || '#');
+    } else {
+      lineBtn.addEventListener('click', function (ev) {
+        ev.preventDefault();
+        if (lineBtn.getAttribute('data-busy')) return;
+        lineBtn.setAttribute('data-busy', '1');
+        var prev = lineBtn.textContent;
+        lineBtn.textContent = 'LINEへ進んでいます…';
+        gateMsg('');
+        function back(text) { lineBtn.removeAttribute('data-busy'); lineBtn.textContent = prev; if (text) { flagClear(); gateMsg(text); } }
+        callAction('getLineLoginUrl', { ret: 'hp', io: '1' })
+          .then(function (r) {
+            if (r && r.success && r.url) { flagSet(); location.replace(r.url); setTimeout(function () { back(''); }, 15000); return; }
+            back('ただいま LINE に進めませんでした。もう一度お試しいただくか、「LINEを使わずに入力する」をお使いください。');
+          })
+          .catch(function () { back('通信がうまくいきませんでした。もう一度お試しください。'); });
+      });
+    }
+  }
+  if (noBtn) {
+    noBtn.addEventListener('click', function () {
+      if (noBtn.disabled) return;
+      noBtn.disabled = true;
+      var prev = noBtn.textContent;
+      noBtn.textContent = '準備しています…';
+      gateMsg('');
+      function back(text) { noBtn.disabled = false; noBtn.textContent = prev; if (text) gateMsg(text); }
+      callAction('intakeOpenStart', { mode: 'noline' })
+        .then(function (r) {
+          if (r && r.success && r.intakeToken) { back(''); openForm(r.intakeToken, 'noline'); return; }
+          back((r && r.error) || 'ただいまご利用いただけません。もう一度お試しください。');
+        })
+        .catch(function () { back('通信がうまくいきませんでした。もう一度お試しください。'); });
+    });
+  }
+
+  if (SETUP.intakeToken === 'open' && !SETUP.manageToken) {
+    flagClear();
+    showGate('');
+  } else if (SETUP.authPending && flagFresh()) {
+    showWait();
+  }
+})();
 </script>
 <script>
 (function () {
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-11-10b";
+    vt.textContent = "版 2026-11-14a";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
@@ -5784,7 +5947,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
       authNetFail = true;
     }
     setup.authPending = !!cbPromise;
-    try { history.replaceState(null, '', location.pathname + (setup.view === 'slots' ? '?view=slots' : '')); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname + (setup.view === 'slots' ? '?view=slots' : (setup.intakeToken === 'open' ? '?intake=open' : ''))); } catch (e) {}
     window.__HP_SETUP__ = setup;
     hideBoot();
     var main = document.getElementById('hpMain');
