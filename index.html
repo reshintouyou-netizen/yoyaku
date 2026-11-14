@@ -1022,7 +1022,7 @@
           もう一度メールアドレスを入力する</button>
       </div>
       <p class="mg-note">※ 変更は空いているお時間の中からお選びいただけます。<br>
-        ※ お急ぎの場合・当日のご予約は、お電話・LINEで承ります。</p>
+        ※ お急ぎの場合・直前（1時間以内）のご予約は、お電話・LINEで承ります。</p>
       <button class="btn btn-ghost" id="mgBack3" type="button" style="width:100%">予約の画面へ戻る</button>
     </div>
 
@@ -1780,7 +1780,7 @@ function wpRender() {
     h += '<p class="wp-hint">この週に空いているお時間はありません。'
        + (ws < WP.maxWeek ? '「▶」で翌週をご覧ください。' : 'お電話・LINEでご相談ください。') + '</p>';
   }
-  h += '<p class="wp-hint">※ 本日のご予約・お急ぎの場合は、お電話・LINEで承ります。</p>';
+  h += '<p class="wp-hint">※ 直前（1時間以内）のご予約・お急ぎの場合は、お電話・LINEで承ります。</p>';
 
   WP.el.innerHTML = h;
   wpBindNav();
@@ -2213,7 +2213,7 @@ function renderDays() {
     }
 
     if (isToday) {
-      h += '<div class="today-note">※ 本日のご予約はお電話・LINEで承ります</div>';
+      h += '<div class="today-note">※ 直前（1時間以内）のご予約はお電話・LINEで承ります</div>';
     }
     h += '</div>';
   });
@@ -5801,7 +5801,7 @@ if (!SETUP.manageToken && !SETUP.updateToken && !SETUP.updateExpired && !SETUP.i
   try {
     var vt = document.createElement('div');
     vt.id = 'hpBuildTag';
-    vt.textContent = "版 2026-11-14a";
+    vt.textContent = "版 2026-11-14b";
     vt.style.cssText = 'position:fixed;right:6px;bottom:4px;font-size:10px;color:#a9a9a9;z-index:9999;pointer-events:none;';
     document.body.appendChild(vt);
   } catch (eV) {}
